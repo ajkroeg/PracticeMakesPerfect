@@ -12,19 +12,35 @@ namespace PracticeMakesPerfect
         public static class FillInPilotData_Patch
 
         {
+           
+
             public static bool Prefix(AAR_UnitStatusWidget __instance, ref int xpEarned, UnitResult ___UnitData)
             {
-                
+                int missionXP = xpEarned;
                 int mechsKilled = ___UnitData.pilot.MechsKilled;
-                int newXP = 0;
-                for (int i = 0; i < mechsKilled; i++)
-                {
-                    newXP += ModInit.Settings.bonusXP_MechKills;
-                }
                 int othersKilled = ___UnitData.pilot.OthersKilled;
-                for (int j = 0; j < othersKilled; j++)
+                int newXP = 0;
+                if (ModInit.Settings.useMissionXPforBonus == true)
                 {
-                    newXP += ModInit.Settings.bonusXP_OtherKills;
+                    for (int i = 0; i < mechsKilled; i++)
+                    {
+                        newXP += Mathf.RoundToInt(missionXP * ModInit.Settings.bonusXP_MissionMechKills);
+                    }
+                    for (int j = 0; j < othersKilled; j++)
+                    {
+                        newXP += Mathf.RoundToInt(missionXP * ModInit.Settings.bonusXP_MissionOtherKills);
+                    }
+                }
+                else
+                {
+                    for (int i = 0; i < mechsKilled; i++)
+                    {
+                        newXP += ModInit.Settings.bonusXP_MechKills;
+                    }
+                    for (int j = 0; j < othersKilled; j++)
+                    {
+                        newXP += ModInit.Settings.bonusXP_OtherKills;
+                    }
                 }
                 newXP += Mathf.RoundToInt((___UnitData.pilot.StructureDamageInflicted * ModInit.Settings.bonusXP_StrDamageMult) + (___UnitData.pilot.ArmorDamageInflicted * ModInit.Settings.bonusXP_ArmDamageMult));
 
@@ -33,6 +49,7 @@ namespace PracticeMakesPerfect
                     newXP = ModInit.Settings.bonusXP_CAP;
                 }
                 ___UnitData.pilot.AddExperience(0, "FromKillsOrDmg", newXP);
+
 
                 xpEarned += newXP;
                 return true;

@@ -27,7 +27,11 @@ namespace PracticeMakesPerfect
 
     }
     public class PracticeMakesPerfectSettings
-    {    
+    {
+        public bool useMissionXPforBonus = true;
+        public float bonusXP_MissionMechKills = 0.05f;
+        public float bonusXP_MissionOtherKills = 0.025f;
+
         public int bonusXP_MechKills = 100;
         public int bonusXP_OtherKills = 50;
         public float bonusXP_StrDamageMult = 0.0f;
