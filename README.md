@@ -21,6 +21,7 @@ Current settings in mod.json:
 `bonusXP_ArmDamageMult` - multiplier for bonus XP given per Armor damage inflicted (e.g., for 200 armor damage inflicted, award 10 XP). Set to 0 to disable.
 
 `bonusXP_CAP` - maximum amount of XP awardable for kills and/or damage. Set to -1 to disable cap, set to 0 to disable <i>all</i> bonus XP.
+__________________________________________________________
 
 New pilot stats accessible through events, etc. as follows:
 
