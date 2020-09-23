@@ -64,7 +64,7 @@ Current settings in mod.json:
 
 
 
-To clarify use of `reUseRestrictedbonusEffects_XP` and `bonusEffects_XP`, the following is an excerpt of the vanilla WeaponDef for `Weapon_PPC_PPC_0-STOCK`
+To clarify use of `reUseRestrictedbonusEffects_XP`, `degradingbonusEffects_XP`, and `bonusEffects_XP`, the following is an excerpt of the vanilla WeaponDef for `Weapon_PPC_PPC_0-STOCK`
 
 ```
 "effectType" : "StatisticEffect",
@@ -90,7 +90,7 @@ To clarify use of `reUseRestrictedbonusEffects_XP` and `bonusEffects_XP`, the fo
                 "targetWeaponSubType" : "NotSet"
             },
 ```
-Bonus XP can be defined by either the effectType.Description.Id (`AbilityDefPPC` above), OR by the effectType.statisticData.statName (`AccuracyModifier`). The mod will check the dictionary first for a matching `Id` before checking for a matching `statName`. This was done to allow some flexibility, as some stats will be unique to certain mods, while others like AccuracyModifier are used in many places where you may not want XP awarded. If a match is found in both `Id` and `statName`, XP rewards will be duplicated.
+Bonus XP can be defined by either the effectType.Description.Id (`AbilityDefPPC` above), OR by the effectType.statisticData.statName (`AccuracyModifier`). The mod will check the dictionary first for a matching `Id` before checking for a matching `statName`. This was done to allow some flexibility, as some stats will be unique to certain mods, while others like AccuracyModifier are used in many places where you may not want XP awarded. <b>Important: aura effects like ECM will re-award the XP bonus every time the effect is removed/restored, even for the same target.</b>
 
 Valid settings for `Weapon_PPC_PPC_0-STOCK` could therefore be
 ```
