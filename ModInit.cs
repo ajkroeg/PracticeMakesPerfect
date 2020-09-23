@@ -1,6 +1,7 @@
 ﻿using Harmony;
 using System;
 using System.Reflection;
+using System.Collections.Generic;
 using Newtonsoft.Json;
 
 namespace PracticeMakesPerfect
@@ -8,10 +9,15 @@ namespace PracticeMakesPerfect
 
     public static class ModInit
     {
+        internal static Logger modLog;
+        internal static string modDir;
+
+
         public static PracticeMakesPerfectSettings Settings = new PracticeMakesPerfectSettings();
         public const string HarmonyPackage = "us.tbone.PracticeMakesPerfect";
         public static void Init(string directory, string settingsJSON)
         {
+            modDir = directory;
             try
             {
                 ModInit.Settings = JsonConvert.DeserializeObject<PracticeMakesPerfectSettings>(settingsJSON);
@@ -21,6 +27,7 @@ namespace PracticeMakesPerfect
 
                 ModInit.Settings = new PracticeMakesPerfectSettings();
             }
+            modLog = new Logger(modDir, "bigPMPin", Settings.enableLogging);
             var harmony = HarmonyInstance.Create(HarmonyPackage);
             harmony.PatchAll(Assembly.GetExecutingAssembly());
         }
@@ -28,6 +35,8 @@ namespace PracticeMakesPerfect
     }
     public class PracticeMakesPerfectSettings
     {
+        public bool enableLogging = false;
+
         public bool useMissionXPforBonus = true;
         public float bonusXP_MissionMechKills = 0.05f;
         public float bonusXP_MissionOtherKills = 0.025f;
@@ -37,6 +46,19 @@ namespace PracticeMakesPerfect
         public float bonusXP_StrDamageMult = 0.0f;
         public float bonusXP_ArmDamageMult = 0.0f;
         public int bonusXP_CAP = -1;
+
+        public bool activeProbeXP_PerTarget = false;
+        public int activeProbeXP = 25;
+        public int sensorLockXP = 25;
+
+        public float missionXPEffects = 0.05f;
+        public float missionXPeffectBonusDivisor = 1000000f;
+
+        public Dictionary<string, int> reUseRestrictedbonusEffects_XP = new Dictionary<string, int>();
+
+        public Dictionary<string, int> degradingbonusEffects_XP = new Dictionary<string, int>();
+        
+        public Dictionary<string, int> bonusEffects_XP = new Dictionary<string, int>();
 
     }
 }

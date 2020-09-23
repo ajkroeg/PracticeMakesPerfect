@@ -2,7 +2,8 @@
     "Name": "PracticeMakesPerfect",
     "DLL": "PracticeMakesPerfect.dll",
 
-    "Version": "1.0.0.0",
+	"Hidden": true,
+    "Version": "1.0.0.3",
     "Description": "",
     "Author": "T-Bone",
     "Website": "https://github.com/ajkroeg/PracticeMakesPerfect",
@@ -10,14 +11,29 @@
     "CustomResourceTypes": [],
 
 	"Settings": {
+			"enableLogging": true,
 			"useMissionXPforBonus": true,
 			"bonusXP_MissionMechKills": 0.05,
 			"bonusXP_MissionOtherKills": 0.025,
-			"bonusXP_MechKills": 100,
-			"bonusXP_OtherKills": 50,
-			"bonusXP_StrDamageMult": 0.0,
-			"bonusXP_ArmDamageMult": 0.0,
-			"bonusXP_CAP": -1
-			},
+			"bonusXP_MechKills": 50,
+			"bonusXP_OtherKills": 25,
+			"bonusXP_StrDamageMult": 0.1,
+			"bonusXP_ArmDamageMult": 0.2,
+			"bonusXP_CAP": -1,
+			"activeProbeXP_PerTarget": true,
+			"activeProbeXP": 25,
+			"sensorLockXP": 10,
+			"missionXPEffects": 0.025,
+			"missionXPeffectBonusDivisor": 25,
+			"reUseRestrictedbonusEffects_XP": {
+				"StatusEffect-Attack_DamageDFA-T2": 25
+				},	
+			"degradingbonusEffects_XP": {
+				"TAG-Effect": 20
+				},					
+			"bonusEffects_XP": {
+			"AbilityDefPPC": 5
+			}
+		},
     "Manifest": []
 }
