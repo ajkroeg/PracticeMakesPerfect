@@ -14,15 +14,20 @@ Current settings in mod.json:
 			"bonusXP_StrDamageMult": 0.0,
 			"bonusXP_ArmDamageMult": 0.0,
 			"bonusXP_CAP": -1
-			
 			"activeProbeXP_PerTarget": true,
 			"activeProbeXP": 25,
 			"sensorLockXP": 25,
+			"missionXPEffects": 0.025,
+			"missionXPeffectBonusDivisor": 35,
 			"reUseRestrictedbonusEffects_XP": {
-				"TAG-Effect": 25
+				"AbilityDefPPC": 50
 				},	
-			"bonusEffects_XP": {				},
-			},
+			"degradingbonusEffects_XP": {
+				"TAG-Effect": 50
+				},					
+			"bonusEffects_XP": {
+				"DamagePerShot": 25
+				}
 ```
 
 `useMissionXPforBonus` - bool, switch for whether bonus XP is awarded as a function of the contract XP or as flat bonus.
@@ -47,9 +52,15 @@ Current settings in mod.json:
 
 `sensorLockXP` - int, XP awarded to player for using Sensor Lock ability.
 
-`reUseRestrictedbonusEffects_XP` - Dictionary<String, int> - Effects and corresponding XP rewards for the player unit applying those effects. XP bonus for effects in this list are limited to being applied once per source-target pair. For example, if the TAG effect is listed in this dictionary, PlayerMech1 can only recieve a single TAG XP bonus for TAG-ing EnemyMech1 <i>until that effect expires</i>, at which point they would be able to recieve TAG XP for EnemyMech1 once again. However, PlayerMech1 <i>would</i> be able to recieve TAG XP for applying TAG to, for example, EnemyMech<b>2</b>. However, PlayerMech<b>2</b> could also receive TAG XP bonus for tagging EnemyMech1, even if EnemyMech1 had an active TAG effect from PlayerMech1.
+`missionXPEffects` - float, multiplier for bonus XP awarded for effects as a function of Mission XP. Functions in tandem with `missionXPeffectBonusDivisor` below to approximate a per-effect bonus.
 
-`bonusEffects_XP` - Dictionary<String, int> - Effects and corresponding XP rewards for player unit applying those effects. Effects in this list are <b>not</b> subject to same limitations as above; XP is rewarded every time the effect is applied, regardless of source and target.
+`missionXPeffectBonusDivisor` - int, divisor of <i>total bonus XP awarded via the dictionaries below, or `effectXP`</i> in order to approximate a per-effect XP bonus based on contract XP. The resulting bonus follows the formula `ContractXP * missionXPEffects * effectXP / missionXPeffectBonusDivisor`. Thus, for 3 effects defined in the dictionaries with flat-rate bonuses of 35, 50, and 75, a `missionXPeffectBonusDivisor` value of 50 to 55 would give be recommended.
+
+`reUseRestrictedbonusEffects_XP` - Dictionary<String, int> - Effects and corresponding XP rewards for the player unit applying those effects. XP bonus for effects in this dictionary are limited to being applied once per source-target pair. For example, if the TAG effect is listed in this dictionary, PlayerMech1 can only recieve a single TAG XP bonus for TAG-ing EnemyMech1 <i>until that effect expires</i>, at which point they would be able to recieve TAG XP for EnemyMech1 once again. However, PlayerMech1 <i>would</i> be able to recieve TAG XP for applying TAG to, for example, EnemyMech<b>2</b>. However, PlayerMech<b>2</b> could also receive TAG XP bonus for tagging EnemyMech1, even if EnemyMech1 had an active TAG effect from PlayerMech1.
+
+`degradingbonusEffects_XP` - Dictionary<String, int> - similar to above. Effects in this dictionary award the full amount when first applied, and then a penalized amount if re-applied, changing as a function of rounds remaining until effect expiration. For example, if the TAG effect has a Duration of 3 activations, the first time TAG is applied, it awards the amount defined in the dictionary. If it is then reapplied the following activation, the XP awarded is base/3. If it was instead reapplied 2 turns later, the XP award would be would be base/2, etc.
+
+`bonusEffects_XP` - Dictionary<String, int> - Effects and corresponding XP rewards for player unit applying those effects. Effects in this dictionary are <b>not</b> subject to same limitations as above; full XP is rewarded every time the effect is applied, regardless of source and target.
 
 
 
