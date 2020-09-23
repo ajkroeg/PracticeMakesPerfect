@@ -46,6 +46,8 @@ Current settings in mod.json:
 
 `bonusXP_CAP` - int, maximum amount of bonus XP awardable for kills, damage, or effects/actions. Set to -1 to disable cap, set to 0 to disable <i>all</i> bonus XP.
 
+NEW STUFF:
+
 `activeProbeXP_PerTarget` - bool, controls whether activeProbeXP bonus is awarded per-target in probe radius. For example, if `activeProbeXP` is set to 25, and 3 targets are affected when a player unit actives Active Probe, that unit would receive 75 XP.
 
 `activeProbeXP` - int, XP awarded to the player for using Active Probe.
