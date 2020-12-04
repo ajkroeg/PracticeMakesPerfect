@@ -215,25 +215,29 @@ example json structure for OpForSpecs is as follows:
 `factionID` - string, faction ID for which progress towards with OpForSpec is tracked, <b>AND</b> against which this OpForSpec applies. Works in conjunction with `applyToFaction`.
 
 `applyToFaction` - bool, determines how OpForSpec effects are applied during contracts. If `false`, the OpForSpec effects will be applied at contract start, <i>if the contract Target faction == `factionID`</i>.  So in a three-way battle contract where the target faction was Taurians, if the effect was increased damage vs Taurians, and the Capellans turn up...you'll  do increased damage against both the Taurians and the Capellans.  Intended targeting data for effects when false is:
-	```
+
+```
 	"targetingData": {
 			"effectTriggerType": "Passive",
 			"effectTargetType": "Creator",
 			"showInStatusPanel": true
 			},
-	```
+```
+
 `effectTargetType` can also be `AllAllies`, `AllLanceMates`, or `AllEnemies` when false.
 
 If `true`, OpForSpec effects are applied <i>only to that specific OpFor faction</i>, meaning in a three-way battle...only the faction matching `factionID` will have the effect applied. So if the effect was increased damage vs Taurians, and the Capellans turn up...you'll only do increased damage against the Taurians. In addition, duration data should be set as above The UI does NOT presently update to show things like increased weapon damage when targeting the faction, so it is recommended to create a 2nd "dummy" effect with `"effectTriggerType": "Passive",` `"effectTargetType": "Creator",`  and `"showInStatusPanel": true` to display an effect tooltip to let the player know that they will deal/recieve the effects vs the appropriate faction (as in above example).
 
+<b>ALSO IMPORTANT if applyToFaction is true:</b> Note durationData in above example! Necessary to ensure that the effect expires at the end of the round and prevent it from potentially applying to units of the wrong faction!
+
 Intended targeting data for effects when `true` is:
-	```
+```
 	"targetingData": {
 			"effectTriggerType": "OnWeaponFire",
 			"effectTargetType": "Creator", 
 			"showInStatusPanel": true
 			},
-	```
+```
 `effectTargetType` can also be `AllEnemies` when `true`.
 
 `description` - human-legible description of the OpForSpec. For `OpForSpec` in `OpForDefaultList`, the string {faction} will be replaced with `FactionDef.Demonym`s: 
