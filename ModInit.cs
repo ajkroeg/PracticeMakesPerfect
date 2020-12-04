@@ -2,7 +2,10 @@
 using System;
 using System.Reflection;
 using System.Collections.Generic;
+using System.IO;
+using BattleTech;
 using Newtonsoft.Json;
+using PracticeMakesPerfect.Framework;
 
 namespace PracticeMakesPerfect
 {
@@ -13,29 +16,39 @@ namespace PracticeMakesPerfect
         internal static string modDir;
 
 
-        public static PracticeMakesPerfectSettings Settings = new PracticeMakesPerfectSettings();
+        internal static Settings modSettings;
         public const string HarmonyPackage = "us.tbone.PracticeMakesPerfect";
         public static void Init(string directory, string settingsJSON)
         {
             modDir = directory;
+            modLog = new Logger(modDir, "bigPMPin", true);
             try
             {
-                ModInit.Settings = JsonConvert.DeserializeObject<PracticeMakesPerfectSettings>(settingsJSON);
-            }
-            catch (Exception)
-            {
+                using (StreamReader reader = new StreamReader($"{modDir}/settings.json"))
+                {
+                    string jsData = reader.ReadToEnd();
+                    ModInit.modSettings = JsonConvert.DeserializeObject<Settings>(jsData);
+                }
 
-                ModInit.Settings = new PracticeMakesPerfectSettings();
             }
-            modLog = new Logger(modDir, "bigPMPin", Settings.enableLogging);
+            catch (Exception ex)
+            {
+                ModInit.modLog.LogException(ex);
+                ModInit.modSettings = new Settings();
+            }
+            //HarmonyInstance.DEBUG = true;
+            SpecManager.ManagerInstance.Initialize();
+            SpecHolder.HolderInstance.Initialize();
             var harmony = HarmonyInstance.Create(HarmonyPackage);
             harmony.PatchAll(Assembly.GetExecutingAssembly());
+
         }
 
     }
-    public class PracticeMakesPerfectSettings
+
+    class Settings
     {
-        public bool enableLogging = false;
+        public bool enableLogging = true;
 
         public bool useMissionXPforBonus = true;
         public float bonusXP_MissionMechKills = 0.05f;
@@ -57,8 +70,29 @@ namespace PracticeMakesPerfect
         public Dictionary<string, int> reUseRestrictedbonusEffects_XP = new Dictionary<string, int>();
 
         public Dictionary<string, int> degradingbonusEffects_XP = new Dictionary<string, int>();
-        
+
         public Dictionary<string, int> bonusEffects_XP = new Dictionary<string, int>();
 
+
+        public int MaxOpForSpecializations = 0;
+        public bool OpForTiersCountTowardMax = false;
+
+        public int MaxMissionSpecializations = 0;
+        public bool MissionTiersCountTowardMax = false;
+
+        public List<string> WhiteListOpFor= new List<string>();
+        public List<string> WhiteListMissions= new List<string>();
+
+        public List<OpForSpec> OpForSpecList = new List<OpForSpec>();
+        public List<OpForSpec> OpForDefaultList = new List<OpForSpec>();
+
+        public List<MissionSpec> MissionSpecList = new List<MissionSpec>();
+        public List<MissionSpec> MissionDefaultList = new List<MissionSpec>();
+
+        public Dictionary<string, string> taggedOpForSpecs = new Dictionary<string, string>();
+        public Dictionary<string, string> taggedMissionSpecs = new Dictionary<string, string>();
+
+        public List<StratCom> StratComs = new List<StratCom>();
+        public bool DebugCleaning = false;
     }
 }

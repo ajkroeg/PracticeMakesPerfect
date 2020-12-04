@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PracticeMakesPerfect
+namespace PracticeMakesPerfect.Framework
 {
     class Logger
     {
@@ -33,9 +33,8 @@ namespace PracticeMakesPerfect
                 string ts = DateTime.UtcNow.ToString("s", System.Globalization.CultureInfo.InvariantCulture);
                 logStreamWriter.WriteLine($"INFO: {ts} - {message}");
             }
-            
         }
-        
+
 
         public void LogError(string message)
         {
