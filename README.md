@@ -377,4 +377,8 @@ Specializations settings in settings.json:
 
 `taggedMissionSpecs` - Dictionary<string,string> - KeyValuePairs where Key = pilot tag and Value = `MissionSpec.MissionSpecID` of the MissionSpec to be awarded to pilots with the tag.
 
+`dummyOpForStat` - string, name of dummy stat used to create fake status effect for pilots with OpForSpecs that use OnWeaponFire
+
+`debugKeepTags` - bool, if true serialized states are kept as company tags after saving. leave false for clean company tags.
+
 `DebugCleaning` - bool. Debugging only! if set to `true`, will wipe all specializations on save load.
