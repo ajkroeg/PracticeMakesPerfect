@@ -212,7 +212,7 @@ example json structure for OpForSpecs is as follows:
 
 `killsRequired` - int, number of kills required vs the appropriate faction for this OpForSpec to be awarded. <b>IMPORTANT:</b> If set to `0` as above, this OpForSpec will <i>not</i> be awarded to pilots via kills, and can only be awarded via tags, using the setting `taggedOpForSpecs`, e.g. for `"taggedOpForSpecs": {"name_t-bone": "TC_Destructor"	},`, pilots with the tag `name_t-bone` would get the OpForSpec `TC_Destructor`.
 
-`factionID` - string, faction ID for which progress towards with OpForSpec is tracked, <b>AND</b> against which this OpForSpec applies. Works in conjunction with `applyToFaction`.
+`factionID` - string, faction ID for which progress towards with OpForSpec is tracked, <b>AND</b> against which this OpForSpec applies. Works in conjunction with `applyToFaction`. e.g. AuriganPirates, TaurianConcordat, Liao, etc.
 
 `applyToFaction` - bool, determines how OpForSpec effects are applied during contracts. If `false`, the OpForSpec effects will be applied at contract start, <i>if the contract Target faction == `factionID`</i>.  So in a three-way battle contract where the target faction was Taurians, if the effect was increased damage vs Taurians, and the Capellans turn up...you'll  do increased damage against both the Taurians and the Capellans.  Intended targeting data for effects when false is:
 
