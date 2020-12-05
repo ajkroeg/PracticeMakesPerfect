@@ -196,11 +196,16 @@ example json structure for OpForSpecs is as follows:
 			"Description": {
 				"Id": "TCDemolisherPassive",
 				"Name": "Demolisher",
-				"Details": "This pilot is an expert at killing Taurians, and has 50% increased damage against them.",
+				"Details": "This pilot is an expert at killing Taurians, and deals 10% increased damage to them.",
 				"Icon": "seeingstars"
 			},
 			"nature": "Buff",
-			"statisticData": {}
+			"statisticData": {
+				"statName": "DummyBuff",
+				"operation": "Set",
+				"modValue": "true",
+				"modType": "System.Boolean"
+			}
 		}
 	]
 }
