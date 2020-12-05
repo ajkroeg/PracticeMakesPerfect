@@ -57,9 +57,42 @@ namespace PracticeMakesPerfect.Patches
                     curPilots.Add(p.FetchGUID());
                 }
 
-                SpecHolder.HolderInstance.CleanMaps(curPilots);
+                if (ModInit.modSettings.removeDeprecated)
+                {
+                    SpecHolder.HolderInstance.CleanMaps(curPilots);
+                }
 
                 SpecHolder.HolderInstance.SerializeSpecState();
+            }
+
+            public static void Postfix(SimGameState __instance)
+            {
+                if (!ModInit.modSettings.debugKeepTags)
+                {
+                    if (sim.CompanyTags.Any(x => x.StartsWith(OP4SpecStateTag)))
+                    {
+                        var op4State = sim.CompanyTags.FirstOrDefault((x) => x.StartsWith(OP4SpecStateTag))?.Substring(OP4SpecStateTag.Length);
+                        GlobalVars.sim.CompanyTags.Remove(op4State);
+                    }
+
+                    if (sim.CompanyTags.Any(x => x.StartsWith(OP4SpecTrackerTag)))
+                    {
+                        var op4Tracker = sim.CompanyTags.FirstOrDefault((x) => x.StartsWith(OP4SpecTrackerTag))?.Substring(OP4SpecTrackerTag.Length);
+                        GlobalVars.sim.CompanyTags.Remove(op4Tracker);
+                    }
+
+                    if (sim.CompanyTags.Any(x => x.StartsWith(MissionSpecStateTag)))
+                    {
+                        var missionState = sim.CompanyTags.FirstOrDefault((x) => x.StartsWith(MissionSpecStateTag))?.Substring(MissionSpecStateTag.Length);
+                        GlobalVars.sim.CompanyTags.Remove(missionState);
+                    }
+
+                    if (sim.CompanyTags.Any(x => x.StartsWith(MissionSpecTrackerTag)))
+                    {
+                        var missionTracker = sim.CompanyTags.FirstOrDefault((x) => x.StartsWith(MissionSpecTrackerTag))?.Substring(MissionSpecTrackerTag.Length);
+                        GlobalVars.sim.CompanyTags.Remove(missionTracker);
+                    }
+                }
             }
         }
 
@@ -125,6 +158,7 @@ namespace PracticeMakesPerfect.Patches
                 var playerUnits = combat.AllActors.Where(x => x.team.IsLocalPlayer).ToList();
                 foreach (var actor in playerUnits)
                 {
+                    actor.StatCollection.AddStatistic<bool>(ModInit.modSettings.dummyOpForStat, false);
                     if (!playerUnits.Any(x => x.GetPilot().IsPlayerCharacter))
                     {
                         SpecManager.ManagerInstance.ApplyStratComs(actor);

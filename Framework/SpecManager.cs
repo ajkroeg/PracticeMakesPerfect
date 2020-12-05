@@ -223,7 +223,7 @@ namespace PracticeMakesPerfect.Framework
             var pKey = p.FetchGUID();
             foreach (var id in SpecHolder.HolderInstance.OpForSpecMap[pKey])
             {
-                foreach (OpForSpec op4Spec in ManagerInstance.OpForSpecList.Where(x => x.OpForSpecID == id && x.factionID == opforID && !x.applyToFaction))
+                foreach (OpForSpec op4Spec in ManagerInstance.OpForSpecList.Where(x => x.OpForSpecID == id && x.factionID == opforID))
                 {
                     this.ApplyPassiveOp4SpecEffects(actor, op4Spec);
                     ModInit.modLog.LogMessage($"Gathered {op4Spec.OpForSpecID} for {p.Description.Callsign}{pKey}");
@@ -304,7 +304,6 @@ namespace PracticeMakesPerfect.Framework
                             false);
                     }
                 }
-
             }
         }
 
@@ -399,22 +398,26 @@ namespace PracticeMakesPerfect.Framework
 
             foreach (var OpForSpecID in SpecHolder.HolderInstance.OpForSpecMap[pKey])
             {
-                foreach (OpForSpec op4Spec in ManagerInstance.OpForSpecList.Where(x =>
-                    x.OpForSpecID == OpForSpecID &&
-                    x.applyToFaction))
+                var control = false;
+                if (control)
                 {
-                    foreach (EffectData effectData in op4Spec.effects)
+                    foreach (OpForSpec op4Spec in ManagerInstance.OpForSpecList.Where(x =>
+                        x.OpForSpecID == OpForSpecID &&
+                        x.applyToFaction))
                     {
-                        ModInit.modLog.LogMessage(
-                            $"Checking for existing effects: {effectData.Description.Name} for {p.Description.Callsign}{pKey}");
+                        foreach (EffectData effectData in op4Spec.effects.Where(x => x.targetingData.effectTriggerType == EffectTriggerType.OnWeaponFire))
+                        {
+                            ModInit.modLog.LogMessage(
+                                $"Checking for existing effects: {effectData.Description.Name} for {p.Description.Callsign}{pKey}");
 
-                        string id = ($"op4Spec_{p.Description.Callsign}_{effectData.Description.Id}");
+                            string id = ($"op4Spec_{p.Description.Callsign}_{effectData.Description.Id}");
 
-
-                        ModInit.modLog.LogMessage($"stopping effects with id: {id}");
-                        playerUnit.Combat.EffectManager.StopAllEffectsWithID(id);
+                            ModInit.modLog.LogMessage($"stopping effects with id: {id}");
+                            playerUnit.Combat.EffectManager.StopAllEffectsWithID(id);
+                        }
                     }
                 }
+                
 
                 foreach (OpForSpec op4Spec in ManagerInstance.OpForSpecList.Where(x => x.OpForSpecID == OpForSpecID && x.factionID == opforUnit.team.FactionValue.Name && x.applyToFaction))
                 {

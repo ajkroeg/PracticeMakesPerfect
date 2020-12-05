@@ -93,6 +93,10 @@ namespace PracticeMakesPerfect
         public Dictionary<string, string> taggedMissionSpecs = new Dictionary<string, string>();
 
         public List<StratCom> StratComs = new List<StratCom>();
+
+        public string dummyOpForStat = "dummyOpForStat";
+        public bool removeDeprecated = false;
+        public bool debugKeepTags = false;
         public bool DebugCleaning = false;
     }
 }
