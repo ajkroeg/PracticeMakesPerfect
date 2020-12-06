@@ -96,7 +96,6 @@ namespace PracticeMakesPerfect
 
         public string dummyOpForStat = "dummyOpForStat";
         public bool removeDeprecated = false;
-        public bool debugKeepTags = false;
         public bool DebugCleaning = false;
     }
 }

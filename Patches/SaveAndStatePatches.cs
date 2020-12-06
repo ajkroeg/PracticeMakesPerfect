@@ -64,36 +64,6 @@ namespace PracticeMakesPerfect.Patches
 
                 SpecHolder.HolderInstance.SerializeSpecState();
             }
-
-            public static void Postfix(SimGameState __instance)
-            {
-                if (!ModInit.modSettings.debugKeepTags)
-                {
-                    if (sim.CompanyTags.Any(x => x.StartsWith(OP4SpecStateTag)))
-                    {
-                        var op4StateCTag = sim.CompanyTags.FirstOrDefault((x) => x.StartsWith(OP4SpecStateTag));
-                        GlobalVars.sim.CompanyTags.Remove(op4StateCTag);
-                    }
-
-                    if (sim.CompanyTags.Any(x => x.StartsWith(OP4SpecTrackerTag)))
-                    {
-                        var op4TrackerCTag = sim.CompanyTags.FirstOrDefault((x) => x.StartsWith(OP4SpecTrackerTag));
-                        GlobalVars.sim.CompanyTags.Remove(op4TrackerCTag);
-                    }
-
-                    if (sim.CompanyTags.Any(x => x.StartsWith(MissionSpecStateTag)))
-                    {
-                        var missionStateCTag = sim.CompanyTags.FirstOrDefault((x) => x.StartsWith(MissionSpecStateTag));
-                        GlobalVars.sim.CompanyTags.Remove(missionStateCTag);
-                    }
-
-                    if (sim.CompanyTags.Any(x => x.StartsWith(MissionSpecTrackerTag)))
-                    {
-                        var missionTrackerCTag = sim.CompanyTags.FirstOrDefault((x) => x.StartsWith(MissionSpecTrackerTag));
-                        GlobalVars.sim.CompanyTags.Remove(missionTrackerCTag);
-                    }
-                }
-            }
         }
 
         [HarmonyPatch(typeof(SimGameState), "Rehydrate", new Type[] {typeof(GameInstanceSave)})]

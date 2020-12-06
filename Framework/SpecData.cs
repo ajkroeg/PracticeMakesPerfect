@@ -239,26 +239,26 @@ namespace PracticeMakesPerfect.Framework
         {
             var op4State = sim.CompanyTags.FirstOrDefault((x) => x.StartsWith(OP4SpecStateTag));
             GlobalVars.sim.CompanyTags.Remove(op4State);
-            op4State = $"{OP4SpecStateTag}{JsonConvert.SerializeObject(OpForSpecMap)}";
-            ModInit.modLog.LogMessage($"Serialized op4State and adding to company tags");
+            op4State = $"{OP4SpecStateTag}{JsonConvert.SerializeObject(HolderInstance.OpForSpecMap)}";
+            ModInit.modLog.LogMessage($"Serialized op4State and adding to company tags.\n\nState was {op4State}.");
             GlobalVars.sim.CompanyTags.Add(op4State);
 
             var op4Tracker = sim.CompanyTags.FirstOrDefault((x) => x.StartsWith(OP4SpecTrackerTag));
             GlobalVars.sim.CompanyTags.Remove(op4Tracker);
-            op4Tracker = $"{OP4SpecTrackerTag}{JsonConvert.SerializeObject(OpForKillsTracker)}";
-            ModInit.modLog.LogMessage($"Serialized op4Tracker and adding to company tags");
+            op4Tracker = $"{OP4SpecTrackerTag}{JsonConvert.SerializeObject(HolderInstance.OpForKillsTracker)}";
+            ModInit.modLog.LogMessage($"Serialized op4Tracker and adding to company tags.\n\nState was {op4Tracker}.");
             GlobalVars.sim.CompanyTags.Add(op4Tracker);
 
             var missionState = sim.CompanyTags.FirstOrDefault((x) => x.StartsWith(MissionSpecStateTag));
             GlobalVars.sim.CompanyTags.Remove(missionState);
-            missionState = $"{MissionSpecStateTag}{JsonConvert.SerializeObject(MissionSpecMap)}";
-            ModInit.modLog.LogMessage($"Serialized missionState and adding to company tags");
+            missionState = $"{MissionSpecStateTag}{JsonConvert.SerializeObject(HolderInstance.MissionSpecMap)}";
+            ModInit.modLog.LogMessage($"Serialized missionState and adding to company tags.\n\nState was {missionState}.");
             GlobalVars.sim.CompanyTags.Add(missionState);
 
             var missionTracker = sim.CompanyTags.FirstOrDefault((x) => x.StartsWith(MissionSpecTrackerTag));
             GlobalVars.sim.CompanyTags.Remove(missionTracker);
-            missionTracker = $"{MissionSpecTrackerTag}{JsonConvert.SerializeObject(MissionsTracker)}";
-            ModInit.modLog.LogMessage($"Serialized missionTracker and adding to company tags");
+            missionTracker = $"{MissionSpecTrackerTag}{JsonConvert.SerializeObject(HolderInstance.MissionsTracker)}";
+            ModInit.modLog.LogMessage($"Serialized missionTracker and adding to company tags.\n\nState was {missionTracker}.");
             GlobalVars.sim.CompanyTags.Add(missionTracker);
         }
 
