@@ -44,6 +44,7 @@ namespace PracticeMakesPerfect.Framework
     {
         public string StratComID = "";
         public string StratComName = "";
+//        public int StratReq = 1;
         public string description = "";
 
         [JsonIgnore]
@@ -266,10 +267,11 @@ namespace PracticeMakesPerfect.Framework
         {
             if (sim.CompanyTags.Any(x => x.StartsWith(OP4SpecStateTag)))
             {
-                var op4State = sim.CompanyTags.FirstOrDefault((x) => x.StartsWith(OP4SpecStateTag))?.Substring(OP4SpecStateTag.Length);
+                var op4StateCTag = sim.CompanyTags.FirstOrDefault((x) => x.StartsWith(OP4SpecStateTag));
+                var op4State = op4StateCTag.Substring(OP4SpecStateTag.Length);
                 HolderInstance.OpForSpecMap = JsonConvert.DeserializeObject<Dictionary<string, List<string>>>(op4State);
                 ModInit.modLog.LogMessage($"Deserializing op4State and removing from company tags");
-                GlobalVars.sim.CompanyTags.Remove(op4State);
+                GlobalVars.sim.CompanyTags.Remove(op4StateCTag);
             }
             else
             {
@@ -278,10 +280,11 @@ namespace PracticeMakesPerfect.Framework
 
             if (sim.CompanyTags.Any(x => x.StartsWith(OP4SpecTrackerTag)))
             {
-                var op4Tracker = sim.CompanyTags.FirstOrDefault((x) => x.StartsWith(OP4SpecTrackerTag))?.Substring(OP4SpecTrackerTag.Length);
+                var op4TrackerCTag = sim.CompanyTags.FirstOrDefault((x) => x.StartsWith(OP4SpecTrackerTag));
+                var op4Tracker = op4TrackerCTag.Substring(OP4SpecTrackerTag.Length);
                 HolderInstance.OpForKillsTracker = JsonConvert.DeserializeObject<Dictionary<string, Dictionary<string, int>>>(op4Tracker);
                 ModInit.modLog.LogMessage($"Deserializing op4Tracker and removing from company tags");
-                GlobalVars.sim.CompanyTags.Remove(op4Tracker);
+                GlobalVars.sim.CompanyTags.Remove(op4TrackerCTag);
             }
             else
             {
@@ -290,10 +293,11 @@ namespace PracticeMakesPerfect.Framework
 
             if (sim.CompanyTags.Any(x => x.StartsWith(MissionSpecStateTag)))
             {
-                var missionState = sim.CompanyTags.FirstOrDefault((x) => x.StartsWith(MissionSpecStateTag))?.Substring(MissionSpecStateTag.Length);
+                var missionStateCTag = sim.CompanyTags.FirstOrDefault((x) => x.StartsWith(MissionSpecStateTag));
+                var missionState = missionStateCTag.Substring(MissionSpecStateTag.Length);
                 HolderInstance.MissionSpecMap = JsonConvert.DeserializeObject<Dictionary<string, List<string>>>(missionState);
                 ModInit.modLog.LogMessage($"Deserializing missionState and removing from company tags");
-                GlobalVars.sim.CompanyTags.Remove(missionState);
+                GlobalVars.sim.CompanyTags.Remove(missionStateCTag);
             }
             else
             {
@@ -302,10 +306,11 @@ namespace PracticeMakesPerfect.Framework
 
             if (sim.CompanyTags.Any(x => x.StartsWith(MissionSpecTrackerTag)))
             {
-                var missionTracker = sim.CompanyTags.FirstOrDefault((x) => x.StartsWith(MissionSpecTrackerTag))?.Substring(MissionSpecTrackerTag.Length);
+                var missionTrackerCTag = sim.CompanyTags.FirstOrDefault((x) => x.StartsWith(MissionSpecTrackerTag));
+                var missionTracker = missionTrackerCTag.Substring(MissionSpecTrackerTag.Length);
                 HolderInstance.MissionsTracker = JsonConvert.DeserializeObject<Dictionary<string, Dictionary<string, int>>>(missionTracker);
                 ModInit.modLog.LogMessage($"Deserializing missionTracker and removing from company tags");
-                GlobalVars.sim.CompanyTags.Remove(missionTracker);
+                GlobalVars.sim.CompanyTags.Remove(missionTrackerCTag);
             }
             else
             {

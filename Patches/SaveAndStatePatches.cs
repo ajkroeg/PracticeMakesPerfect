@@ -71,26 +71,26 @@ namespace PracticeMakesPerfect.Patches
                 {
                     if (sim.CompanyTags.Any(x => x.StartsWith(OP4SpecStateTag)))
                     {
-                        var op4State = sim.CompanyTags.FirstOrDefault((x) => x.StartsWith(OP4SpecStateTag))?.Substring(OP4SpecStateTag.Length);
-                        GlobalVars.sim.CompanyTags.Remove(op4State);
+                        var op4StateCTag = sim.CompanyTags.FirstOrDefault((x) => x.StartsWith(OP4SpecStateTag));
+                        GlobalVars.sim.CompanyTags.Remove(op4StateCTag);
                     }
 
                     if (sim.CompanyTags.Any(x => x.StartsWith(OP4SpecTrackerTag)))
                     {
-                        var op4Tracker = sim.CompanyTags.FirstOrDefault((x) => x.StartsWith(OP4SpecTrackerTag))?.Substring(OP4SpecTrackerTag.Length);
-                        GlobalVars.sim.CompanyTags.Remove(op4Tracker);
+                        var op4TrackerCTag = sim.CompanyTags.FirstOrDefault((x) => x.StartsWith(OP4SpecTrackerTag));
+                        GlobalVars.sim.CompanyTags.Remove(op4TrackerCTag);
                     }
 
                     if (sim.CompanyTags.Any(x => x.StartsWith(MissionSpecStateTag)))
                     {
-                        var missionState = sim.CompanyTags.FirstOrDefault((x) => x.StartsWith(MissionSpecStateTag))?.Substring(MissionSpecStateTag.Length);
-                        GlobalVars.sim.CompanyTags.Remove(missionState);
+                        var missionStateCTag = sim.CompanyTags.FirstOrDefault((x) => x.StartsWith(MissionSpecStateTag));
+                        GlobalVars.sim.CompanyTags.Remove(missionStateCTag);
                     }
 
                     if (sim.CompanyTags.Any(x => x.StartsWith(MissionSpecTrackerTag)))
                     {
-                        var missionTracker = sim.CompanyTags.FirstOrDefault((x) => x.StartsWith(MissionSpecTrackerTag))?.Substring(MissionSpecTrackerTag.Length);
-                        GlobalVars.sim.CompanyTags.Remove(missionTracker);
+                        var missionTrackerCTag = sim.CompanyTags.FirstOrDefault((x) => x.StartsWith(MissionSpecTrackerTag));
+                        GlobalVars.sim.CompanyTags.Remove(missionTrackerCTag);
                     }
                 }
             }
