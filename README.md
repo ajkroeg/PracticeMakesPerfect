@@ -373,9 +373,9 @@ Specializations settings in settings.json:
 	
 `StratComs` - List<StratCom> - list of StratCom bonuses your pilots will recieve when commander is <i>not</i> deployed.
 
-`taggedOpForSpecs` - Dictionary<string,string> - KeyValuePairs where Key = pilot tag and Value = `OpForSpec.OpForSpecID` of the OpForSpec to be awarded to pilots with the tag.
+`taggedOpForSpecs` - Dictionary<string, List<string>> - KeyValuePairs where Key = pilot tag and Values = list of `OpForSpec.OpForSpecID` of the OpForSpecs to be awarded to pilots with the tag.
 
-`taggedMissionSpecs` - Dictionary<string,string> - KeyValuePairs where Key = pilot tag and Value = `MissionSpec.MissionSpecID` of the MissionSpec to be awarded to pilots with the tag.
+`taggedMissionSpecs` - Dictionary<string, List<string>> - KeyValuePairs where Key = pilot tag and Values = list of `MissionSpec.MissionSpecID` of the MissionSpecs to be awarded to pilots with the tag.
 
 `dummyOpForStat` - string, name of dummy stat used to create fake status effect for pilots with OpForSpecs that use OnWeaponFire
 
