@@ -139,9 +139,10 @@ The Specializations module makes use of 3 new data types: OpForSpecs, MissionSpe
 
 ### OpForSpec
 
-OpForSpecs or OpFor Specializations are unique bonuses awarded to pilots that only apply against specific OpFor factions. Depending on settings they may apply specifically against units of that OpFor faction, or they may apply for the entirety of a contract where that OpFor faction is the contract "target" faction.
+OpForSpecs or OpFor Specializations are unique bonuses awarded to pilots that only apply against specific OpFor factions. Depending on settings they may apply specifically against units of that OpFor faction, or they may apply for the entirety of a contract where that OpFor faction is the contract "target" faction. In addition, OpForSpecs can have "simgame" effects apart from the standard in-contract effects using effectData.
 
-example json structure for OpForSpecs is as follows:
+#### OpForSpec - In-Contract effects
+example json structure for OpForSpec with in-contract effects is as follows:
 
 ```
 {
@@ -149,7 +150,7 @@ example json structure for OpForSpecs is as follows:
 	"OpForSpecName": "Taurian Concordat: Demolisher",
 	"killsRequired": 0,
 	"factionID": "TaurianConcordat",
-	"applyToFaction": true,
+	"applyToFaction": ["TaurianConcordat"],
 	"description": "This pilot is an expert at killing Taurians, and has increased damage against them.",
 	"effectDataJO": [
 		{
@@ -209,6 +210,7 @@ example json structure for OpForSpecs is as follows:
 		}
 	]
 }
+
 ```
 
 `OpForSpecID` - string, ID for this OpForSpec
@@ -219,36 +221,90 @@ example json structure for OpForSpecs is as follows:
 
 `factionID` - string, faction ID for which progress towards with OpForSpec is tracked, <b>AND</b> against which this OpForSpec applies. Works in conjunction with `applyToFaction`. e.g. AuriganPirates, TaurianConcordat, Liao, etc.
 
-`applyToFaction` - bool, determines how OpForSpec effects are applied during contracts. If `false`, the OpForSpec effects will be applied at contract start, <i>if the contract Target faction == `factionID`</i>.  So in a three-way battle contract where the target faction was Taurians, if the effect was increased damage vs Taurians, and the Capellans turn up...you'll  do increased damage against both the Taurians and the Capellans.  Intended targeting data for effects when false is:
+`applyToFaction` - List<string>, determines against what factions an OpForSpec is applied. For most in-contract effects, should usually be only the faction against which you have a specialization. However, you may include other factions if, for example, you want a specialization against AuriganPirates to also apply against Circinians and Tortugans. 
+	
+For purposes of PMP Specializations, there are broadly two types of effects; Passive and "Active". Passive effects are applied at contract start, and are applied as long as the contract target faction is one of `applyToFaction`. Passive effects have the following `targetingData`.
+	
+```
+"targetingData": {
+		"effectTriggerType": "Passive",
+		"effectTargetType": "Creator",
+		"showInStatusPanel": true
+		},
+```
+
+`effectTargetType` can also be `AllAllies`, `AllLanceMates`, or `AllEnemies`.
+
+For "Active" effects, OpForSpec effects are applied <i>only to that specific OpFor faction</i>, meaning in a three-way battle...only the factions matching `factionID` will have the effect applied. So if the effect was increased damage vs Taurians, and the Capellans turn up...you'll only do increased damage against the Taurians. In addition, duration data should be set as above The UI does NOT presently update to show things like increased weapon damage when targeting the faction, so it is recommended to create a 2nd "dummy" effect with `"effectTriggerType": "Passive",` `"effectTargetType": "Creator",`  and `"showInStatusPanel": true` to display an effect tooltip to let the player know that they will deal/recieve the effects vs the appropriate faction (as in above example).
+
+<b>ALSO IMPORTANT for "Active effects":</b> Note durationData in above example! Necessary to ensure that the effect expires at the end of the round and prevent it from potentially applying to units of the wrong faction!
+
+Intended targeting data for "Active" effects is:
 
 ```
-	"targetingData": {
-			"effectTriggerType": "Passive",
-			"effectTargetType": "Creator",
-			"showInStatusPanel": true
-			},
+"targetingData": {
+		"effectTriggerType": "OnWeaponFire",
+		"effectTargetType": "Creator", 
+		"showInStatusPanel": true
+		},
 ```
 
-`effectTargetType` can also be `AllAllies`, `AllLanceMates`, or `AllEnemies` when false.
-
-If `true`, OpForSpec effects are applied <i>only to that specific OpFor faction</i>, meaning in a three-way battle...only the faction matching `factionID` will have the effect applied. So if the effect was increased damage vs Taurians, and the Capellans turn up...you'll only do increased damage against the Taurians. In addition, duration data should be set as above The UI does NOT presently update to show things like increased weapon damage when targeting the faction, so it is recommended to create a 2nd "dummy" effect with `"effectTriggerType": "Passive",` `"effectTargetType": "Creator",`  and `"showInStatusPanel": true` to display an effect tooltip to let the player know that they will deal/recieve the effects vs the appropriate faction (as in above example).
-
-<b>ALSO IMPORTANT if applyToFaction is true:</b> Note durationData in above example! Necessary to ensure that the effect expires at the end of the round and prevent it from potentially applying to units of the wrong faction!
-
-Intended targeting data for effects when `true` is:
-```
-	"targetingData": {
-			"effectTriggerType": "OnWeaponFire",
-			"effectTargetType": "Creator", 
-			"showInStatusPanel": true
-			},
-```
 `effectTargetType` can also be `AllEnemies` when `true`.
+
 
 `description` - human-legible description of the OpForSpec. For `OpForSpec` in `OpForDefaultList`, the string {faction} will be replaced with `FactionDef.Demonym`s: 
 e.g., for `"description": "This pilot inflicts increased damage against {faction}.",` , the description in-game would read "This pilot inflicts increased damage against Taurians" for TaurianConcordat, and "This pilot inflicts increased damage against Chainelanians" for Chainelane.
 
 `effectDataJO` - List of standard format `effectData` for this specialization.
+
+
+#### OpForSpec - Simgame effects
+example json structure for OpForSpec with "simgame" effects:
+
+```
+{
+	"OpForSpecID": "Local_Rabble",
+	"OpForSpecName": "Locals: Damn Rabble",
+	"killsRequired": 0,
+	"factionID": "Locals",
+	"applyToFaction": [
+		"Locals"
+	],
+	"description": "This pilot is an expert at killing locals, and does fancy things.",
+	"repMult": {
+		"{OWNER}": 1.0,
+		"Liao": 0.8,
+		"Davion": 0.2,
+		"{TARGET}": 0.5
+		},
+	"storeDiscount": {
+		"ComStar": -0.2
+		},
+	"storeBonus": {
+		"ComStar": 0.2
+		},
+	"cashMult": 2.5,
+	"killBounty": 1500,
+	"effectDataJO": []
+}
+
+```
+
+`repMult` - Dictionary <string, float> - Adjustments to reputation gained/lost for contracts against this faction (or if faction is listed in `applyToFaction`). For listed factions that are <i>not</i> the contract employer or target, reputation will be gained as a multiple of the contract employer reputation gain. The fixed strings "{OWNER}", {"EMPLOYER"}, and "{TARGET}" can also be used to dynamically change reputation for the system owner, your employer, and target factions respectively.
+
+Using the above settings, if a contract would result in you gaining 5 reputation with the Aurigan Restoration and losing 4 with the Locals, you would also:
+	1. Gain 5 reputation with the system owner if the system owner is also your employer.
+	2. Gain 4 reputation with Liao.
+	3. Gain 1 reputation with Davion.
+	4. Only lose 2 reputation with Locals due to `"{TARGET}": 0.5`
+	
+If there is a multiplier for `{"EMPLOYER"}` or `"{OWNER}"` AND that faction is specifically listed in `repMult`, the final employer reputation multiplier will be the largest of the three values.
+
+If there is a multiplier for `"{TARGET}"` AND the target faction is specifically listed in `repMult`, the final target reputation multiplier will be the smaller of  the multipliers (e.g., if you had `"{TARGET}": 0.5, "Locals: 0.9`, the final reputation change multiplier would be 0.5).
+
+`storeDiscount` - Dictionary <string, float> - Adjustments to store purchase discount for listed factions. Stacks with reputation discounts/markups, so values should be negative to decrease prices and positive to increase prices. Changes to discount/markup are reflected in the shop screen.
+
+`storeBonus` - Dictionary <string, float> - Adjustments to store selling prices. Stacks with difficulty setting (e.g. sell price = 15% of item value), so values should be positive to increase selling prices. Changes to sell price are reflected in the shop screen.
 
 
 ### MissionSpec
