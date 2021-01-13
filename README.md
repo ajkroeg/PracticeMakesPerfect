@@ -108,16 +108,16 @@ Bonus XP can be defined by either the effectType.Description.Id (`AbilityDefPPC`
 
 Valid settings for `Weapon_PPC_PPC_0-STOCK` could therefore be
 ```
-			"bonusEffects_XP": {
-				"AbilityDefPPC": 25
-				},	
+	"bonusEffects_XP": {
+		"AbilityDefPPC": 25
+		},	
 ```
 OR
 
 ```
-			"bonusEffects_XP": {
-				"AccuracyModifier": 25
-				},	
+	"bonusEffects_XP": {
+		"AccuracyModifier": 25
+		},	
 ```
 
 
@@ -249,7 +249,7 @@ Intended targeting data for "Active" effects is:
 		},
 ```
 
-`effectTargetType` can also be `AllEnemies` when `true`.
+`effectTargetType` can also be `AllAllies`, `AllLanceMates`, or `AllEnemies`.
 
 
 `description` - human-legible description of the OpForSpec. For `OpForSpec` in `OpForDefaultList`, the string {faction} will be replaced with `FactionDef.Demonym`s: 
@@ -283,14 +283,14 @@ example json structure for OpForSpec with "simgame" effects:
 	"storeBonus": {
 		"ComStar": 0.2
 		},
-	"cashMult": 2.5,
+	"cashMult": 0.2,
 	"killBounty": 1500,
 	"effectDataJO": []
 }
 
 ```
 
-`repMult` - Dictionary <string, float> - Adjustments to reputation gained/lost for contracts against this faction (or if faction is listed in `applyToFaction`). For listed factions that are <i>not</i> the contract employer or target, reputation will be gained as a multiple of the contract employer reputation gain. The fixed strings "{OWNER}", {"EMPLOYER"}, and "{TARGET}" can also be used to dynamically change reputation for the system owner, your employer, and target factions respectively.
+`repMult` - Dictionary <string, float> - Multipliers added to reputation gained/lost for contracts against this faction (or if faction is listed in `applyToFaction`). For listed factions that are <i>not</i> the contract employer or target, reputation will be gained as a multiple of the contract employer reputation gain. The fixed strings "{OWNER}", {"EMPLOYER"}, and "{TARGET}" can also be used to dynamically change reputation for the system owner, your employer, and target factions respectively.
 
 Using the above settings, if a contract would result in you gaining 5 reputation with the Aurigan Restoration and losing 4 with the Locals, you would also:
 	1. Gain 5 reputation with the system owner if the system owner is also your employer.
@@ -306,21 +306,31 @@ If there is a multiplier for `"{TARGET}"` AND the target faction is specifically
 
 `storeBonus` - Dictionary <string, float> - Adjustments to store selling prices. Stacks with difficulty setting (e.g. sell price = 15% of item value), so values should be positive to increase selling prices. Changes to sell price are reflected in the shop screen.
 
+`cashMult` - float, Multiplier added to contract payout if `applyToFaction` contains the contract target. Using above settings, if base contract payout vs Locals was ¢10,000, final contract payout would be ¢12,000 (1 + 0.2 from `cashMult`).
+
+`killBounty` - int, per-kill c-bill bounty awarded at contract resolution if `applyToFaction` contains the contract target.
+
+In all cases, simgame effects of multiple specializations (e.g. from multiple pilots with the same specialization) <b>do stack</b>.
+
 
 ### MissionSpec
 
 MissionSpecs, or Mission Specializations are unique bonuses awarded to pilots that only apply during their respective mission types.
 
 example json structure for MissionSpecs is as follows:
+
 ```
+
 {
-	"MissionSpecID": "DamageResistance",
-	"MissionSpecName": "Damage Resistance",
+	"MissionSpecID": "DamageIncrease",
+	"MissionSpecName": "Damage Increased",
 	"missionsRequired": 10,
 	"contractTypeID": "UNIVERSAL",
-	"description": "This pilot loves the simplicity of a good brawl, and takes less damage during {contract} contracts.",
+	"description": "This pilot loves the simplicity of a good brawl, and deals more damage to Mechs and Vehicles during {contract} contracts.",
+	"AdvTargetInfoUnits": [	"Mech", "Vehicle"],
 	"effectDataJO": []
 }
+
 ```
 
 `MissionSpecID` - string, ID for this MissionSpec
@@ -331,21 +341,77 @@ example json structure for MissionSpecs is as follows:
 
 `contractTypeID` - string, contract type for which progress is tracked and for which effects are applied when specialization is awarded; e.g. SimpleBattle, DuoDuel.
 
-`description` - human-legible description for this specialization. Similar to OpforSpecs, `MissionSpec` in `MissionDefaultList`, the string {contract} will be replaced with `ContractTypeValue.Name`: 
-e.g., for `"description": "This pilot loves the simplicity of a good brawl, and takes less damage during {contract} contracts.",` , the description in-game would read "This pilot loves the simplicity of a good brawl, and takes less damage during SimpleBattle contracts."
+`description` - human-legible description for this specialization. Similar to OpforSpecs, `MissionSpec` in `MissionDefaultList`, the string {contract} will be replaced with `ContractTypeValue.Name`: e.g., for `"description": "This pilot loves the simplicity of a good brawl, and takes less damage during {contract} contracts.",` , the description in-game would read "This pilot loves the simplicity of a good brawl, and takes less damage during SimpleBattle contracts."
 
+`AdvTargetInfoUnits` - List<string>, Defines "Advanced Targeting info" that only applies in-contract effects to certain units in conjunction with effect `targetingData`. Allowed values are: `Primary, NotPlayer, Mech, Vehicle, Turret, Building`
+
+`Primary` - effects apply for Primary mission targets for the contract type. E.g., for assassination contracts, the effects would be applied only to the assassination target if the `"effectTriggerType": "Passive"` and `"effectTargetType": "AllEnemies"`. Similar to "Active" vs "Passive" effects as discussed for OpForSpecs, using `"effectTriggerType": "OnWeaponFire"` applies the effect only when weapons are fired, and should be used in conjunction with durationData to ensure the effect expires immediately after firing.
+
+`NotPlayer` - effects apply to non-player factions. Only implemented in conjunction with `"effectTargetType": "AllEnemies"` (impacts all factions in three-way battles, including friendlies!).
+
+`Mech, Vehicle, Turret, Building` - effects apply to the unit type in question. Buildings are a special case, as they are not considered AbstractActors; as such they do not have the same statistics such as `DamageReductionMultiplierAll`. In order to conditionally adjust building damage, it is necessary to adjust the damage <i>dealt by the attacking unit</i>, as in the following example.
+
+```
+{
+			"MissionSpecID": "DefendBase_Bulwark",
+			"MissionSpecName": "Defend Base: Bulwark Writ Large",
+			"missionsRequired": 10,
+			"contractTypeID": "DefendBase",
+			"description": "Friendly building damage reduction",
+			"AdvTargetInfoUnits": [
+				"Building"
+			],
+			"effectDataJO": [
+				{
+					"durationData": {
+						"duration": 1,
+						"ticksOnEndOfRound": true,
+						"useActivationsOfTarget": true,
+						"stackLimit": 1
+					},
+					"targetingData": {
+						"effectTriggerType": "OnWeaponFire",
+						"effectTargetType": "AllEnemies",
+						"showInStatusPanel": true
+					},
+					"effectType": "StatisticEffect",
+					"Description": {
+						"Id": "DB_DR",
+						"Name": "Damage Decreased",
+						"Details": "Friendly building damage reduction",
+						"Icon": "hooded-assassin"
+					},
+					"nature": "Buff",
+					"statisticData": {
+						"statName": "DamagePerShot",
+						"operation": "Float_Multiply",
+						"modValue": "0.8",
+						"modType": "System.Single",
+						"additionalRules": "NotSet",
+						"targetCollection": "Weapon",
+						"targetWeaponCategory": "NotSet",
+						"targetWeaponType": "NotSet",
+						"targetAmmoCategory": "NotSet",
+						"targetWeaponSubType": "NotSet"
+					}
+				}
+			]
+		},
+```
+
+In the above example, friendly buildings effectively take 80% damage from opponents due to the effect applying ```"targetingData": {
+						"effectTriggerType": "OnWeaponFire",
+						"effectTargetType": "AllEnemies",
+						"showInStatusPanel": true
+					},```
+
+ If you wanted to <i>increase</i> damage your pilot deals to buildings, you could use `"effectTriggerType": "OnWeaponFire",` and `"effectTargetType": "Creator",` with  ```"statisticData": {
+	"statName": "DamagePerShot",
+	"operation": "Float_Multiply",
+	"modValue": "1.2",```
+ 
+ 
 `effectDataJO` - List of standard format `effectData` for this specialization.
-
-Intended targeting data for MissionSpecs:
-```
-	"targetingData": {
-			"effectTriggerType": "Passive",
-			"effectTargetType": "Creator",
-			"showInStatusPanel": true
-			},
-```
-
-`effectTargetType` can also be `AllAllies`, `AllLanceMates`, or `AllEnemies` 
 
 ### StratCom
 
