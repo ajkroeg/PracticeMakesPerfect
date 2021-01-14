@@ -3,8 +3,6 @@ using Harmony;
 using BattleTech;
 using System.Collections.Generic;
 using System.Linq;
-using BattleTech.Framework;
-using BattleTech.UI.Tooltips;
 
 namespace PracticeMakesPerfect.Patches
 {

@@ -1,21 +1,11 @@
 ﻿using System;
-using System.CodeDom;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Mime;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 using static PracticeMakesPerfect.Framework.GlobalVars;
 using BattleTech;
 using BattleTech.UI;
-using BattleTech.UI.TMProWrapper;
 using BattleTech.UI.Tooltips;
 using UnityEngine.UI;
 using PracticeMakesPerfect.Framework;
 using Harmony;
-using JetBrains.Annotations;
-using UnityEngine;
 using UnityEngine.Events;
 
 namespace PracticeMakesPerfect.Patches

@@ -1,19 +1,14 @@
 ﻿using System;
-using System.CodeDom;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using Harmony;
 using BattleTech;
 using PracticeMakesPerfect.Framework;
 using static PracticeMakesPerfect.Framework.GlobalVars;
-using System.Threading.Tasks;
-using BattleTech.DataObjects;
 using BattleTech.Save;
 using BattleTech.Save.Test;
 using BattleTech.UI;
-using ErosionBrushPlugin;
-using TB.ComponentModel;
+using UnityEngine;
 
 namespace PracticeMakesPerfect.Patches
 {
@@ -164,18 +159,149 @@ namespace PracticeMakesPerfect.Patches
             }
         }
 
+        [HarmonyPatch(typeof(SimGameState), "GetFinalReputationChange", new Type[] {typeof(FactionValue), typeof(int)})]
+        static class SimGameState_GetFinalReputationChange
+        {
+            static void Postfix(SimGameState __instance, FactionValue faction, int valueChange)
+            {
+                SpecHolder.HolderInstance.emplRep = valueChange;
+            }
+        }
+
+
         [HarmonyPatch(typeof(Contract), "CompleteContract", new Type[] {typeof(MissionResult), typeof(bool)})]
         static class Contract_CompleteContract_Patch
         {
-            static void Prefix(Contract __instance, MissionResult result, bool isGoodFaithEffort)
+            [HarmonyPriority(Priority.First)]
+            static void Postfix(Contract __instance, MissionResult result, bool isGoodFaithEffort)
             {
+                var employer = __instance.Override.employerTeam.FactionDef.FactionValue.Name;
+                var target = __instance.Override.targetTeam.FactionDef.FactionValue.Name;
+                var employerRepMult = 1f;
+                var targetRepMult = 1f;
+                var contractPayOutMult = 1f;
+
+                SpecHolder.HolderInstance.kills = 0;
+                SpecHolder.HolderInstance.bounty = 0;
+                SpecHolder.HolderInstance.emplRep = 0;
+
                 var playerUnits = UnityGameInstance.BattleTechGame.Combat.AllActors.Where(x => x.team.IsLocalPlayer);
                 foreach (var unit in playerUnits)
                 {
                     var p = unit.GetPilot();
                     var pKey = p.FetchGUID();
-                    var contractID = __instance.Override.ContractTypeValue.Name;
 
+                    var contractID = __instance.Override.ContractTypeValue.Name;
+                    //processing mission outcomes
+
+                    if (SpecHolder.HolderInstance.OpForSpecMap.ContainsKey(pKey))
+                    {
+                        foreach (var spec in SpecHolder.HolderInstance.OpForSpecMap[pKey])
+                        {
+                            var employerRepMultTemp = new List<float>();
+
+                            var opSpecs =
+                                SpecManager.ManagerInstance.OpForSpecList.Where(x =>
+                                    x.OpForSpecID == spec);
+
+                            foreach (var opSpec in opSpecs)
+                            {
+                                if (opSpec.factionID == target || opSpec.applyToFaction.Contains(target))
+                                {
+                                    if (opSpec.repMult.ContainsKey(employer))
+                                    {
+                                        employerRepMultTemp.Add(opSpec.repMult[employer]);
+                                        //employerRepMult += (opSpec.repMult[employer]);
+                                        ModInit.modLog.LogMessage($"current employer reputation multiplier: {opSpec.repMult[employer]}");
+                                    }
+
+                                    if (opSpec.repMult.ContainsKey(employer_string))
+                                    {
+                                        employerRepMultTemp.Add(opSpec.repMult[employer_string]);
+                                        //employerRepMult += (opSpec.repMult[employer_string]);
+                                        ModInit.modLog.LogMessage($"current employer reputation multiplier: {opSpec.repMult[employer_string]}");
+                                    }
+
+                                    if (opSpec.repMult.ContainsKey(owner_string) && sim.CurSystem.OwnerValue.Name == employer)
+                                    {
+                                        employerRepMultTemp.Add(opSpec.repMult[owner_string]);
+//                                        employerRepMult += (opSpec.repMult[owner_string]);
+                                        ModInit.modLog.LogMessage($"current employer reputation multiplier: {opSpec.repMult[owner_string]}");
+                                    }
+
+                                    if (opSpec.repMult.ContainsKey(target) && !opSpec.repMult.ContainsKey(target_string))
+                                    {
+                                        targetRepMult *= (opSpec.repMult[target]);
+                                        ModInit.modLog.LogMessage($"current target reputation multiplier: {targetRepMult}");
+                                    }
+                                    if (!opSpec.repMult.ContainsKey(target) && opSpec.repMult.ContainsKey(target_string))
+                                    {
+                                        targetRepMult *= (opSpec.repMult[target_string]);
+                                        ModInit.modLog.LogMessage($"current target reputation multiplier: {targetRepMult}");
+                                    }
+                                    if (opSpec.repMult.ContainsKey(target) && opSpec.repMult.ContainsKey(target_string))
+                                    {
+                                        targetRepMult *= Math.Min(opSpec.repMult[target], opSpec.repMult[target_string]);
+                                        ModInit.modLog.LogMessage($"current target reputation multiplier: {targetRepMult}");
+                                    }
+
+                                    employerRepMult += employerRepMultTemp.Max();
+
+                                    contractPayOutMult += (opSpec.cashMult);
+                                    ModInit.modLog.LogMessage($"current contract payout multiplier: {contractPayOutMult}");
+                                }
+                                
+                            }
+                            
+                        }
+
+                        if (SpecHolder.HolderInstance.OpForKillsTEMPTracker.ContainsKey(pKey))
+                        {
+                            SpecHolder.HolderInstance.kills += SpecHolder.HolderInstance.OpForKillsTEMPTracker[pKey][target];
+                            ModInit.modLog.LogMessage($"OpForKillsTEMPTracker was {SpecHolder.HolderInstance.OpForKillsTEMPTracker[pKey][target]}");
+
+                            foreach (var spec in SpecHolder.HolderInstance.OpForSpecMap[pKey])
+                            {
+                                var opSpecs =
+                                    SpecManager.ManagerInstance.OpForSpecList.Where(x => x.OpForSpecID == spec);
+
+                                foreach (var opSpec in opSpecs)
+                                {
+                                    if (opSpec.applyToFaction.Contains(target) && opSpec.killBounty > 0)
+                                    {
+                                        SpecHolder.HolderInstance.bounty += opSpec.killBounty;
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    var taggedMSpecCt = 0;
+                    var taggedOPSpecCt = 0;
+
+                    if (!ModInit.modSettings.TaggedMissionSpecsCountTowardMax)
+                    {
+
+                        foreach (var tag in ModInit.modSettings.taggedMissionSpecs)
+                        {
+                            if (p.pilotDef.PilotTags.Contains(tag.Key))
+                            {
+                                taggedMSpecCt += tag.Value.Count;
+                            }
+                        }
+
+                        ModInit.modLog.LogMessage(
+                            $"{taggedMSpecCt} tagged Mission Specs found for {p.Callsign}.");
+                        foreach (var tag in ModInit.modSettings.taggedOpForSpecs)
+                        {
+                            if (p.pilotDef.PilotTags.Contains(tag.Key))
+                            {
+                                taggedOPSpecCt += tag.Value.Count;
+                            }
+                        }
+                    }
+
+                    //processing spec progress below
                     if (ModInit.modSettings.WhiteListMissions.Contains(contractID))
                     {
                         if (!SpecHolder.HolderInstance.MissionsTracker[pKey].ContainsKey(contractID))
@@ -194,51 +320,70 @@ namespace PracticeMakesPerfect.Patches
 
                         if (SpecManager.ManagerInstance.MissionSpecList.Any(x => x.contractTypeID == contractID))
                         {
-                            foreach (var missionSpec in SpecManager.ManagerInstance.MissionSpecList.Where(x => x.contractTypeID == contractID))
+                            foreach (var missionSpec in SpecManager.ManagerInstance.MissionSpecList.Where(x =>
+                                x.contractTypeID == contractID))
                             {
                                 if (missionSpec.missionsRequired == 0)
                                 {
-                                    ModInit.modLog.LogMessage($"{missionSpec.MissionSpecName} has 0 required missions set, ignoring.");
+                                    ModInit.modLog.LogMessage(
+                                        $"{missionSpec.MissionSpecName} has 0 required missions set, ignoring.");
                                     continue;
                                 }
-                                if ((SpecHolder.HolderInstance.MissionSpecMap[pKey].Count <
+
+                                if (missionSpec.cashMult > 0)
+                                {
+                                    contractPayOutMult += (missionSpec.cashMult);
+                                    ModInit.modLog.LogMessage(
+                                        $"current contract payout multiplier: {contractPayOutMult} from {missionSpec.MissionSpecName}");
+                                }
+
+                                if ((SpecHolder.HolderInstance.MissionSpecMap[pKey].Count - taggedMSpecCt <
                                      ModInit.modSettings.MaxMissionSpecializations) ||
-                                    (!ModInit.modSettings.MissionTiersCountTowardMax && mspecsCollapsed.Contains(missionSpec.contractTypeID)))
+                                    (!ModInit.modSettings.MissionTiersCountTowardMax &&
+                                     mspecsCollapsed.Contains(missionSpec.contractTypeID)))
                                 {
                                     if (SpecHolder.HolderInstance.MissionsTracker[pKey][contractID] >=
-                                        missionSpec.missionsRequired && contractID == missionSpec.contractTypeID && !SpecHolder
-                                            .HolderInstance.MissionSpecMap[pKey].Contains(missionSpec.MissionSpecID))
+                                        missionSpec.missionsRequired && contractID == missionSpec.contractTypeID &&
+                                        !SpecHolder
+                                            .HolderInstance.MissionSpecMap[pKey]
+                                            .Contains(missionSpec.MissionSpecID))
                                     {
                                         ModInit.modLog.LogMessage(
                                             $"{p.Callsign} has achieved {missionSpec.MissionSpecName} for {missionSpec.contractTypeID}!");
-                                        SpecHolder.HolderInstance.MissionSpecMap[pKey].Add(missionSpec.MissionSpecID);
+                                        SpecHolder.HolderInstance.MissionSpecMap[pKey]
+                                            .Add(missionSpec.MissionSpecID);
                                     }
                                 }
                                 else
                                 {
-                                    ModInit.modLog.LogMessage($"{p.Callsign} already has the maximum, {ModInit.modSettings.MaxMissionSpecializations}, Mission Specializations!");
+                                    ModInit.modLog.LogMessage(
+                                        $"{p.Callsign} already has the maximum, {ModInit.modSettings.MaxMissionSpecializations}, Mission Specializations!");
                                 }
                             }
                         }
                     }
 
-                    foreach (var key in SpecHolder.HolderInstance.OpForKillsTEMPTracker[pKey].Keys)
+                    if (ModInit.modSettings.WhiteListOpFor.Contains(__instance.Override.targetTeam.FactionValue.Name))
                     {
-                        if (ModInit.modSettings.WhiteListOpFor.Contains(key))
+                        foreach (var key in SpecHolder.HolderInstance.OpForKillsTEMPTracker[pKey].Keys)
                         {
-                            if (!SpecHolder.HolderInstance.OpForKillsTracker[pKey].ContainsKey(key))
+                            if (ModInit.modSettings.WhiteListOpFor.Contains(key))
                             {
-                                SpecHolder.HolderInstance.OpForKillsTracker[pKey].Add(key, 0);
+                                if (!SpecHolder.HolderInstance.OpForKillsTracker[pKey].ContainsKey(key))
+                                {
+                                    SpecHolder.HolderInstance.OpForKillsTracker[pKey].Add(key, 0);
+                                    ModInit.modLog.LogMessage(
+                                        $"No key for {key} found in {p.Callsign}'s OpForKillsTracker. Adding it with default value 0.");
+                                }
+                                SpecHolder.HolderInstance.OpForKillsTracker[pKey][key] +=
+                                    SpecHolder.HolderInstance.OpForKillsTEMPTracker[pKey][key];
                                 ModInit.modLog.LogMessage(
-                                    $"No key for {key} found in {p.Callsign}'s OpForKillsTracker. Adding it with default value 0.");
+                                    $"Adding {SpecHolder.HolderInstance.OpForKillsTEMPTracker[pKey][key]} {key} kills to {p.Callsign}'s OpForKillsTracker");
                             }
-                            SpecHolder.HolderInstance.OpForKillsTracker[pKey][key] +=
-                                SpecHolder.HolderInstance.OpForKillsTEMPTracker[pKey][key];
-                            ModInit.modLog.LogMessage(
-                                $"Adding {SpecHolder.HolderInstance.OpForKillsTEMPTracker[pKey][key]} {key} kills to {p.Callsign}'s OpForKillsTracker");
+
                         }
-                        
                     }
+
                     var opforspecCollapsed = SpecManager.ManagerInstance.OpForSpecList.Where(x =>
                             SpecHolder.HolderInstance.OpForSpecMap[pKey].Any(y => y == x.OpForSpecID))
                         .Select(x => x.factionID).ToList();
@@ -251,7 +396,7 @@ namespace PracticeMakesPerfect.Patches
                             ModInit.modLog.LogMessage($"{opforSpec.OpForSpecName} has 0 required kills set, ignoring.");
                             continue;
                         }
-                        if ((SpecHolder.HolderInstance.OpForSpecMap[pKey].Count <
+                        if ((SpecHolder.HolderInstance.OpForSpecMap[pKey].Count - taggedOPSpecCt <
                              ModInit.modSettings.MaxOpForSpecializations) ||
                             (!ModInit.modSettings.OpForTiersCountTowardMax && opforspecCollapsed.Contains(opforSpec.factionID)))
                         {
@@ -270,6 +415,23 @@ namespace PracticeMakesPerfect.Patches
                         }
                     }
                 }
+
+                SpecHolder.HolderInstance.totalBounty = SpecHolder.HolderInstance.kills * SpecHolder.HolderInstance.bounty;
+                ModInit.modLog.LogMessage($"{SpecHolder.HolderInstance.totalBounty} in bounties awarded.");
+
+                var employerRep = Mathf.RoundToInt(__instance.EmployerReputationResults * employerRepMult);
+                var targetRep = Mathf.RoundToInt(__instance.TargetReputationResults * targetRepMult);
+                var contractPayout = Mathf.RoundToInt((__instance.MoneyResults * contractPayOutMult) + SpecHolder.HolderInstance.totalBounty);
+
+                ModInit.modLog.LogMessage($"Employer Reputation Change: {__instance.EmployerReputationResults} x {employerRepMult} = {employerRep}");
+                ModInit.modLog.LogMessage($"Target Reputation Change: {__instance.TargetReputationResults} x {targetRepMult} = {targetRep}");
+                ModInit.modLog.LogMessage($"Contract Payout: ({__instance.MoneyResults} x {contractPayOutMult}) + {SpecHolder.HolderInstance.totalBounty} = {contractPayOutMult}");
+
+
+                Traverse.Create(__instance).Property("EmployerReputationResults").SetValue(employerRep);
+                Traverse.Create(__instance).Property("TargetReputationResults").SetValue(targetRep);
+                Traverse.Create(__instance).Property("MoneyResults").SetValue(contractPayout);
+
                 SpecHolder.HolderInstance.OpForKillsTEMPTracker = new Dictionary<string, Dictionary<string, int>>();
             }
         }

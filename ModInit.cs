@@ -3,7 +3,6 @@ using System;
 using System.Reflection;
 using System.Collections.Generic;
 using System.IO;
-using BattleTech;
 using Newtonsoft.Json;
 using PracticeMakesPerfect.Framework;
 
@@ -80,6 +79,9 @@ namespace PracticeMakesPerfect
         public int MaxMissionSpecializations = 0;
         public bool MissionTiersCountTowardMax = false;
 
+        public bool TaggedOpforSpecsCountTowardMax = false;
+        public bool TaggedMissionSpecsCountTowardMax = false;
+
         public List<string> WhiteListOpFor= new List<string>();
         public List<string> WhiteListMissions= new List<string>();
 
@@ -89,8 +91,8 @@ namespace PracticeMakesPerfect
         public List<MissionSpec> MissionSpecList = new List<MissionSpec>();
         public List<MissionSpec> MissionDefaultList = new List<MissionSpec>();
 
-        public Dictionary<string, string> taggedOpForSpecs = new Dictionary<string, string>();
-        public Dictionary<string, string> taggedMissionSpecs = new Dictionary<string, string>();
+        public Dictionary<string, List<string>> taggedOpForSpecs = new Dictionary<string, List<string>>();
+        public Dictionary<string, List<string>> taggedMissionSpecs = new Dictionary<string, List<string>>();
 
         public List<StratCom> StratComs = new List<StratCom>();
 

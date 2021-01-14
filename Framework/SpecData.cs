@@ -1,10 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using BattleTech;
-using BattleTech.Framework;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using static PracticeMakesPerfect.Framework.GlobalVars;
@@ -20,6 +17,23 @@ namespace PracticeMakesPerfect.Framework
         internal const string OP4SpecTrackerTag = "PMP_OP4TRACKER_";
         internal const string MissionSpecStateTag = "PMP_MISSIONSPEC_";
         internal const string MissionSpecTrackerTag = "PMP_MISSIONTRACKER_";
+
+        internal const string owner_string = "{OWNER}";
+        internal const string employer_string = "{EMPLOYER}";
+        internal const string target_string = "{TARGET}";
+
+        public enum AdvTargetUnitData
+
+        {
+            NotSet,
+            Primary,
+            NotPlayer,
+            Mech,
+            Vehicle,
+            Turret,
+            Building
+        }
+
     }
     public class OpForSpec
     {
@@ -27,8 +41,16 @@ namespace PracticeMakesPerfect.Framework
         public string OpForSpecName = "";
         public int killsRequired = 0;
         public string factionID = ""; //e.g. TaurianConcordat
-        public bool applyToFaction = true;
+        public List<string> applyToFaction = new List<string>();
         public string description = "";
+
+        public Dictionary<string, float> repMult = new Dictionary<string, float>();
+        public Dictionary<string, float> storeDiscount = new Dictionary<string, float>();
+        public Dictionary<string, float> storeBonus = new Dictionary<string, float>();
+        public float cashMult = 1f;
+        public int killBounty = 0;
+
+
 
         [JsonIgnore]
         public List<EffectData> effects = new List<EffectData>();
@@ -59,6 +81,10 @@ namespace PracticeMakesPerfect.Framework
         public string MissionSpecName = "";
         public int missionsRequired = 0;
         public string contractTypeID = ""; //eg SimpleBattle
+
+        public List<AdvTargetUnitData> AdvTargetInfoUnits = new List<AdvTargetUnitData>(); // Primary, NotPlayer, Mech, Vehicle, Turret, Building
+        public float cashMult = 1f; // need to implement still
+
         public string description = "";
 
         [JsonIgnore]
@@ -85,6 +111,11 @@ namespace PracticeMakesPerfect.Framework
 
         public Dictionary<string, Dictionary<string, int>> OpForKillsTEMPTracker;
 
+        public int kills;
+        public int bounty;
+        public int totalBounty;
+        public int emplRep;
+
         public static SpecHolder HolderInstance
         {
             get
@@ -103,6 +134,11 @@ namespace PracticeMakesPerfect.Framework
             MissionsTracker = new Dictionary<string, Dictionary<string, int>>();
 
             OpForKillsTEMPTracker = new Dictionary<string, Dictionary<string, int>>();
+
+            kills = new int();
+            bounty = new int();
+            totalBounty = new int();
+            emplRep = new int();
 
         }
 
@@ -218,19 +254,31 @@ namespace PracticeMakesPerfect.Framework
             var pKey = pilot.FetchGUID();
             foreach (var tag in ModInit.modSettings.taggedMissionSpecs)
             {
-                if (pilot.pilotDef.PilotTags.Contains(tag.Key) && !SpecHolder.HolderInstance.MissionSpecMap[pKey].Contains(tag.Value))
+                if (pilot.pilotDef.PilotTags.Contains(tag.Key))
                 {
-                    SpecHolder.HolderInstance.MissionSpecMap[pKey].Add(tag.Value);
-                    ModInit.modLog.LogMessage($"Adding {tag.Value} to {pilot.Callsign}'s MissionSpecMap from Pilot Tag: {tag.Value}.");
+                    foreach (var mspec in tag.Value)
+                    {
+                        if (!SpecHolder.HolderInstance.MissionSpecMap[pKey].Contains(mspec))
+                        {
+                            SpecHolder.HolderInstance.MissionSpecMap[pKey].Add(mspec);
+                            ModInit.modLog.LogMessage($"Adding {mspec} to {pilot.Callsign}'s MissionSpecMap from Pilot Tag: {tag.Key}.");
+                        }
+                    }
                 }
             }
 
             foreach (var tag in ModInit.modSettings.taggedOpForSpecs)
             {
-                if (pilot.pilotDef.PilotTags.Contains(tag.Key) && !SpecHolder.HolderInstance.OpForSpecMap[pKey].Contains(tag.Value))
+                if (pilot.pilotDef.PilotTags.Contains(tag.Key))
                 {
-                    SpecHolder.HolderInstance.OpForSpecMap[pKey].Add(tag.Value);
-                    ModInit.modLog.LogMessage($"Adding {tag.Value} to {pilot.Callsign}'s OpForSpecMap from Pilot Tag: {tag.Value}.");
+                    foreach (var opspec in tag.Value)
+                    {
+                        if (!SpecHolder.HolderInstance.OpForSpecMap[pKey].Contains(opspec))
+                        {
+                            SpecHolder.HolderInstance.OpForSpecMap[pKey].Add(opspec);
+                            ModInit.modLog.LogMessage($"Adding {opspec} to {pilot.Callsign}'s OpForSpecMap from Pilot Tag: {tag.Key}.");
+                        }
+                    }
                 }
             }
         }
@@ -268,7 +316,7 @@ namespace PracticeMakesPerfect.Framework
             if (sim.CompanyTags.Any(x => x.StartsWith(OP4SpecStateTag)))
             {
                 var op4StateCTag = sim.CompanyTags.FirstOrDefault((x) => x.StartsWith(OP4SpecStateTag));
-                var op4State = op4StateCTag.Substring(OP4SpecStateTag.Length);
+                var op4State = op4StateCTag?.Substring(OP4SpecStateTag.Length);
                 HolderInstance.OpForSpecMap = JsonConvert.DeserializeObject<Dictionary<string, List<string>>>(op4State);
                 ModInit.modLog.LogMessage($"Deserializing op4State and removing from company tags");
                 GlobalVars.sim.CompanyTags.Remove(op4StateCTag);
@@ -281,7 +329,7 @@ namespace PracticeMakesPerfect.Framework
             if (sim.CompanyTags.Any(x => x.StartsWith(OP4SpecTrackerTag)))
             {
                 var op4TrackerCTag = sim.CompanyTags.FirstOrDefault((x) => x.StartsWith(OP4SpecTrackerTag));
-                var op4Tracker = op4TrackerCTag.Substring(OP4SpecTrackerTag.Length);
+                var op4Tracker = op4TrackerCTag?.Substring(OP4SpecTrackerTag.Length);
                 HolderInstance.OpForKillsTracker = JsonConvert.DeserializeObject<Dictionary<string, Dictionary<string, int>>>(op4Tracker);
                 ModInit.modLog.LogMessage($"Deserializing op4Tracker and removing from company tags");
                 GlobalVars.sim.CompanyTags.Remove(op4TrackerCTag);
@@ -294,7 +342,7 @@ namespace PracticeMakesPerfect.Framework
             if (sim.CompanyTags.Any(x => x.StartsWith(MissionSpecStateTag)))
             {
                 var missionStateCTag = sim.CompanyTags.FirstOrDefault((x) => x.StartsWith(MissionSpecStateTag));
-                var missionState = missionStateCTag.Substring(MissionSpecStateTag.Length);
+                var missionState = missionStateCTag?.Substring(MissionSpecStateTag.Length);
                 HolderInstance.MissionSpecMap = JsonConvert.DeserializeObject<Dictionary<string, List<string>>>(missionState);
                 ModInit.modLog.LogMessage($"Deserializing missionState and removing from company tags");
                 GlobalVars.sim.CompanyTags.Remove(missionStateCTag);
@@ -307,7 +355,7 @@ namespace PracticeMakesPerfect.Framework
             if (sim.CompanyTags.Any(x => x.StartsWith(MissionSpecTrackerTag)))
             {
                 var missionTrackerCTag = sim.CompanyTags.FirstOrDefault((x) => x.StartsWith(MissionSpecTrackerTag));
-                var missionTracker = missionTrackerCTag.Substring(MissionSpecTrackerTag.Length);
+                var missionTracker = missionTrackerCTag?.Substring(MissionSpecTrackerTag.Length);
                 HolderInstance.MissionsTracker = JsonConvert.DeserializeObject<Dictionary<string, Dictionary<string, int>>>(missionTracker);
                 ModInit.modLog.LogMessage($"Deserializing missionTracker and removing from company tags");
                 GlobalVars.sim.CompanyTags.Remove(missionTrackerCTag);

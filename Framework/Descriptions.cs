@@ -1,14 +1,6 @@
-﻿using System;
-using BattleTech;
-using Harmony;
+﻿using BattleTech;
 using System.Collections.Generic;
 using System.Linq;
-using static PracticeMakesPerfect.Framework.GlobalVars;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
-using BattleTech.UI;
-using BattleTech.UI.TMProWrapper;
 
 namespace PracticeMakesPerfect.Framework
 {
@@ -66,7 +58,7 @@ namespace PracticeMakesPerfect.Framework
                 foreach (var missionSpec in mspecsOrdered)
                 {
                     var description =
-                        $"<b>{missionSpec.MissionSpecName} [{missionSpec.missionsRequired}]:</b> {missionSpec.description}\n";
+                        $"<b>{missionSpec.MissionSpecName} [{missionSpec.missionsRequired}]:</b> {missionSpec.description}\n\n";
                     rtrn += description;
                 }
             }
@@ -80,7 +72,7 @@ namespace PracticeMakesPerfect.Framework
                 foreach (var opforSpec in opspecsOrdered)
                 {
                     var description =
-                        $"<b>{opforSpec.OpForSpecName} [{opforSpec.killsRequired}]:</b> {opforSpec.description}\n";
+                        $"<b>{opforSpec.OpForSpecName} [{opforSpec.killsRequired}]:</b> {opforSpec.description}\n\n";
                     rtrn += description;
                 }
             }

@@ -71,6 +71,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Framework\Descriptions.cs" />
+    <Compile Include="Patches\AAR_Widget_Patches.cs" />
+    <Compile Include="Patches\ShopPatches.cs" />
     <Compile Include="Patches\DescriptionPatches.cs" />
     <Compile Include="Patches\CombatPatches.cs" />
     <Compile Include="Framework\SpecManager.cs" />
