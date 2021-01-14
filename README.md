@@ -484,6 +484,10 @@ Specializations settings in settings.json:
 
 `MissionTiersCountTowardMax` - bool, same as `OpForTiersCountTowardMax`, just for Mission specializations.
 
+`TaggedOpforSpecsCountTowardMax` - bool, do OpForSpecs awarded via pilot tags count toward the max.
+
+`TaggedMissionSpecsCountTowardMax` - bool, do MissionSpecs awarded via pilot tags count toward the max.
+
 `WhiteListOpFor` - List<string>, List of OpFor factions (e.g., Liao, AuriganPirates, ClanWolf) for which specializations will be created from `OpForDefaultList` and for which progress towards specializations will be tracked.
 	
 `WhiteListMissions` - List<string>, List of contract types (e.g., SimpleBattle, CaptureBase, DuoDuel) for which specializations will be created from `MissionDefaultList` and for which progress towards specializations will be tracked.
