@@ -327,6 +327,7 @@ example json structure for MissionSpecs is as follows:
 	"missionsRequired": 10,
 	"contractTypeID": "UNIVERSAL",
 	"description": "This pilot loves the simplicity of a good brawl, and deals more damage to Mechs and Vehicles during {contract} contracts.",
+	"cashMult": 0.1,
 	"AdvTargetInfoUnits": [	"Mech", "Vehicle"],
 	"effectDataJO": []
 }
@@ -342,6 +343,8 @@ example json structure for MissionSpecs is as follows:
 `contractTypeID` - string, contract type for which progress is tracked and for which effects are applied when specialization is awarded; e.g. SimpleBattle, DuoDuel.
 
 `description` - human-legible description for this specialization. Similar to OpforSpecs, `MissionSpec` in `MissionDefaultList`, the string {contract} will be replaced with `ContractTypeValue.Name`: e.g., for `"description": "This pilot loves the simplicity of a good brawl, and takes less damage during {contract} contracts.",` , the description in-game would read "This pilot loves the simplicity of a good brawl, and takes less damage during SimpleBattle contracts."
+
+`cashMult` - float, as with MissionSpecs, provides a bonus modifier added to contract payouts for this contract type.
 
 `AdvTargetInfoUnits` - List<string>, Defines "Advanced Targeting info" that only applies in-contract effects to certain units in conjunction with effect `targetingData`. Allowed values are: `Primary, NotPlayer, Mech, Vehicle, Turret, Building`
 
