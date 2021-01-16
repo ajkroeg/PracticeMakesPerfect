@@ -620,7 +620,7 @@ namespace PracticeMakesPerfect.Framework
             foreach (var missionSpecID in SpecHolder.HolderInstance.MissionSpecMap[pKey])
             {
                 foreach (MissionSpec missionSpec in ManagerInstance.MissionSpecList.Where(x =>
-                    x.MissionSpecID == missionSpecID))
+                    x.MissionSpecID == missionSpecID && x.contractTypeID == playerUnit.Combat.ActiveContract.ContractTypeValue.Name))
                 {
                     foreach (EffectData effectData in missionSpec.effects)
                     {
@@ -694,7 +694,7 @@ namespace PracticeMakesPerfect.Framework
                 foreach (var missionSpecID in SpecHolder.HolderInstance.MissionSpecMap[pKey])
                 {
                     foreach (MissionSpec missionSpec in ManagerInstance.MissionSpecList.Where(x =>
-                        x.MissionSpecID == missionSpecID))
+                        x.MissionSpecID == missionSpecID && x.contractTypeID == unit.Combat.ActiveContract.ContractTypeValue.Name))
                     {
                         foreach (EffectData effectData in missionSpec.effects)
                         {
@@ -830,7 +830,7 @@ namespace PracticeMakesPerfect.Framework
             foreach (var missionSpecID in SpecHolder.HolderInstance.MissionSpecMap[pKey])
             {
                 foreach (MissionSpec missionSpec in ManagerInstance.MissionSpecList.Where(x =>
-                    x.MissionSpecID == missionSpecID))
+                    x.MissionSpecID == missionSpecID && x.contractTypeID == unit.Combat.ActiveContract.ContractTypeValue.Name))
                 {
                     foreach (EffectData effectData in missionSpec.effects)
                     {
@@ -897,9 +897,8 @@ namespace PracticeMakesPerfect.Framework
 
             foreach (var missionSpecID in SpecHolder.HolderInstance.MissionSpecMap[pKey])
             {
-                if (playerUnit.Combat.ActiveContract.Override.ContractTypeValue.Name == missionSpecID)
-                {
-                    foreach (MissionSpec missionSpec in ManagerInstance.MissionSpecList.Where(x => x.MissionSpecID == missionSpecID))
+
+                    foreach (MissionSpec missionSpec in ManagerInstance.MissionSpecList.Where(x => x.MissionSpecID == missionSpecID && x.contractTypeID == playerUnit.Combat.ActiveContract.ContractTypeValue.Name))
                     {
                         foreach (EffectData effectData in missionSpec.effects)
                         {
@@ -996,7 +995,7 @@ namespace PracticeMakesPerfect.Framework
 
                         }
                     }
-                }
+                
             }
         }
 
@@ -1007,8 +1006,10 @@ namespace PracticeMakesPerfect.Framework
             foreach (var playerunit in playerUnits)
             {
                 var pKey = playerunit.GetPilot().FetchGUID();
+                ModInit.modLog.LogMessage($"Checking {playerunit.GetPilot().Callsign} for effects to apply");
                 foreach (var opForSpecID in SpecHolder.HolderInstance.OpForSpecMap[pKey])
                 {
+                    ModInit.modLog.LogMessage($"Found {opForSpecID}");
                     foreach (OpForSpec op4Spec in ManagerInstance.OpForSpecList.Where(x => x.OpForSpecID == opForSpecID))
                     {
                         foreach (EffectData effectData in op4Spec.effects)
@@ -1031,7 +1032,8 @@ namespace PracticeMakesPerfect.Framework
 
                 foreach (var missionSpecID in SpecHolder.HolderInstance.MissionSpecMap[pKey])
                 {
-                    foreach (MissionSpec missionSpec in ManagerInstance.MissionSpecList.Where(x => x.MissionSpecID == missionSpecID && actor.Combat.ActiveContract.ContractTypeValue.Name == x.MissionSpecName))
+                    ModInit.modLog.LogMessage($"Found {missionSpecID}");
+                    foreach (MissionSpec missionSpec in ManagerInstance.MissionSpecList.Where(x => x.MissionSpecID == missionSpecID && playerunit.Combat.ActiveContract.ContractTypeValue.Name == x.contractTypeID))
                     {
                         if (missionSpec.AdvTargetInfoUnits.Count < 1)
                         {

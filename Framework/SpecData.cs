@@ -47,7 +47,7 @@ namespace PracticeMakesPerfect.Framework
         public Dictionary<string, float> repMult = new Dictionary<string, float>();
         public Dictionary<string, float> storeDiscount = new Dictionary<string, float>();
         public Dictionary<string, float> storeBonus = new Dictionary<string, float>();
-        public float cashMult = 1f;
+        public float cashMult = 0f;
         public int killBounty = 0;
 
 
@@ -83,7 +83,7 @@ namespace PracticeMakesPerfect.Framework
         public string contractTypeID = ""; //eg SimpleBattle
 
         public List<AdvTargetUnitData> AdvTargetInfoUnits = new List<AdvTargetUnitData>(); // Primary, NotPlayer, Mech, Vehicle, Turret, Building
-        public float cashMult = 1f; // need to implement still
+        public float cashMult = 0f; // need to implement still
 
         public string description = "";
 

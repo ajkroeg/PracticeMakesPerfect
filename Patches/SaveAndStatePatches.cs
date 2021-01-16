@@ -425,7 +425,7 @@ namespace PracticeMakesPerfect.Patches
 
                 ModInit.modLog.LogMessage($"Employer Reputation Change: {__instance.EmployerReputationResults} x {employerRepMult} = {employerRep}");
                 ModInit.modLog.LogMessage($"Target Reputation Change: {__instance.TargetReputationResults} x {targetRepMult} = {targetRep}");
-                ModInit.modLog.LogMessage($"Contract Payout: ({__instance.MoneyResults} x {contractPayOutMult}) + {SpecHolder.HolderInstance.totalBounty} = {contractPayOutMult}");
+                ModInit.modLog.LogMessage($"Contract Payout: ({__instance.MoneyResults} x {contractPayOutMult}) + {SpecHolder.HolderInstance.totalBounty} = {contractPayout}");
 
 
                 Traverse.Create(__instance).Property("EmployerReputationResults").SetValue(employerRep);
