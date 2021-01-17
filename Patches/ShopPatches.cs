@@ -18,6 +18,7 @@ namespace PracticeMakesPerfect.Patches
         {
             public static void Postfix(SimGameState __instance, ref float __result, FactionValue faction)
             {
+                if (GlobalVars.sim == null) return;
                 List<string> curPilots = new List<string>();
                 curPilots.Add(GlobalVars.sim.Commander.FetchGUID());
                 foreach (Pilot p in GlobalVars.sim.PilotRoster)
@@ -58,6 +59,7 @@ namespace PracticeMakesPerfect.Patches
             public static void Prefix(SG_Shop_Screen __instance, StarSystem ___theSystem, ShopDefItem itemDef, Shop shop, //removed ref from shopdefitem?
                 IMechLabDropTarget targetWidget, bool isSelling = false, bool isBulkAdd = false)
             {
+                if (GlobalVars.sim == null) return;
                 if (!isSelling) return;
                 List<string> curPilots = new List<string>();
                 curPilots.Add(GlobalVars.sim.Commander.FetchGUID());
@@ -112,7 +114,7 @@ namespace PracticeMakesPerfect.Patches
         {
             public static void Postfix(SG_Stores_MiniFactionWidget __instance, FactionValue theFaction, FactionValue ___owningFactionValue, LocalizableText ___ReputationBonusText)
             {
-
+                if (GlobalVars.sim == null) return;
                 var sellBonus = 0f;
 
                 List<string> curPilots = new List<string>();
