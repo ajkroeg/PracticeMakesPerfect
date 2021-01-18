@@ -283,8 +283,12 @@ example json structure for OpForSpec with "simgame" effects:
 	"storeBonus": {
 		"ComStar": 0.2
 		},
-	"cashMult": 0.2,
-	"killBounty": 1500,
+	"cashMult": {
+		"{EMPLOYER}": 0.25
+		},
+	"killBounty": {
+		"Locals": 2500
+		},
 	"effectDataJO": []
 }
 
@@ -306,9 +310,9 @@ If there is a multiplier for `"{TARGET}"` AND the target faction is specifically
 
 `storeBonus` - Dictionary <string, float> - Adjustments to store selling prices. Stacks with difficulty setting (e.g. sell price = 15% of item value), so values should be positive to increase selling prices. Changes to sell price are reflected in the shop screen.
 
-`cashMult` - float, Multiplier added to contract payout if `applyToFaction` contains the contract target. Using above settings, if base contract payout vs Locals was ¢10,000, final contract payout would be ¢12,000 (1 + 0.2 from `cashMult`).
+`cashMult` - Dictionary <string, float>, Multiplier added to contract payout if `applyToFaction` contains the contract target and the employer is either explicitely listed as the key, or `{"EMPLOYER"}` is listed as a key (in which case, `cashMult` is applied for all contracts against the target faction). Using above settings, if base contract payout vs Locals was ¢10,000, final contract payout would be ¢12,000 (1 + 0.2 from `cashMult`), and would apply for all employers.
 
-`killBounty` - int, per-kill c-bill bounty awarded at contract resolution if `applyToFaction` contains the contract target.
+`killBounty` - Dictionary <string, int>, per-kill c-bill bounty awarded at contract resolution if `applyToFaction` contains the contract target and the employer is either explicitely listed as the key, or `{"EMPLOYER"}` is listed as a key (in which case, `killBounty` is applied for all contracts against the target faction). Using the above settings, getting 5 kills against Locals would award you a ¢12500 bonus <b>if</b> the contract employer is Liao.
 
 In all cases, simgame effects of multiple specializations (e.g. from multiple pilots with the same specialization) <b>do stack</b>.
 
