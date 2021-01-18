@@ -47,8 +47,8 @@ namespace PracticeMakesPerfect.Framework
         public Dictionary<string, float> repMult = new Dictionary<string, float>();
         public Dictionary<string, float> storeDiscount = new Dictionary<string, float>();
         public Dictionary<string, float> storeBonus = new Dictionary<string, float>();
-        public float cashMult = 0f;
-        public int killBounty = 0;
+        public Dictionary<string, float> cashMult = new Dictionary<string, float>();
+        public Dictionary<string, int> killBounty = new Dictionary<string, int>();
 
 
 

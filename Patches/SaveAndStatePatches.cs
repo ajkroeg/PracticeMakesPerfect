@@ -196,80 +196,110 @@ namespace PracticeMakesPerfect.Patches
 
                     if (SpecHolder.HolderInstance.OpForSpecMap.ContainsKey(pKey))
                     {
+                        var opSpecs = new List<OpForSpec>();
+                        var employerRepMultTemp = new List<float>(){0f};
                         foreach (var spec in SpecHolder.HolderInstance.OpForSpecMap[pKey])
                         {
-                            var employerRepMultTemp = new List<float>();
+                            opSpecs.AddRange(SpecManager.ManagerInstance.OpForSpecList.Where(x=>x.OpForSpecID == spec));
+                        }
 
-                            var opSpecs =
-                                SpecManager.ManagerInstance.OpForSpecList.Where(x =>
-                                    x.OpForSpecID == spec);
-
-                            foreach (var opSpec in opSpecs)
+                        foreach (var opSpec in opSpecs)
+                        {
+                            if (opSpec.factionID == target || opSpec.applyToFaction.Contains(target))
                             {
-                                if (opSpec.factionID == target || opSpec.applyToFaction.Contains(target))
+                                if (opSpec.repMult.ContainsKey(employer))
                                 {
-                                    if (opSpec.repMult.ContainsKey(employer))
-                                    {
-                                        employerRepMultTemp.Add(opSpec.repMult[employer]);
-                                        //employerRepMult += (opSpec.repMult[employer]);
-                                        ModInit.modLog.LogMessage($"current employer reputation multiplier: {opSpec.repMult[employer]}");
-                                    }
+                                    employerRepMultTemp.Add(opSpec.repMult[employer]);
+                                    //employerRepMult += (opSpec.repMult[employer]);
+                                    ModInit.modLog.LogMessage($"current employer reputation multiplier: {opSpec.repMult[employer]}");
+                                }
 
-                                    if (opSpec.repMult.ContainsKey(employer_string))
-                                    {
-                                        employerRepMultTemp.Add(opSpec.repMult[employer_string]);
-                                        //employerRepMult += (opSpec.repMult[employer_string]);
-                                        ModInit.modLog.LogMessage($"current employer reputation multiplier: {opSpec.repMult[employer_string]}");
-                                    }
+                                if (opSpec.repMult.ContainsKey(employer_string))
+                                {
+                                    employerRepMultTemp.Add(opSpec.repMult[employer_string]);
+                                    //employerRepMult += (opSpec.repMult[employer_string]);
+                                    ModInit.modLog.LogMessage($"current employer reputation multiplier: {opSpec.repMult[employer_string]}");
+                                }
 
-                                    if (opSpec.repMult.ContainsKey(owner_string) && sim.CurSystem.OwnerValue.Name == employer)
-                                    {
-                                        employerRepMultTemp.Add(opSpec.repMult[owner_string]);
+                                if (opSpec.repMult.ContainsKey(owner_string) && sim.CurSystem.OwnerValue.Name == employer)
+                                {
+                                    employerRepMultTemp.Add(opSpec.repMult[owner_string]);
 //                                        employerRepMult += (opSpec.repMult[owner_string]);
-                                        ModInit.modLog.LogMessage($"current employer reputation multiplier: {opSpec.repMult[owner_string]}");
-                                    }
+                                    ModInit.modLog.LogMessage($"current employer reputation multiplier: {opSpec.repMult[owner_string]}");
+                                }
 
-                                    if (opSpec.repMult.ContainsKey(target) && !opSpec.repMult.ContainsKey(target_string))
-                                    {
-                                        targetRepMult *= (opSpec.repMult[target]);
-                                        ModInit.modLog.LogMessage($"current target reputation multiplier: {targetRepMult}");
-                                    }
-                                    if (!opSpec.repMult.ContainsKey(target) && opSpec.repMult.ContainsKey(target_string))
-                                    {
-                                        targetRepMult *= (opSpec.repMult[target_string]);
-                                        ModInit.modLog.LogMessage($"current target reputation multiplier: {targetRepMult}");
-                                    }
-                                    if (opSpec.repMult.ContainsKey(target) && opSpec.repMult.ContainsKey(target_string))
-                                    {
-                                        targetRepMult *= Math.Min(opSpec.repMult[target], opSpec.repMult[target_string]);
-                                        ModInit.modLog.LogMessage($"current target reputation multiplier: {targetRepMult}");
-                                    }
+                                employerRepMult += employerRepMultTemp.Max();
 
-                                    employerRepMult += employerRepMultTemp.Max();
 
-                                    contractPayOutMult += (opSpec.cashMult);
+
+
+
+                                if (opSpec.repMult.ContainsKey(target) && !opSpec.repMult.ContainsKey(target_string))
+                                {
+                                    targetRepMult *= (opSpec.repMult[target]);
+                                    ModInit.modLog.LogMessage($"current target reputation multiplier: {targetRepMult}");
+                                }
+                                if (!opSpec.repMult.ContainsKey(target) && opSpec.repMult.ContainsKey(target_string))
+                                {
+                                    targetRepMult *= (opSpec.repMult[target_string]);
+                                    ModInit.modLog.LogMessage($"current target reputation multiplier: {targetRepMult}");
+                                }
+                                if (opSpec.repMult.ContainsKey(target) && opSpec.repMult.ContainsKey(target_string))
+                                {
+                                    targetRepMult *= Math.Min(opSpec.repMult[target], opSpec.repMult[target_string]);
+                                    ModInit.modLog.LogMessage($"current target reputation multiplier: {targetRepMult}");
+                                }
+
+                                if (opSpec.cashMult.ContainsKey(employer) && !opSpec.cashMult.ContainsKey(employer_string))
+                                {
+                                    contractPayOutMult += (opSpec.cashMult[employer]);
                                     ModInit.modLog.LogMessage($"current contract payout multiplier: {contractPayOutMult}");
                                 }
-                                
+
+                                if (!opSpec.cashMult.ContainsKey(employer) && opSpec.cashMult.ContainsKey(employer_string))
+                                {
+                                    contractPayOutMult += (opSpec.cashMult[employer_string]);
+                                    ModInit.modLog.LogMessage($"current contract payout multiplier: {contractPayOutMult}");
+                                }
+
+                                if (opSpec.cashMult.ContainsKey(employer) && opSpec.cashMult.ContainsKey(employer_string))
+                                {
+                                    contractPayOutMult += Math.Max(opSpec.cashMult[employer_string], opSpec.cashMult[employer]);
+                                    ModInit.modLog.LogMessage($"current contract payout multiplier: {contractPayOutMult}");
+                                }
+                                    
                             }
-                            
+                                
                         }
+                            
+                        
 
                         if (SpecHolder.HolderInstance.OpForKillsTEMPTracker.ContainsKey(pKey))
                         {
                             SpecHolder.HolderInstance.kills += SpecHolder.HolderInstance.OpForKillsTEMPTracker[pKey][target];
                             ModInit.modLog.LogMessage($"OpForKillsTEMPTracker was {SpecHolder.HolderInstance.OpForKillsTEMPTracker[pKey][target]}");
 
-                            foreach (var spec in SpecHolder.HolderInstance.OpForSpecMap[pKey])
+                            foreach (var opSpec in opSpecs)
                             {
-                                var opSpecs =
-                                    SpecManager.ManagerInstance.OpForSpecList.Where(x => x.OpForSpecID == spec);
-
-                                foreach (var opSpec in opSpecs)
+                                if (opSpec.applyToFaction.Contains(target))
                                 {
-                                    if (opSpec.applyToFaction.Contains(target) && opSpec.killBounty > 0)
+                                    if (opSpec.killBounty.ContainsKey(employer) &&
+                                        !opSpec.killBounty.ContainsKey(employer_string))
                                     {
-                                        SpecHolder.HolderInstance.bounty += opSpec.killBounty;
+                                        SpecHolder.HolderInstance.bounty += opSpec.killBounty[employer];
+                                        ModInit.modLog.LogMessage($"Kill bounty: {SpecHolder.HolderInstance.bounty}");
+                                    }
+                                    if (!opSpec.killBounty.ContainsKey(employer) &&
+                                        opSpec.killBounty.ContainsKey(employer_string))
+                                    {
+                                        SpecHolder.HolderInstance.bounty += opSpec.killBounty[employer_string];
+                                        ModInit.modLog.LogMessage($"Kill bounty: {SpecHolder.HolderInstance.bounty}");
+                                    }
+                                    if (opSpec.killBounty.ContainsKey(employer) &&
+                                        opSpec.killBounty.ContainsKey(employer_string))
+                                    {
+                                        SpecHolder.HolderInstance.bounty += Math.Max(opSpec.killBounty[employer], opSpec.killBounty[employer_string]);
+                                        ModInit.modLog.LogMessage($"Kill bounty: {SpecHolder.HolderInstance.bounty}");
                                     }
                                 }
                             }
