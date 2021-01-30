@@ -492,6 +492,8 @@ Specializations settings in settings.json:
 
 `TaggedMissionSpecsCountTowardMax` - bool, do MissionSpecs awarded via pilot tags count toward the max.
 
+`MissionSpecSuccessRequirement` - int, controls whether a mission needs to be successful to count toward MissionSpec progress. if 0, all missions outcomes count (even bad faith effort or total failure). if 1, good faith efforts count.  if 2, only a mission success counts.
+
 `WhiteListOpFor` - List<string>, List of OpFor factions (e.g., Liao, AuriganPirates, ClanWolf) for which specializations will be created from `OpForDefaultList` and for which progress towards specializations will be tracked.
 	
 `WhiteListMissions` - List<string>, List of contract types (e.g., SimpleBattle, CaptureBase, DuoDuel) for which specializations will be created from `MissionDefaultList` and for which progress towards specializations will be tracked.
