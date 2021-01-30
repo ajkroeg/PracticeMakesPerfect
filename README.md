@@ -137,9 +137,18 @@ New pilot stats accessible through events, etc. as follows:
 
 The Specializations module makes use of 3 new data types: OpForSpecs, MissionSpecs, and StratComs.
 
+Pilot specializations (and progress towards them) can be seen by hovering over their large portrait on the right side of the Barracks screen:
+
+![TextPop](https://github.com/ajkroeg/PracticeMakesPerfect/blob/master/doc/progress.png)
+
+
 ### OpForSpec
 
 OpForSpecs or OpFor Specializations are unique bonuses awarded to pilots that only apply against specific OpFor factions. Depending on settings they may apply specifically against units of that OpFor faction, or they may apply for the entirety of a contract where that OpFor faction is the contract "target" faction. In addition, OpForSpecs can have "simgame" effects apart from the standard in-contract effects using effectData.
+
+Available OpForSpecs for a given faction can be seen in the faction tooltips in the Commanders Quarters and in Command Center screens. The number in brackets indicates the number of kills required for the OpForSpec to be awarded:
+
+![TextPop](https://github.com/ajkroeg/PracticeMakesPerfect/blob/master/doc/availableOpFor.png)
 
 #### OpForSpec - In-Contract effects
 example json structure for OpForSpec with in-contract effects is as follows:
@@ -316,10 +325,13 @@ If there is a multiplier for `"{TARGET}"` AND the target faction is specifically
 
 In all cases, simgame effects of multiple specializations (e.g. from multiple pilots with the same specialization) <b>do stack</b>.
 
-
 ### MissionSpec
 
 MissionSpecs, or Mission Specializations are unique bonuses awarded to pilots that only apply during their respective mission types.
+
+Available MissionSpecs for a given contract type can be seen in the contract tooltip in the Command Center. The number in brackets indicates the number of missions required for the MissionSpec to be awarded:
+
+![TextPop](https://github.com/ajkroeg/PracticeMakesPerfect/blob/master/doc/availableMission.png)
 
 example json structure for MissionSpecs is as follows:
 
@@ -423,6 +435,10 @@ In the above example, friendly buildings effectively take 80% damage from oppone
 ### StratCom
 
 StratComs are unique bonuses that apply to your pilots <i>only when your commander is not on the field</i>. We all know Darius is pretty useless, so it might make sense for there to be strategic-level advantage for the commander to focus on...well, commanding, instead of just blasting the OpFor.
+
+StratComs can be seen by hovering over the commanders portrait in the barracks:
+
+![TextPop](https://github.com/ajkroeg/PracticeMakesPerfect/blob/master/doc/stratcom.png)
 
 example json structure for StratComs is as follows:
 ```
