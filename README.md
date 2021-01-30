@@ -528,6 +528,10 @@ Specializations settings in settings.json:
 
 `taggedMissionSpecs` - Dictionary<string, List<string>> - KeyValuePairs where Key = pilot tag and Values = list of `MissionSpec.MissionSpecID` of the MissionSpecs to be awarded to pilots with the tag.
 
+`argoUpgradeToReset` - string, company tag associated with argo upgrade required to reset specializations, e.g "argo_trainingModule3". If null, specializations can always be reset. Reset specializations by holding Control while clicking on the "Service Record" tab in the Barracks:
+
+![TextPop](https://github.com/ajkroeg/PracticeMakesPerfect/blob/master/doc/resetSpec.png)
+
 `dummyOpForStat` - string, name of dummy stat used to create fake status effect for pilots with OpForSpecs that use OnWeaponFire
 
 `DebugCleaning` - bool. Debugging only! if set to `true`, will wipe all specializations on save load.
