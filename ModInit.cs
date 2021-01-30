@@ -99,6 +99,9 @@ namespace PracticeMakesPerfect
         public List<StratCom> StratComs = new List<StratCom>();
 
         public string dummyOpForStat = "dummyOpForStat";
+
+        public string argoUpgradeToReset = null;
+
         public bool removeDeprecated = false;
         public bool DebugCleaning = false;
     }

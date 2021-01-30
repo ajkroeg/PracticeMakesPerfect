@@ -1,8 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using SVGImporter;
 using BattleTech;
 using BattleTech.Designed;
+using BattleTech.UI;
+using BattleTech.UI.Tooltips;
 using Harmony;
 using static PracticeMakesPerfect.Framework.GlobalVars;
 
@@ -350,6 +353,19 @@ namespace PracticeMakesPerfect.Framework
                         false);
                 }
             }
+        }
+        internal void ResetPilotSpecs(Pilot pilot, SGBarracksDossierPanel dossier, SGBarracksMWDetailPanel details)
+        {
+            var pKey = pilot.FetchGUID();
+            SpecHolder.HolderInstance.MissionSpecMap[pKey] = new List<string>();
+            SpecHolder.HolderInstance.OpForSpecMap[pKey] = new List<string>();
+            SpecHolder.HolderInstance.OpForKillsTracker[pKey] = new Dictionary<string, int>();
+            SpecHolder.HolderInstance.MissionsTracker[pKey] = new Dictionary<string, int>();
+            ModInit.modLog.LogMessage(
+                $"Clearing specializations and progress for {pilot.Description.Callsign}");
+
+            dossier.SetPilot(pilot, details, pilot.GUID != sim.Commander.GUID, false);
+            
         }
 
         protected void ApplyPassiveMissionSpecEffects(AbstractActor actor, MissionSpec missionSpec)
