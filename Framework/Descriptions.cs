@@ -49,6 +49,19 @@ namespace PracticeMakesPerfect.Framework
             var pilotID = pilot.FetchGUID();
             var rtrn = "";
 
+            if (pilot.IsPlayerCharacter)
+            {
+                rtrn+= $"\n<b>Strategic Command</b>\n\n";
+
+                var stratcoms = SpecManager.ManagerInstance.StratComs;
+                foreach (var stratCom in stratcoms)
+                {
+                    var description =
+                        $"<b>{stratCom.StratComName}:</b> {stratCom.description}\n\n";
+                    rtrn += description;
+                }
+            }
+
             if (SpecHolder.HolderInstance.MissionSpecMap[pilotID].Count > 0)
             {
                 rtrn+= $"\n<b>Mission Specializations</b>\n\n";

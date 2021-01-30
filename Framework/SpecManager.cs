@@ -159,7 +159,9 @@ namespace PracticeMakesPerfect.Framework
                         op.description =
                             opforDefault.description.Replace("{faction}", $"{faction.Value.Demonym} forces");
 
-                        ModInit.modLog.LogMessage($"Adding {op.OpForSpecName} for {op.factionID}!");
+                        op.effects = opforDefault.effects;
+
+                        ModInit.modLog.LogMessage($"Adding {op.OpForSpecName} for {op.factionID}!\n 1st effectdata Id was {op.effects[0].Description.Id}");
                         OpForSpecList.Add(op);
                     }
                 }
@@ -187,12 +189,18 @@ namespace PracticeMakesPerfect.Framework
 
                         con.missionsRequired = defaultMissionSpec.missionsRequired;
 
+                        con.AdvTargetInfoUnits = defaultMissionSpec.AdvTargetInfoUnits;
+
+                        con.cashMult = defaultMissionSpec.cashMult;
+
                         con.contractTypeID = contract.Name;
 
                         con.description =
                             defaultMissionSpec.description.Replace("{contract}", $"{contract.Name}");
 
-                        ModInit.modLog.LogMessage($"Adding {con.MissionSpecName} for {con.MissionSpecID}!");
+                        con.effects = defaultMissionSpec.effects;
+
+                        ModInit.modLog.LogMessage($"Adding {con.MissionSpecName} for {con.MissionSpecID}!\n 1st effectdata Id was {con.effects[0].Description.Id}");
                         MissionSpecList.Add(con);
                     }
                 }

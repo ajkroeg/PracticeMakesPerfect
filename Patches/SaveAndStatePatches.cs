@@ -281,7 +281,7 @@ namespace PracticeMakesPerfect.Patches
 
                             foreach (var opSpec in opSpecs)
                             {
-                                if (opSpec.applyToFaction.Contains(target))
+                                if (opSpec.factionID.Contains(target) || opSpec.applyToFaction.Contains(target))
                                 {
                                     if (opSpec.killBounty.ContainsKey(employer) &&
                                         !opSpec.killBounty.ContainsKey(employer_string))
@@ -341,8 +341,13 @@ namespace PracticeMakesPerfect.Patches
                                 $"No key for {contractID} found in {p.Callsign}'s MissionsTracker. Adding it with default value 0.");
                         }
 
-                        SpecHolder.HolderInstance.MissionsTracker[pKey][contractID] += 1;
-                        ModInit.modLog.LogMessage($"Adding 1 to {p.Callsign}'s MissionsTracker for {contractID}");
+                        if (ModInit.modSettings.MissionSpecSuccessRequirement == 0 ||
+                            (ModInit.modSettings.MissionSpecSuccessRequirement == 1 && isGoodFaithEffort) ||
+                            (ModInit.modSettings.MissionSpecSuccessRequirement == 2 && result == MissionResult.Victory))
+                        {
+                            SpecHolder.HolderInstance.MissionsTracker[pKey][contractID] += 1;
+                            ModInit.modLog.LogMessage($"Adding 1 to {p.Callsign}'s MissionsTracker for {contractID}");
+                        }
 
                         var mspecsCollapsed = SpecManager.ManagerInstance.MissionSpecList.Where(x =>
                                 SpecHolder.HolderInstance.MissionSpecMap[pKey].Any(y => y == x.MissionSpecID))
@@ -358,13 +363,6 @@ namespace PracticeMakesPerfect.Patches
                                     ModInit.modLog.LogMessage(
                                         $"{missionSpec.MissionSpecName} has 0 required missions set, ignoring.");
                                     continue;
-                                }
-
-                                if (missionSpec.cashMult > 0)
-                                {
-                                    contractPayOutMult += (missionSpec.cashMult);
-                                    ModInit.modLog.LogMessage(
-                                        $"current contract payout multiplier: {contractPayOutMult} from {missionSpec.MissionSpecName}");
                                 }
 
                                 if ((SpecHolder.HolderInstance.MissionSpecMap[pKey].Count - taggedMSpecCt <
@@ -388,6 +386,13 @@ namespace PracticeMakesPerfect.Patches
                                 {
                                     ModInit.modLog.LogMessage(
                                         $"{p.Callsign} already has the maximum, {ModInit.modSettings.MaxMissionSpecializations}, Mission Specializations!");
+                                }
+
+                                if (missionSpec.cashMult > 0 && SpecHolder.HolderInstance.MissionSpecMap[pKey].Any(y=>y == missionSpec.MissionSpecID))
+                                {
+                                    contractPayOutMult += (missionSpec.cashMult);
+                                    ModInit.modLog.LogMessage(
+                                        $"current contract payout multiplier: {contractPayOutMult} from {missionSpec.MissionSpecName}");
                                 }
                             }
                         }

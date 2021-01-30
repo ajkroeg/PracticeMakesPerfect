@@ -36,6 +36,7 @@ namespace PracticeMakesPerfect
                 ModInit.modSettings = new Settings();
             }
             //HarmonyInstance.DEBUG = true;
+            ModInit.modLog.LogMessage($"Initializing PracticeMakesPerfect - Version {typeof(Settings).Assembly.GetName().Version}");
             SpecManager.ManagerInstance.Initialize();
             SpecHolder.HolderInstance.Initialize();
             var harmony = HarmonyInstance.Create(HarmonyPackage);
@@ -72,7 +73,6 @@ namespace PracticeMakesPerfect
 
         public Dictionary<string, int> bonusEffects_XP = new Dictionary<string, int>();
 
-
         public int MaxOpForSpecializations = 0;
         public bool OpForTiersCountTowardMax = false;
 
@@ -81,6 +81,8 @@ namespace PracticeMakesPerfect
 
         public bool TaggedOpforSpecsCountTowardMax = false;
         public bool TaggedMissionSpecsCountTowardMax = false;
+
+        public int MissionSpecSuccessRequirement = 0; //0 = no req, 1 = GoodFaith, 2 = SuccessOnly
 
         public List<string> WhiteListOpFor= new List<string>();
         public List<string> WhiteListMissions= new List<string>();
