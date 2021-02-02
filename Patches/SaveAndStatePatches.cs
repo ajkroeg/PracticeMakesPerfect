@@ -368,7 +368,7 @@ namespace PracticeMakesPerfect.Patches
                                 if ((SpecHolder.HolderInstance.MissionSpecMap[pKey].Count - taggedMSpecCt <
                                      ModInit.modSettings.MaxMissionSpecializations) ||
                                     (!ModInit.modSettings.MissionTiersCountTowardMax &&
-                                     mspecsCollapsed.Contains(missionSpec.contractTypeID)))
+                                     mspecsCollapsed.Count - taggedMSpecCt < ModInit.modSettings.MaxMissionSpecializations))
                                 {
                                     if (SpecHolder.HolderInstance.MissionsTracker[pKey][contractID] >=
                                         missionSpec.missionsRequired && contractID == missionSpec.contractTypeID &&
@@ -433,7 +433,7 @@ namespace PracticeMakesPerfect.Patches
                         }
                         if ((SpecHolder.HolderInstance.OpForSpecMap[pKey].Count - taggedOPSpecCt <
                              ModInit.modSettings.MaxOpForSpecializations) ||
-                            (!ModInit.modSettings.OpForTiersCountTowardMax && opforspecCollapsed.Contains(opforSpec.factionID)))
+                            (!ModInit.modSettings.OpForTiersCountTowardMax && opforspecCollapsed.Count - taggedOPSpecCt < ModInit.modSettings.MaxOpForSpecializations))
                         {
                             foreach (var opfor in new List<string>(SpecHolder.HolderInstance.OpForKillsTracker[pKey]
                                 .Keys))
