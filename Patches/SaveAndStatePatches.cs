@@ -371,7 +371,7 @@ namespace PracticeMakesPerfect.Patches
 
                         var mspecsCollapsed = SpecManager.ManagerInstance.MissionSpecList.Where(x =>
                                 SpecHolder.HolderInstance.MissionSpecMap[pKey].Any(y => y == x.MissionSpecID))
-                            .Select(x => x.contractTypeID).Count();
+                            .Select(x => x.contractTypeID).Distinct().Count();
 
                         if (SpecManager.ManagerInstance.MissionSpecList.Any(x => x.contractTypeID == contractID))
                         {
