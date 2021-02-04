@@ -122,7 +122,7 @@ namespace PracticeMakesPerfect.Patches
                 var background = UIManager.Instance.UILookAndColorConstants.PopupBackfill;
 
                 var hk = Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl);
-
+                if (!hk) return;
                 if (!String.IsNullOrEmpty(ModInit.modSettings.argoUpgradeToReset) &&
                     !sim.CompanyTags.Contains(ModInit.modSettings.argoUpgradeToReset))
                 {
