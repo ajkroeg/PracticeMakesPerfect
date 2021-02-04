@@ -34,6 +34,13 @@ namespace PracticeMakesPerfect.Patches
                         var opfor = __instance.team.FactionValue.Name;
                         if (ModInit.modSettings.WhiteListOpFor.Contains(opfor))
                         {
+                            if (!SpecHolder.HolderInstance.OpForKillsTEMPTracker.ContainsKey(pKey))
+                            {
+                                SpecHolder.HolderInstance.OpForKillsTEMPTracker.Add(pKey, new Dictionary<string, int>());
+                                SpecHolder.HolderInstance.OpForKillsTEMPTracker[pKey].Add(opfor, 0);
+                                ModInit.modLog.LogMessage(
+                                    $"*****Something done fucked up because {p.Callsign} should probably already have an OpForKillsTEMPTracker. Adding it anyway.");
+                            }
                             if (!SpecHolder.HolderInstance.OpForKillsTEMPTracker[pKey].ContainsKey(opfor))
                             {
                                 SpecHolder.HolderInstance.OpForKillsTEMPTracker[pKey].Add(opfor, 0);

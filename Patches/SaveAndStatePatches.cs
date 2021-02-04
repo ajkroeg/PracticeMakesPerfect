@@ -119,6 +119,8 @@ namespace PracticeMakesPerfect.Patches
                 ModInit.modLog.LogMessage($"ActiveContract.Override.ContractTypeValue.Name: {contractID}");
 
                 var opforID = __instance.Combat.ActiveContract.Override.targetTeam.FactionValue.Name;
+                var opAllyID = __instance.Combat.ActiveContract.Override.targetsAllyTeam.FactionValue.Name;
+                var hostiletoALLID = __instance.Combat.ActiveContract.Override.hostileToAllTeam.FactionValue.Name;
 
                 var playerUnits = combat.AllActors.Where(x => x.team.IsLocalPlayer).ToList();
                 foreach (var actor in playerUnits)
@@ -135,10 +137,28 @@ namespace PracticeMakesPerfect.Patches
                     }
                     var pKey = actor.GetPilot().FetchGUID();
 
-                    if (!SpecHolder.HolderInstance.OpForKillsTEMPTracker.ContainsKey(pKey) && ModInit.modSettings.WhiteListOpFor.Contains(opforID))
+                    if (!SpecHolder.HolderInstance.OpForKillsTEMPTracker.ContainsKey(pKey))
                     {
                         SpecHolder.HolderInstance.OpForKillsTEMPTracker.Add(pKey, new Dictionary<string, int>());
+                        ModInit.modLog.LogMessage($"{p.Callsign} was missing OpForKillsTEMPTracker. Adding an empty one.");
+                    }
+
+                    if (ModInit.modSettings.WhiteListOpFor.Contains(opforID))
+                    {
                         SpecHolder.HolderInstance.OpForKillsTEMPTracker[pKey].Add(opforID, 0);
+                        ModInit.modLog.LogMessage($"Initializing {p.Callsign}'s OpForKillsTEMPTracker for target team {opforID}.");
+                    }
+
+                    if (ModInit.modSettings.WhiteListOpFor.Contains(opAllyID) && string.IsNullOrEmpty(opAllyID))
+                    {
+                        SpecHolder.HolderInstance.OpForKillsTEMPTracker[pKey].Add(opAllyID, 0);
+                        ModInit.modLog.LogMessage($"Initializing {p.Callsign}'s OpForKillsTEMPTracker for targets ally team {opAllyID}.");
+                    }
+
+                    if (ModInit.modSettings.WhiteListOpFor.Contains(hostiletoALLID) && string.IsNullOrEmpty(hostiletoALLID))
+                    {
+                        SpecHolder.HolderInstance.OpForKillsTEMPTracker[pKey].Add(hostiletoALLID, 0);
+                        ModInit.modLog.LogMessage($"Initializing {p.Callsign}'s OpForKillsTEMPTracker for hostile to all team {hostiletoALLID}.");
                     }
 
                     SpecManager.ManagerInstance.GatherPassiveMissionSpecs(actor, contractID);
@@ -351,7 +371,7 @@ namespace PracticeMakesPerfect.Patches
 
                         var mspecsCollapsed = SpecManager.ManagerInstance.MissionSpecList.Where(x =>
                                 SpecHolder.HolderInstance.MissionSpecMap[pKey].Any(y => y == x.MissionSpecID))
-                            .Select(x => x.contractTypeID).ToList();
+                            .Select(x => x.contractTypeID).Count();
 
                         if (SpecManager.ManagerInstance.MissionSpecList.Any(x => x.contractTypeID == contractID))
                         {
@@ -368,7 +388,7 @@ namespace PracticeMakesPerfect.Patches
                                 if ((SpecHolder.HolderInstance.MissionSpecMap[pKey].Count - taggedMSpecCt <
                                      ModInit.modSettings.MaxMissionSpecializations) ||
                                     (!ModInit.modSettings.MissionTiersCountTowardMax &&
-                                     mspecsCollapsed.Count - taggedMSpecCt < ModInit.modSettings.MaxMissionSpecializations))
+                                     mspecsCollapsed - taggedMSpecCt < ModInit.modSettings.MaxMissionSpecializations))
                                 {
                                     if (SpecHolder.HolderInstance.MissionsTracker[pKey][contractID] >=
                                         missionSpec.missionsRequired && contractID == missionSpec.contractTypeID &&
@@ -380,6 +400,7 @@ namespace PracticeMakesPerfect.Patches
                                             $"{p.Callsign} has achieved {missionSpec.MissionSpecName} for {missionSpec.contractTypeID}!");
                                         SpecHolder.HolderInstance.MissionSpecMap[pKey]
                                             .Add(missionSpec.MissionSpecID);
+                                        mspecsCollapsed += 1;
                                     }
                                 }
                                 else
@@ -421,8 +442,7 @@ namespace PracticeMakesPerfect.Patches
 
                     var opforspecCollapsed = SpecManager.ManagerInstance.OpForSpecList.Where(x =>
                             SpecHolder.HolderInstance.OpForSpecMap[pKey].Any(y => y == x.OpForSpecID))
-                        .Select(x => x.factionID).ToList();
-
+                        .Select(x => x.factionID).Distinct().Count();
 
                     foreach (var opforSpec in SpecManager.ManagerInstance.OpForSpecList)
                     {
@@ -433,7 +453,7 @@ namespace PracticeMakesPerfect.Patches
                         }
                         if ((SpecHolder.HolderInstance.OpForSpecMap[pKey].Count - taggedOPSpecCt <
                              ModInit.modSettings.MaxOpForSpecializations) ||
-                            (!ModInit.modSettings.OpForTiersCountTowardMax && opforspecCollapsed.Count - taggedOPSpecCt < ModInit.modSettings.MaxOpForSpecializations))
+                            (!ModInit.modSettings.OpForTiersCountTowardMax && opforspecCollapsed - taggedOPSpecCt < ModInit.modSettings.MaxOpForSpecializations))
                         {
                             foreach (var opfor in new List<string>(SpecHolder.HolderInstance.OpForKillsTracker[pKey]
                                 .Keys))
@@ -445,8 +465,14 @@ namespace PracticeMakesPerfect.Patches
                                     ModInit.modLog.LogMessage(
                                         $"{p.Callsign} has achieved {opforSpec.OpForSpecName} against {opforSpec.factionID}!");
                                     SpecHolder.HolderInstance.OpForSpecMap[pKey].Add(opforSpec.OpForSpecID);
+                                    opforspecCollapsed += 1;
                                 }
                             }
+                        }
+                        else
+                        {
+                            ModInit.modLog.LogMessage(
+                                $"{p.Callsign} already has the maximum, {opforspecCollapsed}/{ModInit.modSettings.MaxOpForSpecializations}, OpFor Specializations!");
                         }
                     }
                 }
