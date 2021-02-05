@@ -17,6 +17,7 @@ namespace PracticeMakesPerfect.Framework
         internal const string OP4SpecTrackerTag = "PMP_OP4TRACKER_";
         internal const string MissionSpecStateTag = "PMP_MISSIONSPEC_";
         internal const string MissionSpecTrackerTag = "PMP_MISSIONTRACKER_";
+        internal const string ActiveStratComTag = "PMP_ACTIVESTRATCOM_";
 
         internal const string owner_string = "{OWNER}";
         internal const string employer_string = "{EMPLOYER}";
@@ -111,6 +112,8 @@ namespace PracticeMakesPerfect.Framework
 
         public Dictionary<string, Dictionary<string, int>> OpForKillsTEMPTracker;
 
+        public string activeStratCom;
+
         public int kills;
         public int bounty;
         public int totalBounty;
@@ -134,6 +137,8 @@ namespace PracticeMakesPerfect.Framework
             MissionsTracker = new Dictionary<string, Dictionary<string, int>>();
 
             OpForKillsTEMPTracker = new Dictionary<string, Dictionary<string, int>>();
+
+            activeStratCom = null;
 
             kills = new int();
             bounty = new int();
@@ -308,6 +313,12 @@ namespace PracticeMakesPerfect.Framework
             missionTracker = $"{MissionSpecTrackerTag}{JsonConvert.SerializeObject(HolderInstance.MissionsTracker)}";
             ModInit.modLog.LogMessage($"Serialized missionTracker and adding to company tags.\n\nState was {missionTracker}.");
             GlobalVars.sim.CompanyTags.Add(missionTracker);
+
+            var activeStratCom = sim.CompanyTags.FirstOrDefault((x) => x.StartsWith(ActiveStratComTag));
+            GlobalVars.sim.CompanyTags.Remove(activeStratCom);
+            activeStratCom = $"{ActiveStratComTag}{JsonConvert.SerializeObject(HolderInstance.activeStratCom)}";
+            ModInit.modLog.LogMessage($"Serialized activeStratCom and adding to company tags.\n\nState was {activeStratCom}.");
+            GlobalVars.sim.CompanyTags.Add(activeStratCom);
         }
 
         //deserialize injurymap (dictionary) from tag and save to PilotInjuryHolder.Instance
@@ -363,6 +374,19 @@ namespace PracticeMakesPerfect.Framework
             else
             {
                 ModInit.modLog.LogMessage($"No missionTracker to deserialize. Hopefully this is the first time you're running PMP Specializations!");
+            }
+
+            if (sim.CompanyTags.Any(x => x.StartsWith(ActiveStratComTag)))
+            {
+                var activeStratTag = sim.CompanyTags.FirstOrDefault((x) => x.StartsWith(ActiveStratComTag));
+                var activeStratTracker = activeStratTag?.Substring(ActiveStratComTag.Length);
+                HolderInstance.activeStratCom = JsonConvert.DeserializeObject<string>(activeStratTracker);
+                ModInit.modLog.LogMessage($"Deserializing activeStratCom and removing from company tags");
+                GlobalVars.sim.CompanyTags.Remove(activeStratTag);
+            }
+            else
+            {
+                ModInit.modLog.LogMessage($"No activeStratCom to deserialize. Hopefully this is the first time you're running PMP Specializations!");
             }
         }
     }

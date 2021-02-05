@@ -51,10 +51,10 @@ namespace PracticeMakesPerfect.Framework
 
             if (pilot.IsPlayerCharacter)
             {
-                rtrn+= $"\n<b>Strategic Command</b>\n\n";
+                rtrn+= $"\n<b>Active StratCom</b>\n\n";
 
                 var stratcoms = SpecManager.ManagerInstance.StratComs;
-                foreach (var stratCom in stratcoms)
+                foreach (var stratCom in stratcoms.Where(x=>x.StratComID == SpecHolder.HolderInstance.activeStratCom))
                 {
                     var description =
                         $"<b>{stratCom.StratComName}:</b> {stratCom.description}\n\n";

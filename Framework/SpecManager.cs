@@ -338,7 +338,8 @@ namespace PracticeMakesPerfect.Framework
         {
             var p = actor.GetPilot();
             var pKey = p.FetchGUID();
-            foreach (StratCom stratcom in ManagerInstance.StratComs)
+
+            foreach (StratCom stratcom in ManagerInstance.StratComs.Where(x=>x.StratComID == SpecHolder.HolderInstance.activeStratCom))
             {
                 foreach (EffectData effectData in stratcom.effects)
                 {
@@ -354,6 +355,13 @@ namespace PracticeMakesPerfect.Framework
                 }
             }
         }
+
+        internal void SetStratCom(string stratcom, Pilot pilot, SGBarracksDossierPanel dossier, SGBarracksMWDetailPanel details)
+        {
+            SpecHolder.HolderInstance.activeStratCom = stratcom;
+            dossier.SetPilot(pilot, details, pilot.GUID != sim.Commander.GUID, false);
+        }
+
         internal void ResetPilotSpecs(Pilot pilot, SGBarracksDossierPanel dossier, SGBarracksMWDetailPanel details)
         {
             var pKey = pilot.FetchGUID();
