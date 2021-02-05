@@ -141,6 +141,10 @@ Pilot specializations (and progress towards them) can be seen by hovering over t
 
 ![TextPop](https://github.com/ajkroeg/PracticeMakesPerfect/blob/master/doc/progress.png)
 
+Players can reset specializations and clear progress (allowing new specializations to be earned) by holding Control while clicking on the "Service Record" tab in the Barracks. Optionally this ability can be tied to an argo upgrade:
+
+![TextPop](https://github.com/ajkroeg/PracticeMakesPerfect/blob/master/doc/resetSpec.png)
+
 
 ### OpForSpec
 
@@ -436,7 +440,17 @@ In the above example, friendly buildings effectively take 80% damage from oppone
 
 StratComs are unique bonuses that apply to your pilots <i>only when your commander is not on the field</i>. We all know Darius is pretty useless, so it might make sense for there to be strategic-level advantage for the commander to focus on...well, commanding, instead of just blasting the OpFor.
 
-StratComs can be seen by hovering over the commanders portrait in the barracks:
+Players can select the active StratCom by holding Control while clicking the "Service Record" tab in the Barracks when the Commander pilot is selected.
+
+The first popup will ask the player if they want to Change StratComes or Reset Specs:
+![TextPop](https://github.com/ajkroeg/PracticeMakesPerfect/blob/master/doc/changeorreset.png)
+
+If "Change StratComs" was selected, the following popup lets the player choose the active stratcom:
+![TextPop](https://github.com/ajkroeg/PracticeMakesPerfect/blob/master/doc/selectActive.png)
+
+Otherwise, if "Reset Specs" was selected, the popup is as for a normal pilot.
+
+The currently selected StratCom can be seen by hovering over the commanders portrait in the barracks:
 
 ![TextPop](https://github.com/ajkroeg/PracticeMakesPerfect/blob/master/doc/stratcom.png)
 
@@ -528,9 +542,7 @@ Specializations settings in settings.json:
 
 `taggedMissionSpecs` - Dictionary<string, List<string>> - KeyValuePairs where Key = pilot tag and Values = list of `MissionSpec.MissionSpecID` of the MissionSpecs to be awarded to pilots with the tag.
 
-`argoUpgradeToReset` - string, company tag associated with argo upgrade required to reset specializations, e.g "argo_trainingModule3". If null, specializations can always be reset. Reset specializations by holding Control while clicking on the "Service Record" tab in the Barracks:
-
-![TextPop](https://github.com/ajkroeg/PracticeMakesPerfect/blob/master/doc/resetSpec.png)
+`argoUpgradeToReset` - string, company tag associated with argo upgrade required to reset specializations, e.g "argo_trainingModule3". If null, specializations can always be reset.
 
 `dummyOpForStat` - string, name of dummy stat used to create fake status effect for pilots with OpForSpecs that use OnWeaponFire
 
