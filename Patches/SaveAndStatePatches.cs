@@ -91,6 +91,13 @@ namespace PracticeMakesPerfect.Patches
                     SpecHolder.HolderInstance.ProcessTaggedSpecs(p);
                 }
                 SpecHolder.HolderInstance.CleanMaps(curPilots);
+
+                if (String.IsNullOrEmpty(SpecHolder.HolderInstance.activeStratCom))
+                {
+                    SpecHolder.HolderInstance.activeStratCom =
+                        SpecManager.ManagerInstance.StratComs[0].StratComID;
+                    ModInit.modLog.LogMessage($"no active StratCom detected, setting to first available.");
+                }
             }
         }
 
@@ -371,7 +378,7 @@ namespace PracticeMakesPerfect.Patches
 
                         var mspecsCollapsed = SpecManager.ManagerInstance.MissionSpecList.Where(x =>
                                 SpecHolder.HolderInstance.MissionSpecMap[pKey].Any(y => y == x.MissionSpecID))
-                            .Select(x => x.contractTypeID).Distinct().Count();
+                            .Select(x => x.contractTypeID).Distinct().ToList();
 
                         if (SpecManager.ManagerInstance.MissionSpecList.Any(x => x.contractTypeID == contractID))
                         {
@@ -388,7 +395,7 @@ namespace PracticeMakesPerfect.Patches
                                 if ((SpecHolder.HolderInstance.MissionSpecMap[pKey].Count - taggedMSpecCt <
                                      ModInit.modSettings.MaxMissionSpecializations) ||
                                     (!ModInit.modSettings.MissionTiersCountTowardMax &&
-                                     mspecsCollapsed - taggedMSpecCt < ModInit.modSettings.MaxMissionSpecializations))
+                                     (mspecsCollapsed.Count - taggedMSpecCt < ModInit.modSettings.MaxMissionSpecializations) || mspecsCollapsed.Contains(missionSpec.contractTypeID)))
                                 {
                                     if (SpecHolder.HolderInstance.MissionsTracker[pKey][contractID] >=
                                         missionSpec.missionsRequired && contractID == missionSpec.contractTypeID &&
@@ -400,7 +407,10 @@ namespace PracticeMakesPerfect.Patches
                                             $"{p.Callsign} has achieved {missionSpec.MissionSpecName} for {missionSpec.contractTypeID}!");
                                         SpecHolder.HolderInstance.MissionSpecMap[pKey]
                                             .Add(missionSpec.MissionSpecID);
-                                        mspecsCollapsed += 1;
+                                        if (!mspecsCollapsed.Contains(missionSpec.contractTypeID))
+                                        {
+                                            mspecsCollapsed.Add(missionSpec.contractTypeID);
+                                        }
                                     }
                                 }
                                 else
@@ -442,7 +452,7 @@ namespace PracticeMakesPerfect.Patches
 
                     var opforspecCollapsed = SpecManager.ManagerInstance.OpForSpecList.Where(x =>
                             SpecHolder.HolderInstance.OpForSpecMap[pKey].Any(y => y == x.OpForSpecID))
-                        .Select(x => x.factionID).Distinct().Count();
+                        .Select(x => x.factionID).Distinct().ToList();
 
                     foreach (var opforSpec in SpecManager.ManagerInstance.OpForSpecList)
                     {
@@ -453,7 +463,7 @@ namespace PracticeMakesPerfect.Patches
                         }
                         if ((SpecHolder.HolderInstance.OpForSpecMap[pKey].Count - taggedOPSpecCt <
                              ModInit.modSettings.MaxOpForSpecializations) ||
-                            (!ModInit.modSettings.OpForTiersCountTowardMax && opforspecCollapsed - taggedOPSpecCt < ModInit.modSettings.MaxOpForSpecializations))
+                            (!ModInit.modSettings.OpForTiersCountTowardMax && (opforspecCollapsed.Count - taggedOPSpecCt < ModInit.modSettings.MaxOpForSpecializations) || opforspecCollapsed.Contains(opforSpec.factionID)))
                         {
                             foreach (var opfor in new List<string>(SpecHolder.HolderInstance.OpForKillsTracker[pKey]
                                 .Keys))
@@ -465,7 +475,10 @@ namespace PracticeMakesPerfect.Patches
                                     ModInit.modLog.LogMessage(
                                         $"{p.Callsign} has achieved {opforSpec.OpForSpecName} against {opforSpec.factionID}!");
                                     SpecHolder.HolderInstance.OpForSpecMap[pKey].Add(opforSpec.OpForSpecID);
-                                    opforspecCollapsed += 1;
+                                    if(!opforspecCollapsed.Contains(opforSpec.factionID))
+                                    {
+                                        opforspecCollapsed.Add(opforSpec.factionID);
+                                    }
                                 }
                             }
                         }
