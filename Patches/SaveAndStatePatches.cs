@@ -150,19 +150,19 @@ namespace PracticeMakesPerfect.Patches
                         ModInit.modLog.LogMessage($"{p.Callsign} was missing OpForKillsTEMPTracker. Adding an empty one.");
                     }
 
-                    if (ModInit.modSettings.WhiteListOpFor.Contains(opforID))
+                    if (ModInit.modSettings.WhiteListOpFor.Contains(opforID) && !SpecHolder.HolderInstance.OpForKillsTEMPTracker[pKey].ContainsKey(opforID))
                     {
                         SpecHolder.HolderInstance.OpForKillsTEMPTracker[pKey].Add(opforID, 0);
                         ModInit.modLog.LogMessage($"Initializing {p.Callsign}'s OpForKillsTEMPTracker for target team {opforID}.");
                     }
 
-                    if (ModInit.modSettings.WhiteListOpFor.Contains(opAllyID) && string.IsNullOrEmpty(opAllyID))
+                    if (ModInit.modSettings.WhiteListOpFor.Contains(opAllyID) && string.IsNullOrEmpty(opAllyID) && !SpecHolder.HolderInstance.OpForKillsTEMPTracker[pKey].ContainsKey(opAllyID))
                     {
                         SpecHolder.HolderInstance.OpForKillsTEMPTracker[pKey].Add(opAllyID, 0);
                         ModInit.modLog.LogMessage($"Initializing {p.Callsign}'s OpForKillsTEMPTracker for targets ally team {opAllyID}.");
                     }
 
-                    if (ModInit.modSettings.WhiteListOpFor.Contains(hostiletoALLID) && string.IsNullOrEmpty(hostiletoALLID))
+                    if (ModInit.modSettings.WhiteListOpFor.Contains(hostiletoALLID) && string.IsNullOrEmpty(hostiletoALLID) && !SpecHolder.HolderInstance.OpForKillsTEMPTracker[pKey].ContainsKey(hostiletoALLID))
                     {
                         SpecHolder.HolderInstance.OpForKillsTEMPTracker[pKey].Add(hostiletoALLID, 0);
                         ModInit.modLog.LogMessage($"Initializing {p.Callsign}'s OpForKillsTEMPTracker for hostile to all team {hostiletoALLID}.");
