@@ -158,7 +158,7 @@ namespace PracticeMakesPerfect.Patches
                                 !sim.CompanyTags.Contains(ModInit.modSettings.argoUpgradeToReset))
                             {
                                 GenericPopupBuilder
-                                    .Create("Unable To Reset Specializations", "Training Module 3 Required.")
+                                    .Create("Unable To Reset Specializations", $"Required Argo Upgrade Not Found: {ModInit.modSettings.argoUpgradeToReset}.")
                                     .AddButton("Understood")
                                     .CancelOnEscape()
                                     .AddFader(background)
@@ -190,7 +190,7 @@ namespace PracticeMakesPerfect.Patches
                     !sim.CompanyTags.Contains(ModInit.modSettings.argoUpgradeToReset))
                 {
                     GenericPopupBuilder
-                        .Create("Unable To Reset Specializations", "Training Module 3 Required.")
+                        .Create("Unable To Reset Specializations", $"Required Argo Upgrade Not Found: {ModInit.modSettings.argoUpgradeToReset}.")
                         .AddButton("Understood")
                         .CancelOnEscape()
                         .AddFader(background)
