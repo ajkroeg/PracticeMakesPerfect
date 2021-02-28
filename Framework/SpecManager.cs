@@ -359,6 +359,8 @@ namespace PracticeMakesPerfect.Framework
         internal void SetStratCom(string stratcom, Pilot pilot, SGBarracksDossierPanel dossier, SGBarracksMWDetailPanel details)
         {
             SpecHolder.HolderInstance.activeStratCom = stratcom;
+            ModInit.modLog.LogMessage(
+                $"Active StratCom changed to: {stratcom}");
             dossier.SetPilot(pilot, details, pilot.GUID != sim.Commander.GUID, false);
         }
 

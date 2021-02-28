@@ -85,7 +85,8 @@ namespace PracticeMakesPerfect.Patches
                     }
                     else
                     {
-                        repChange = SpecHolder.HolderInstance.emplRep;
+                        repChange = Mathf.RoundToInt(Math.Abs(theContract.TargetReputationResults *
+                                                     repMultDictionary[faction.FactionValue.Name]));
                     }
 
                     __instance.SetWidgetData(idx, faction.FactionValue, repChange, true, false);

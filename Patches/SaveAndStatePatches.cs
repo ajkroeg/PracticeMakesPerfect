@@ -114,8 +114,8 @@ namespace PracticeMakesPerfect.Patches
             }
         }
 
-        [HarmonyPatch(typeof(TurnDirector), "OnInitializeContractComplete", new Type[] {typeof(MessageCenterMessage)})]
-        public static class TurnDirector_OnInitializeContractComplete
+        [HarmonyPatch(typeof(TurnDirector), "StartFirstRound")]
+        public static class TurnDirector_StartFirstRound
         {
             public static void Postfix(TurnDirector __instance)
             {
@@ -257,10 +257,6 @@ namespace PracticeMakesPerfect.Patches
 
                                 employerRepMult += employerRepMultTemp.Max();
 
-
-
-
-
                                 if (opSpec.repMult.ContainsKey(target) && !opSpec.repMult.ContainsKey(target_string))
                                 {
                                     targetRepMult *= (opSpec.repMult[target]);
@@ -298,13 +294,14 @@ namespace PracticeMakesPerfect.Patches
                             }
                                 
                         }
-                            
-                        
 
                         if (SpecHolder.HolderInstance.OpForKillsTEMPTracker.ContainsKey(pKey))
                         {
-                            SpecHolder.HolderInstance.kills += SpecHolder.HolderInstance.OpForKillsTEMPTracker[pKey][target];
-                            ModInit.modLog.LogMessage($"OpForKillsTEMPTracker was {SpecHolder.HolderInstance.OpForKillsTEMPTracker[pKey][target]}");
+                            if (SpecHolder.HolderInstance.OpForKillsTEMPTracker[pKey].ContainsKey(target))
+                            {
+                                SpecHolder.HolderInstance.kills += SpecHolder.HolderInstance.OpForKillsTEMPTracker[pKey][target];
+                                ModInit.modLog.LogMessage($"OpForKillsTEMPTracker was {SpecHolder.HolderInstance.OpForKillsTEMPTracker[pKey][target]}");
+                            }
 
                             foreach (var opSpec in opSpecs)
                             {
@@ -485,7 +482,7 @@ namespace PracticeMakesPerfect.Patches
                         else
                         {
                             ModInit.modLog.LogMessage(
-                                $"{p.Callsign} already has the maximum, {opforspecCollapsed}/{ModInit.modSettings.MaxOpForSpecializations}, OpFor Specializations!");
+                                $"{p.Callsign} already has the maximum, {opforspecCollapsed.Count}/{ModInit.modSettings.MaxOpForSpecializations}, OpFor Specializations!");
                         }
                     }
                 }
