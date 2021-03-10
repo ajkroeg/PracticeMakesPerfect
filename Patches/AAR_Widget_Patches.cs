@@ -34,7 +34,8 @@ namespace PracticeMakesPerfect.Patches
                 }
 
                 var repMultDictionary = new Dictionary<string, float>();
-
+                
+                
                 foreach (var pKey in curPilots)
                 {
                     if (SpecHolder.HolderInstance.OpForSpecMap.ContainsKey(pKey))
@@ -58,6 +59,7 @@ namespace PracticeMakesPerfect.Patches
                                     }
                                     ModInit.modLog.LogMessage($"repMultDictionary contains {repMult.Key} and {repMult.Value}");
                                 }
+                                
                             }
                         }
                     }
@@ -80,7 +82,7 @@ namespace PracticeMakesPerfect.Patches
                     var repChange = 0;
                     if (theContract.Override.employerTeam.FactionDef.FactionValue.DoesGainReputation)
                     {
-                        repChange = Mathf.RoundToInt(theContract.EmployerReputationResults *
+                        repChange = Mathf.RoundToInt( SpecHolder.HolderInstance.emplRep *
                                                          repMultDictionary[faction.FactionValue.Name]);
                     }
                     else

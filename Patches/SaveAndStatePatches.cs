@@ -210,7 +210,6 @@ namespace PracticeMakesPerfect.Patches
 
                 SpecHolder.HolderInstance.kills = 0;
                 SpecHolder.HolderInstance.bounty = 0;
-                SpecHolder.HolderInstance.emplRep = 0;
 
                 var playerUnits = UnityGameInstance.BattleTechGame.Combat.AllActors.Where(x => x.team.IsLocalPlayer);
                 foreach (var unit in playerUnits)
@@ -238,21 +237,21 @@ namespace PracticeMakesPerfect.Patches
                                 {
                                     employerRepMultTemp.Add(opSpec.repMult[employer]);
                                     //employerRepMult += (opSpec.repMult[employer]);
-                                    ModInit.modLog.LogMessage($"current employer reputation multiplier: {opSpec.repMult[employer]}");
+                                    ModInit.modLog.LogMessage($"current employer [employer] reputation multiplier: {opSpec.repMult[employer]}");
                                 }
 
                                 if (opSpec.repMult.ContainsKey(employer_string))
                                 {
                                     employerRepMultTemp.Add(opSpec.repMult[employer_string]);
                                     //employerRepMult += (opSpec.repMult[employer_string]);
-                                    ModInit.modLog.LogMessage($"current employer reputation multiplier: {opSpec.repMult[employer_string]}");
+                                    ModInit.modLog.LogMessage($"current employer [employer_string] reputation multiplier: {opSpec.repMult[employer_string]}");
                                 }
 
                                 if (opSpec.repMult.ContainsKey(owner_string) && sim.CurSystem.OwnerValue.Name == employer)
                                 {
                                     employerRepMultTemp.Add(opSpec.repMult[owner_string]);
 //                                        employerRepMult += (opSpec.repMult[owner_string]);
-                                    ModInit.modLog.LogMessage($"current employer reputation multiplier: {opSpec.repMult[owner_string]}");
+                                    ModInit.modLog.LogMessage($"current employer [owner_string] reputation multiplier: {opSpec.repMult[owner_string]}");
                                 }
 
                                 employerRepMult += employerRepMultTemp.Max();
@@ -260,17 +259,17 @@ namespace PracticeMakesPerfect.Patches
                                 if (opSpec.repMult.ContainsKey(target) && !opSpec.repMult.ContainsKey(target_string))
                                 {
                                     targetRepMult *= (opSpec.repMult[target]);
-                                    ModInit.modLog.LogMessage($"current target reputation multiplier: {targetRepMult}");
+                                    ModInit.modLog.LogMessage($"current target [target] reputation multiplier: {targetRepMult}");
                                 }
                                 if (!opSpec.repMult.ContainsKey(target) && opSpec.repMult.ContainsKey(target_string))
                                 {
                                     targetRepMult *= (opSpec.repMult[target_string]);
-                                    ModInit.modLog.LogMessage($"current target reputation multiplier: {targetRepMult}");
+                                    ModInit.modLog.LogMessage($"current target [target_string] reputation multiplier: {targetRepMult}");
                                 }
                                 if (opSpec.repMult.ContainsKey(target) && opSpec.repMult.ContainsKey(target_string))
                                 {
                                     targetRepMult *= Math.Min(opSpec.repMult[target], opSpec.repMult[target_string]);
-                                    ModInit.modLog.LogMessage($"current target reputation multiplier: {targetRepMult}");
+                                    ModInit.modLog.LogMessage($"current target [target && target_string] reputation multiplier: {targetRepMult}");
                                 }
 
                                 if (opSpec.cashMult.ContainsKey(employer) && !opSpec.cashMult.ContainsKey(employer_string))
@@ -413,7 +412,7 @@ namespace PracticeMakesPerfect.Patches
                                 else
                                 {
                                     ModInit.modLog.LogMessage(
-                                        $"{p.Callsign} already has the maximum, {ModInit.modSettings.MaxMissionSpecializations}, Mission Specializations!");
+                                        $"{p.Callsign} already has the maximum, {mspecsCollapsed.Count}{ModInit.modSettings.MaxMissionSpecializations}, Mission Specializations!");
                                 }
 
                                 if (missionSpec.cashMult > 0 && SpecHolder.HolderInstance.MissionSpecMap[pKey].Any(y=>y == missionSpec.MissionSpecID))
