@@ -186,22 +186,13 @@ namespace PracticeMakesPerfect.Patches
             }
         }
 
-        [HarmonyPatch(typeof(SimGameState), "GetFinalReputationChange", new Type[] {typeof(FactionValue), typeof(int)})]
-        static class SimGameState_GetFinalReputationChange
-        {
-            static void Postfix(SimGameState __instance, FactionValue faction, int valueChange)
-            {
-                SpecHolder.HolderInstance.emplRep = valueChange;
-            }
-        }
-
-
         [HarmonyPatch(typeof(Contract), "CompleteContract", new Type[] {typeof(MissionResult), typeof(bool)})]
         static class Contract_CompleteContract_Patch
         {
             [HarmonyPriority(Priority.First)]
             static void Postfix(Contract __instance, MissionResult result, bool isGoodFaithEffort)
             {
+                SpecHolder.HolderInstance.emplRep = __instance.EmployerReputationResults;
                 var employer = __instance.Override.employerTeam.FactionDef.FactionValue.Name;
                 var target = __instance.Override.targetTeam.FactionDef.FactionValue.Name;
                 var employerRepMult = 1f;

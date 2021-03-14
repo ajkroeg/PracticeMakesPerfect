@@ -89,6 +89,7 @@ namespace PracticeMakesPerfect.Patches
                     {
                         repChange = Mathf.RoundToInt(Math.Abs(theContract.TargetReputationResults *
                                                      repMultDictionary[faction.FactionValue.Name]));
+                        if (repChange <= 1) repChange = theContract.Difficulty + 2; //this is some hacky ugly bullshit for stupid edgecase where player is working for local gov against someone with fully negatived rep.
                     }
 
                     __instance.SetWidgetData(idx, faction.FactionValue, repChange, true, false);
