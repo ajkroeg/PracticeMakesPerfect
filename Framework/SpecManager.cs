@@ -364,19 +364,32 @@ namespace PracticeMakesPerfect.Framework
             dossier.SetPilot(pilot, details, pilot.GUID != sim.Commander.GUID, false);
         }
 
-        internal void ResetPilotSpecs(Pilot pilot, SGBarracksDossierPanel dossier, SGBarracksMWDetailPanel details)
+        internal void ResetMissionSpecs(Pilot pilot, SGBarracksDossierPanel dossier, SGBarracksMWDetailPanel details)
         {
             var pKey = pilot.FetchGUID();
             SpecHolder.HolderInstance.MissionSpecMap[pKey] = new List<string>();
-            SpecHolder.HolderInstance.OpForSpecMap[pKey] = new List<string>();
-            SpecHolder.HolderInstance.OpForKillsTracker[pKey] = new Dictionary<string, int>();
             SpecHolder.HolderInstance.MissionsTracker[pKey] = new Dictionary<string, int>();
             ModInit.modLog.LogMessage(
-                $"Clearing specializations and progress for {pilot.Description.Callsign}");
+                $"Clearing Mission specializations and progress for {pilot.Description.Callsign}");
 
             dossier.SetPilot(pilot, details, pilot.GUID != sim.Commander.GUID, false);
             
         }
+
+        internal void ResetOpForSpecs(Pilot pilot, SGBarracksDossierPanel dossier, SGBarracksMWDetailPanel details)
+        {
+            var pKey = pilot.FetchGUID();
+            SpecHolder.HolderInstance.OpForSpecMap[pKey] = new List<string>();
+            SpecHolder.HolderInstance.OpForKillsTracker[pKey] = new Dictionary<string, int>();
+            ModInit.modLog.LogMessage(
+                $"Clearing Opfor specializations and progress for {pilot.Description.Callsign}");
+
+            dossier.SetPilot(pilot, details, pilot.GUID != sim.Commander.GUID, false);
+            
+        }
+
+
+
 
         protected void ApplyPassiveMissionSpecEffects(AbstractActor actor, MissionSpec missionSpec)
         {

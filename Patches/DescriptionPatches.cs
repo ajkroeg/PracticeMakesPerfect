@@ -173,8 +173,11 @@ namespace PracticeMakesPerfect.Patches
                                     .Create("Reset Specializations",
                                         "Are you sure you want to reset all specializations and progress for this pilot?")
                                     .AddButton("Cancel")
-                                    .AddButton("Reset",
-                                        () => SpecManager.ManagerInstance.ResetPilotSpecs(___curPilot, ___dossier,
+                                    .AddButton("Reset Mission Specs",
+                                        () => SpecManager.ManagerInstance.ResetMissionSpecs(___curPilot, ___dossier,
+                                            __instance))
+                                    .AddButton("Reset Opfor Specs",
+                                        () => SpecManager.ManagerInstance.ResetOpForSpecs(___curPilot, ___dossier,
                                             __instance))
                                     .CancelOnEscape()
                                     .AddFader(background)
@@ -204,7 +207,8 @@ namespace PracticeMakesPerfect.Patches
                     GenericPopupBuilder
                         .Create("Reset Specializations", "Are you sure you want to reset all specializations and progress for this pilot?")
                         .AddButton("Cancel")
-                        .AddButton("Reset", () => SpecManager.ManagerInstance.ResetPilotSpecs(___curPilot, ___dossier, __instance))
+                        .AddButton("Reset Mission Specs", () => SpecManager.ManagerInstance.ResetMissionSpecs(___curPilot, ___dossier, __instance))
+                        .AddButton("Reset Opfor Specs", () => SpecManager.ManagerInstance.ResetOpForSpecs(___curPilot, ___dossier, __instance))
                         .CancelOnEscape()
                         .AddFader(background)
                         .Render();

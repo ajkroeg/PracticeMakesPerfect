@@ -163,12 +163,13 @@ namespace PracticeMakesPerfect.Patches
 
 
         [HarmonyPatch(typeof(CombatHUDWeaponPanel), "RefreshDisplayedWeapons", new Type[] {typeof(bool), typeof(bool)})]
-        public static bool Prepare()
-        {
-            return false;
-        }
+
         public static class CombatHUDWeaponPanel_RefreshDisplayedWeapons_patch
         {
+            public static bool Prepare()
+            {
+                return false;
+            }
             [HarmonyPriority(Priority.First)]
             public static void Prefix(CombatHUDWeaponPanel __instance, AbstractActor ___displayedActor, bool consideringJump = false, bool useCOILPathingPreview = true)
             {
