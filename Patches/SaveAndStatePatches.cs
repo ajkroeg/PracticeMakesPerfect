@@ -207,7 +207,7 @@ namespace PracticeMakesPerfect.Patches
                 {
                     var p = unit.GetPilot();
                     var pKey = p.FetchGUID();
-
+                    if (pKey == "NOTAPILOT") continue;
                     var contractID = __instance.Override.ContractTypeValue.Name;
                     //processing mission outcomes
 
@@ -348,75 +348,84 @@ namespace PracticeMakesPerfect.Patches
                     //processing spec progress below
                     if (ModInit.modSettings.WhiteListMissions.Contains(contractID))
                     {
-                        if (!SpecHolder.HolderInstance.MissionsTracker[pKey].ContainsKey(contractID))
+                        if (SpecHolder.HolderInstance.MissionsTracker.ContainsKey(pKey))
                         {
-                            SpecHolder.HolderInstance.MissionsTracker[pKey].Add(contractID, 0);
-                            ModInit.modLog.LogMessage(
-                                $"No key for {contractID} found in {p.Callsign}'s MissionsTracker. Adding it with default value 0.");
-                        }
 
-                        if (ModInit.modSettings.MissionSpecSuccessRequirement == 0 ||
-                            (ModInit.modSettings.MissionSpecSuccessRequirement == 1 && isGoodFaithEffort) ||
-                            (ModInit.modSettings.MissionSpecSuccessRequirement == 2 && result == MissionResult.Victory))
-                        {
-                            SpecHolder.HolderInstance.MissionsTracker[pKey][contractID] += 1;
-                            ModInit.modLog.LogMessage($"Adding 1 to {p.Callsign}'s MissionsTracker for {contractID}");
-                        }
-
-                        var mspecsCollapsed = SpecManager.ManagerInstance.MissionSpecList.Where(x =>
-                                SpecHolder.HolderInstance.MissionSpecMap[pKey].Any(y => y == x.MissionSpecID))
-                            .Select(x => x.contractTypeID).Distinct().ToList();
-
-                        if (SpecManager.ManagerInstance.MissionSpecList.Any(x => x.contractTypeID == contractID))
-                        {
-                            foreach (var missionSpec in SpecManager.ManagerInstance.MissionSpecList.Where(x =>
-                                x.contractTypeID == contractID))
+                            if (!SpecHolder.HolderInstance.MissionsTracker[pKey].ContainsKey(contractID))
                             {
-                                if (missionSpec.missionsRequired == 0)
-                                {
-                                    ModInit.modLog.LogMessage(
-                                        $"{missionSpec.MissionSpecName} has 0 required missions set, ignoring.");
-                                    continue;
-                                }
+                                SpecHolder.HolderInstance.MissionsTracker[pKey].Add(contractID, 0);
+                                ModInit.modLog.LogMessage(
+                                    $"No key for {contractID} found in {p.Callsign}'s MissionsTracker. Adding it with default value 0.");
+                            }
 
-                                if ((SpecHolder.HolderInstance.MissionSpecMap[pKey].Count - taggedMSpecCt <
-                                     ModInit.modSettings.MaxMissionSpecializations) ||
-                                    (!ModInit.modSettings.MissionTiersCountTowardMax &&
-                                     (mspecsCollapsed.Count - taggedMSpecCt < ModInit.modSettings.MaxMissionSpecializations) || mspecsCollapsed.Contains(missionSpec.contractTypeID)))
+                            if (ModInit.modSettings.MissionSpecSuccessRequirement == 0 ||
+                                (ModInit.modSettings.MissionSpecSuccessRequirement == 1 && isGoodFaithEffort) ||
+                                (ModInit.modSettings.MissionSpecSuccessRequirement == 2 &&
+                                 result == MissionResult.Victory))
+                            {
+                                SpecHolder.HolderInstance.MissionsTracker[pKey][contractID] += 1;
+                                ModInit.modLog.LogMessage(
+                                    $"Adding 1 to {p.Callsign}'s MissionsTracker for {contractID}");
+                            }
+
+                            var mspecsCollapsed = SpecManager.ManagerInstance.MissionSpecList.Where(x =>
+                                    SpecHolder.HolderInstance.MissionSpecMap[pKey].Any(y => y == x.MissionSpecID))
+                                .Select(x => x.contractTypeID).Distinct().ToList();
+
+                            if (SpecManager.ManagerInstance.MissionSpecList.Any(x => x.contractTypeID == contractID))
+                            {
+                                foreach (var missionSpec in SpecManager.ManagerInstance.MissionSpecList.Where(x =>
+                                    x.contractTypeID == contractID))
                                 {
-                                    if (SpecHolder.HolderInstance.MissionsTracker[pKey][contractID] >=
-                                        missionSpec.missionsRequired && contractID == missionSpec.contractTypeID &&
-                                        !SpecHolder
-                                            .HolderInstance.MissionSpecMap[pKey]
-                                            .Contains(missionSpec.MissionSpecID))
+                                    if (missionSpec.missionsRequired == 0)
                                     {
                                         ModInit.modLog.LogMessage(
-                                            $"{p.Callsign} has achieved {missionSpec.MissionSpecName} for {missionSpec.contractTypeID}!");
-                                        SpecHolder.HolderInstance.MissionSpecMap[pKey]
-                                            .Add(missionSpec.MissionSpecID);
-                                        if (!mspecsCollapsed.Contains(missionSpec.contractTypeID))
+                                            $"{missionSpec.MissionSpecName} has 0 required missions set, ignoring.");
+                                        continue;
+                                    }
+
+                                    if ((SpecHolder.HolderInstance.MissionSpecMap[pKey].Count - taggedMSpecCt <
+                                         ModInit.modSettings.MaxMissionSpecializations) ||
+                                        (!ModInit.modSettings.MissionTiersCountTowardMax &&
+                                         (mspecsCollapsed.Count - taggedMSpecCt <
+                                          ModInit.modSettings.MaxMissionSpecializations) ||
+                                         mspecsCollapsed.Contains(missionSpec.contractTypeID)))
+                                    {
+                                        if (SpecHolder.HolderInstance.MissionsTracker[pKey][contractID] >=
+                                            missionSpec.missionsRequired && contractID == missionSpec.contractTypeID &&
+                                            !SpecHolder
+                                                .HolderInstance.MissionSpecMap[pKey]
+                                                .Contains(missionSpec.MissionSpecID))
                                         {
-                                            mspecsCollapsed.Add(missionSpec.contractTypeID);
+                                            ModInit.modLog.LogMessage(
+                                                $"{p.Callsign} has achieved {missionSpec.MissionSpecName} for {missionSpec.contractTypeID}!");
+                                            SpecHolder.HolderInstance.MissionSpecMap[pKey]
+                                                .Add(missionSpec.MissionSpecID);
+                                            if (!mspecsCollapsed.Contains(missionSpec.contractTypeID))
+                                            {
+                                                mspecsCollapsed.Add(missionSpec.contractTypeID);
+                                            }
                                         }
                                     }
-                                }
-                                else
-                                {
-                                    ModInit.modLog.LogMessage(
-                                        $"{p.Callsign} already has the maximum, {mspecsCollapsed.Count}{ModInit.modSettings.MaxMissionSpecializations}, Mission Specializations!");
-                                }
+                                    else
+                                    {
+                                        ModInit.modLog.LogMessage(
+                                            $"{p.Callsign} already has the maximum, {mspecsCollapsed.Count}{ModInit.modSettings.MaxMissionSpecializations}, Mission Specializations!");
+                                    }
 
-                                if (missionSpec.cashMult > 0 && SpecHolder.HolderInstance.MissionSpecMap[pKey].Any(y=>y == missionSpec.MissionSpecID))
-                                {
-                                    contractPayOutMult += (missionSpec.cashMult);
-                                    ModInit.modLog.LogMessage(
-                                        $"current contract payout multiplier: {contractPayOutMult} from {missionSpec.MissionSpecName}");
+                                    if (missionSpec.cashMult > 0 && SpecHolder.HolderInstance.MissionSpecMap[pKey]
+                                        .Any(y => y == missionSpec.MissionSpecID))
+                                    {
+                                        contractPayOutMult += (missionSpec.cashMult);
+                                        ModInit.modLog.LogMessage(
+                                            $"current contract payout multiplier: {contractPayOutMult} from {missionSpec.MissionSpecName}");
+                                    }
                                 }
                             }
                         }
                     }
 
-                    if (ModInit.modSettings.WhiteListOpFor.Contains(__instance.Override.targetTeam.FactionValue.Name))
+                    if (ModInit.modSettings.WhiteListOpFor.Contains(__instance.Override.targetTeam.FactionValue.Name) && SpecHolder.HolderInstance.OpForKillsTEMPTracker.ContainsKey(pKey))
                     {
                         foreach (var key in SpecHolder.HolderInstance.OpForKillsTEMPTracker[pKey].Keys)
                         {
@@ -441,38 +450,47 @@ namespace PracticeMakesPerfect.Patches
                             SpecHolder.HolderInstance.OpForSpecMap[pKey].Any(y => y == x.OpForSpecID))
                         .Select(x => x.factionID).Distinct().ToList();
 
-                    foreach (var opforSpec in SpecManager.ManagerInstance.OpForSpecList)
+                    if (SpecHolder.HolderInstance.OpForSpecMap.ContainsKey(pKey) &&
+                        (SpecHolder.HolderInstance.OpForKillsTracker.ContainsKey(pKey)))
                     {
-                        if (opforSpec.killsRequired == 0)
+                        foreach (var opforSpec in SpecManager.ManagerInstance.OpForSpecList)
                         {
-                            ModInit.modLog.LogMessage($"{opforSpec.OpForSpecName} has 0 required kills set, ignoring.");
-                            continue;
-                        }
-                        if ((SpecHolder.HolderInstance.OpForSpecMap[pKey].Count - taggedOPSpecCt <
-                             ModInit.modSettings.MaxOpForSpecializations) ||
-                            (!ModInit.modSettings.OpForTiersCountTowardMax && (opforspecCollapsed.Count - taggedOPSpecCt < ModInit.modSettings.MaxOpForSpecializations) || opforspecCollapsed.Contains(opforSpec.factionID)))
-                        {
-                            foreach (var opfor in new List<string>(SpecHolder.HolderInstance.OpForKillsTracker[pKey]
-                                .Keys))
+                            if (opforSpec.killsRequired == 0)
                             {
-                                if (SpecHolder.HolderInstance.OpForKillsTracker[pKey][opfor] >=
-                                    opforSpec.killsRequired && opfor == opforSpec.factionID && !SpecHolder
-                                        .HolderInstance.OpForSpecMap[pKey].Contains(opforSpec.OpForSpecID))
+                                ModInit.modLog.LogMessage(
+                                    $"{opforSpec.OpForSpecName} has 0 required kills set, ignoring.");
+                                continue;
+                            }
+
+                            if ((SpecHolder.HolderInstance.OpForSpecMap[pKey].Count - taggedOPSpecCt <
+                                 ModInit.modSettings.MaxOpForSpecializations) ||
+                                (!ModInit.modSettings.OpForTiersCountTowardMax &&
+                                 (opforspecCollapsed.Count - taggedOPSpecCt <
+                                  ModInit.modSettings.MaxOpForSpecializations) ||
+                                 opforspecCollapsed.Contains(opforSpec.factionID)))
+                            {
+                                foreach (var opfor in new List<string>(SpecHolder.HolderInstance.OpForKillsTracker[pKey]
+                                    .Keys))
                                 {
-                                    ModInit.modLog.LogMessage(
-                                        $"{p.Callsign} has achieved {opforSpec.OpForSpecName} against {opforSpec.factionID}!");
-                                    SpecHolder.HolderInstance.OpForSpecMap[pKey].Add(opforSpec.OpForSpecID);
-                                    if(!opforspecCollapsed.Contains(opforSpec.factionID))
+                                    if (SpecHolder.HolderInstance.OpForKillsTracker[pKey][opfor] >=
+                                        opforSpec.killsRequired && opfor == opforSpec.factionID && !SpecHolder
+                                            .HolderInstance.OpForSpecMap[pKey].Contains(opforSpec.OpForSpecID))
                                     {
-                                        opforspecCollapsed.Add(opforSpec.factionID);
+                                        ModInit.modLog.LogMessage(
+                                            $"{p.Callsign} has achieved {opforSpec.OpForSpecName} against {opforSpec.factionID}!");
+                                        SpecHolder.HolderInstance.OpForSpecMap[pKey].Add(opforSpec.OpForSpecID);
+                                        if (!opforspecCollapsed.Contains(opforSpec.factionID))
+                                        {
+                                            opforspecCollapsed.Add(opforSpec.factionID);
+                                        }
                                     }
                                 }
                             }
-                        }
-                        else
-                        {
-                            ModInit.modLog.LogMessage(
-                                $"{p.Callsign} already has the maximum, {opforspecCollapsed.Count}/{ModInit.modSettings.MaxOpForSpecializations}, OpFor Specializations!");
+                            else
+                            {
+                                ModInit.modLog.LogMessage(
+                                    $"{p.Callsign} already has the maximum, {opforspecCollapsed.Count}/{ModInit.modSettings.MaxOpForSpecializations}, OpFor Specializations!");
+                            }
                         }
                     }
                 }
