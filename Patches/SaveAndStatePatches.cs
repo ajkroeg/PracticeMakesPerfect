@@ -427,7 +427,8 @@ namespace PracticeMakesPerfect.Patches
 
                     if (ModInit.modSettings.WhiteListOpFor.Contains(__instance.Override.targetTeam.FactionValue.Name) && SpecHolder.HolderInstance.OpForKillsTEMPTracker.ContainsKey(pKey))
                     {
-                        foreach (var key in SpecHolder.HolderInstance.OpForKillsTEMPTracker[pKey].Keys)
+                        if (SpecHolder.HolderInstance.OpForKillsTEMPTracker[pKey].Count <= 0) return;
+                        foreach (var key in SpecHolder.HolderInstance.OpForKillsTEMPTracker[pKey]?.Keys)
                         {
                             if (ModInit.modSettings.WhiteListOpFor.Contains(key))
                             {

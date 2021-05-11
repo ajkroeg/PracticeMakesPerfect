@@ -26,13 +26,15 @@ namespace PracticeMakesPerfect.Patches
                 var target = theContract.Override.targetTeam.FactionDef.FactionValue.Name;
 
                 List<string> curPilots = new List<string>();
-                
-                foreach (Pilot p in GlobalVars.sim.PilotRoster)
+                var playerUnits = UnityGameInstance.BattleTechGame.Combat.AllActors.Where(x => x.team.IsLocalPlayer);
+                foreach (var unit in playerUnits)
+//                foreach (Pilot p in GlobalVars.sim.PilotRoster)
                 {
+                    var p = unit.GetPilot();
                     SpecHolder.HolderInstance.AddToMaps(p);
                     curPilots.Add(p.FetchGUID());
                 }
-                curPilots.Add(GlobalVars.sim.Commander.FetchGUID());
+//                curPilots.Add(GlobalVars.sim.Commander.FetchGUID());
 
 
                 var repMultDictionary = new Dictionary<string, float>();
