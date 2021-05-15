@@ -11,42 +11,30 @@ using UnityEngine;
 
 namespace PracticeMakesPerfect.Patches
 {
-    class ShopPatches
+    public class ShopPatches
     {
         [HarmonyPatch(typeof(SimGameState), "GetReputationShopAdjustment", new Type[] {typeof(FactionValue)})]
         public static class SGS_GetReputationShopAdjustmentFV_Patch
         {
-            public static void Postfix(SimGameState __instance, ref float __result, FactionValue faction)
+            public static void Postfix(SimGameState __instance, ref float result, FactionValue faction)
             {
                 if (GlobalVars.sim == null) return;
-                List<string> curPilots = new List<string>();
-                curPilots.Add(GlobalVars.sim.Commander.FetchGUID());
-                foreach (Pilot p in GlobalVars.sim.PilotRoster)
+                var curPilots = new List<string> {GlobalVars.sim.Commander.FetchGUID()};
+                foreach (var p in GlobalVars.sim.PilotRoster)
                 {
                     SpecHolder.HolderInstance.AddToMaps(p);
                     curPilots.Add(p.FetchGUID());
                 }
 
                 var discount = 0f;
-                foreach (var pKey in curPilots)
+                foreach (var opSpec in from pKey in curPilots where SpecHolder.HolderInstance.OpForSpecMap.ContainsKey(pKey) from spec in SpecHolder.HolderInstance.OpForSpecMap[pKey] select SpecManager.ManagerInstance.OpForSpecList.FirstOrDefault(x => x.OpForSpecID == spec) into opSpec where opSpec.storeDiscount.ContainsKey(faction.Name) select opSpec)
                 {
-                    if (SpecHolder.HolderInstance.OpForSpecMap.ContainsKey(pKey))
-                    {
-                        foreach (var spec in SpecHolder.HolderInstance.OpForSpecMap[pKey])
-                        {
-                            var opSpec =
-                                SpecManager.ManagerInstance.OpForSpecList.FirstOrDefault(x => x.OpForSpecID == spec);
-                            if (opSpec.storeDiscount.ContainsKey(faction.Name))
-                            {
-                                discount += opSpec.storeDiscount[faction.Name];
-                                ModInit.modLog.LogMessage($"Current discount from specs: {discount}");
-                            }
-                        }
-                    }
+                    discount += opSpec.storeDiscount[faction.Name];
+                    ModInit.modLog.LogMessage($"Current discount from specs: {discount}");
                 }
 
                 ModInit.modLog.LogMessage($"Total discount from specs: {discount}");
-                __result += discount;
+                result += discount;
             }
         }
 
@@ -56,31 +44,30 @@ namespace PracticeMakesPerfect.Patches
         public static class SH_Shop_Screen_AddShopItemToWidget
         {
             [HarmonyPriority(Priority.First)]
-            public static void Prefix(SG_Shop_Screen __instance, StarSystem ___theSystem, ShopDefItem itemDef, Shop shop, //removed ref from shopdefitem?
+            public static void Prefix(SG_Shop_Screen __instance, StarSystem theSystem, ShopDefItem itemDef, Shop shop, //removed ref from shopdefitem?
                 IMechLabDropTarget targetWidget, bool isSelling = false, bool isBulkAdd = false)
             {
                 if (GlobalVars.sim == null) return;
                 if (!isSelling) return;
-                List<string> curPilots = new List<string>();
-                curPilots.Add(GlobalVars.sim.Commander.FetchGUID());
-                foreach (Pilot p in GlobalVars.sim.PilotRoster)
+                var curPilots = new List<string> {GlobalVars.sim.Commander.FetchGUID()};
+                foreach (var p in GlobalVars.sim.PilotRoster)
                 {
                     SpecHolder.HolderInstance.AddToMaps(p);
                     curPilots.Add(p.FetchGUID());
                 }
 
                 var sellBonus = 1f;
-                var shopOwner = ""; 
+                string shopOwner; 
                 if (shop.ThisShopType == Shop.ShopType.BlackMarket)
                 {
                     shopOwner = FactionEnumeration.GetAuriganPiratesFactionValue().Name;
-                    ModInit.modLog.LogMessage($"System: {___theSystem.Name}. shopOwner: {shopOwner}");
+                    ModInit.modLog.LogMessage($"System: {theSystem.Name}. shopOwner: {shopOwner}");
                 }
                 else
                 {
                     shopOwner = sim.CurSystem.Def.OwnerValue.Name;
                     //shopOwner = Traverse.Create(shop).Field("system").GetValue<StarSystem>().Def.OwnerValue.Name;
-                    ModInit.modLog.LogMessage($"System: {___theSystem.Name}. shopOwner: {shopOwner}");
+                    ModInit.modLog.LogMessage($"System: {theSystem.Name}. shopOwner: {shopOwner}");
                 }
 
                 foreach (var pKey in curPilots)
@@ -91,7 +78,7 @@ namespace PracticeMakesPerfect.Patches
                         {
                             var opSpec =
                                 SpecManager.ManagerInstance.OpForSpecList.FirstOrDefault(x => x.OpForSpecID == spec);
-                            if (opSpec.storeBonus.ContainsKey(shopOwner))
+                            if (opSpec != null && opSpec.storeBonus.ContainsKey(shopOwner))
                             {
                                 sellBonus += opSpec.storeBonus[shopOwner];
                                 ModInit.modLog.LogMessage($"Current sell multiplier from specs: {sellBonus}");
@@ -112,14 +99,14 @@ namespace PracticeMakesPerfect.Patches
             new Type[] {typeof(FactionValue)})]
         public static class SG_Stores_MiniFactionWidget_FillInData_Patch
         {
-            public static void Postfix(SG_Stores_MiniFactionWidget __instance, FactionValue theFaction, FactionValue ___owningFactionValue, LocalizableText ___ReputationBonusText)
+            public static void Postfix(SG_Stores_MiniFactionWidget __instance, FactionValue theFaction, FactionValue owningFactionValue, LocalizableText reputationBonusText)
             {
                 if (GlobalVars.sim == null) return;
                 var sellBonus = 0f;
 
-                List<string> curPilots = new List<string>();
+                var curPilots = new List<string>();
                 curPilots.Add(GlobalVars.sim.Commander.FetchGUID());
-                foreach (Pilot p in GlobalVars.sim.PilotRoster)
+                foreach (var p in GlobalVars.sim.PilotRoster)
                 {
                     SpecHolder.HolderInstance.AddToMaps(p);
                     curPilots.Add(p.FetchGUID());
@@ -133,9 +120,9 @@ namespace PracticeMakesPerfect.Patches
                         {
                             var opSpec =
                                 SpecManager.ManagerInstance.OpForSpecList.FirstOrDefault(x => x.OpForSpecID == spec);
-                            if (opSpec.storeBonus.ContainsKey(___owningFactionValue.Name))
+                            if (opSpec != null && opSpec.storeBonus.ContainsKey(owningFactionValue.Name))
                             {
-                                sellBonus += opSpec.storeBonus[___owningFactionValue.Name];
+                                sellBonus += opSpec.storeBonus[owningFactionValue.Name];
                                 ModInit.modLog.LogMessage($"Current sell multiplier from specs: {sellBonus}");
                             }
                         }
@@ -143,7 +130,7 @@ namespace PracticeMakesPerfect.Patches
                 }
 
                 if (sellBonus == 0f) return;
-                ___ReputationBonusText.AppendTextAndRefresh(", {0}% Sell Bonus", new object[]
+                reputationBonusText.AppendTextAndRefresh(", {0}% Sell Bonus", new object[]
                     {
                         Mathf.RoundToInt(sellBonus * 100f)
                     });

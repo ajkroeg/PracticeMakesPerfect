@@ -12,23 +12,21 @@ namespace PracticeMakesPerfect.Patches
         public static class FillInPilotData_Patch
 
         {
-           
-
             public static bool Prefix(AAR_UnitStatusWidget __instance, ref int xpEarned, UnitResult ___UnitData)
             {
-                int missionXP = xpEarned;
-                int mechsKilled = ___UnitData.pilot.MechsKilled;
-                int othersKilled = ___UnitData.pilot.OthersKilled;
-                int newXP = 0;
-                if (ModInit.modSettings.useMissionXPforBonus == true)
+                var missionXP = xpEarned;
+                var mechsKilled = ___UnitData.pilot.MechsKilled;
+                var othersKilled = ___UnitData.pilot.OthersKilled;
+                var newXP = 0;
+                if (ModInit.modSettings.useMissionXPforBonus)
                 {
-                    for (int i = 0; i < mechsKilled; i++)
+                    for (var i = 0; i < mechsKilled; i++)
                     {
                         newXP += Mathf.RoundToInt(missionXP * ModInit.modSettings.bonusXP_MissionMechKills);
                         ModInit.modLog.LogMessage($"adding {Mathf.RoundToInt(missionXP * ModInit.modSettings.bonusXP_MissionMechKills)}XP to {___UnitData.pilot.Description.Callsign} for mech kill, contract multiplier");
                     }
 
-                    for (int j = 0; j < othersKilled; j++)
+                    for (var j = 0; j < othersKilled; j++)
                     {
                         newXP += Mathf.RoundToInt(missionXP * ModInit.modSettings.bonusXP_MissionOtherKills);
                         ModInit.modLog.LogMessage($"adding {Mathf.RoundToInt(missionXP * ModInit.modSettings.bonusXP_MissionOtherKills)}XP to {___UnitData.pilot.Description.Callsign} for other kill, contract multiplier");
@@ -37,13 +35,13 @@ namespace PracticeMakesPerfect.Patches
 
                 }
 
-                for (int i = 0; i < mechsKilled; i++)
+                for (var i = 0; i < mechsKilled; i++)
                 {
                     newXP += ModInit.modSettings.bonusXP_MechKills;
                     ModInit.modLog.LogMessage($"adding {ModInit.modSettings.bonusXP_MechKills}XP to {___UnitData.pilot.Description.Callsign} for mech kill, flat bonus");
 
                 }
-                for (int j = 0; j < othersKilled; j++)
+                for (var j = 0; j < othersKilled; j++)
                 {
                     newXP += ModInit.modSettings.bonusXP_OtherKills;
                     ModInit.modLog.LogMessage($"adding {ModInit.modSettings.bonusXP_OtherKills}XP to {___UnitData.pilot.Description.Callsign} for other kill, flat bonus");
@@ -66,7 +64,7 @@ namespace PracticeMakesPerfect.Patches
 
                     var contractFX_XP = Mathf.RoundToInt((missionXP * ModInit.modSettings.missionXPEffects) *
 
-                                                         ((float) ___UnitData.pilot.StatCollection.GetValue<int>(
+                                                         (___UnitData.pilot.StatCollection.GetValue<int>(
                                                               "effectXP") /
                                                           ModInit.modSettings.missionXPeffectBonusDivisor));
                     newXP += contractFX_XP;
@@ -99,17 +97,14 @@ namespace PracticeMakesPerfect.Patches
         {
             public static void Postfix(SimGameState __instance)
             {
-                List<Pilot> list = new List<Pilot>(__instance.PilotRoster);
-                list.Add(__instance.Commander);
-                foreach (Pilot pilot in list)
+                var list = new List<Pilot>(__instance.PilotRoster) {__instance.Commander};
+                foreach (var pilot in list)
                 {    
                     pilot.StatCollection.AddStatistic<int>("TotalMechKills", pilot.pilotDef.MechKills);
                     pilot.StatCollection.AddStatistic<int>("TotalOtherKills", pilot.pilotDef.OtherKills);
                     pilot.StatCollection.AddStatistic<int>("TotalKills", pilot.pilotDef.MechKills + pilot.pilotDef.OtherKills);
                     pilot.StatCollection.AddStatistic<int>("TotalInjuries", pilot.pilotDef.LifetimeInjuries);
                 }
-
-                return;
             }
         }
     }

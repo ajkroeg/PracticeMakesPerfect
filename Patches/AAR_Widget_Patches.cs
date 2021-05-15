@@ -11,21 +11,20 @@ using UnityEngine;
 
 namespace PracticeMakesPerfect.Patches
 {
-    class AAR_Widget_Patches
+    public class AAR_Widget_Patches
     {
         [HarmonyPatch(typeof(AAR_FactionReputationResultWidget), "InitializeData",
             new Type[] {typeof(SimGameState), typeof(Contract)})]
         public static class AAR_FactionReputationResultWidget_InitializeData_Patch
         {
             public static void Postfix(AAR_FactionReputationResultWidget __instance,
-                List<SGReputationWidget_Simple> ___FactionWidgets, RectTransform ___WidgetListAnchor,
-                SimGameState theSimState,
+                List<SGReputationWidget_Simple> factionWidgets, RectTransform widgetListAnchor,
                 Contract theContract)
             {
                 var employer = theContract.Override.employerTeam.FactionDef.FactionValue.Name;
                 var target = theContract.Override.targetTeam.FactionDef.FactionValue.Name;
 
-                List<string> curPilots = new List<string>();
+                var curPilots = new List<string>();
                 var playerUnits = UnityGameInstance.BattleTechGame.Combat.AllActors.Where(x => x.team.IsLocalPlayer);
                 foreach (var unit in playerUnits)
 //                foreach (Pilot p in GlobalVars.sim.PilotRoster)
@@ -68,21 +67,21 @@ namespace PracticeMakesPerfect.Patches
                     }
                 }
 
-                var idx = ___FactionWidgets.Count;
+                var idx = factionWidgets.Count;
                 foreach (var repMult in repMultDictionary)
                 {
-                    SGReputationWidget_Simple component = sim.DataManager
+                    var component = sim.DataManager
                         .PooledInstantiate("uixPrfWidget_AAR_FactionRepBarAndIcon",
-                            BattleTechResourceType.UIModulePrefabs, null, null, null)
+                            BattleTechResourceType.UIModulePrefabs)
                         .GetComponent<SGReputationWidget_Simple>();
-                    component.transform.SetParent(___WidgetListAnchor, false);
+                    component.transform.SetParent(widgetListAnchor, false);
 
-                    ___FactionWidgets.Add(component);
+                    factionWidgets.Add(component);
 
                     var faction = UnityGameInstance.BattleTechGame.DataManager.Factions
                         .FirstOrDefault(x => x.Value.FactionValue.Name == repMult.Key).Value;
 
-                    var repChange = 0;
+                    int repChange;
                     if (theContract.Override.employerTeam.FactionDef.FactionValue.DoesGainReputation)
                     {
                         repChange = Mathf.RoundToInt( SpecHolder.HolderInstance.emplRep *
@@ -103,9 +102,9 @@ namespace PracticeMakesPerfect.Patches
                         }
                     }
 
-                    __instance.SetWidgetData(idx, faction.FactionValue, repChange, true, false);
+                    __instance.SetWidgetData(idx, faction.FactionValue, repChange, true);
 
-                    sim.SetReputation(faction.FactionValue, repChange, StatCollection.StatOperation.Int_Add, null);
+                    sim.SetReputation(faction.FactionValue, repChange);
                     ModInit.modLog.LogMessage($"Reputation with {faction.FactionValue.Name} changed by {repChange}");
 
                     idx += 1;
@@ -118,18 +117,18 @@ namespace PracticeMakesPerfect.Patches
         [HarmonyPatch(typeof(AAR_ContractObjectivesWidget), "FillInObjectives")]
         public static class AAR_ContractObjectivesWidget_FillInObjectives_Patch
         {
-            static void Postfix(AAR_ContractObjectivesWidget __instance, Contract ___theContract)
+            public static void Postfix(AAR_ContractObjectivesWidget __instance, Contract theContract)
             {
 
                 if (SpecHolder.HolderInstance.totalBounty != 0)
                 {
                     var addObjectiveMethod = Traverse.Create(__instance).Method("AddObjective", new Type[] { typeof(MissionObjectiveResult) });
 
-                    string bountyResults = $"Bounty Payouts: {SpecHolder.HolderInstance.kills} kills x {SpecHolder.HolderInstance.bounty} = ¢{SpecHolder.HolderInstance.totalBounty}";
+                    var bountyResults = $"Bounty Payouts: {SpecHolder.HolderInstance.kills} kills x {SpecHolder.HolderInstance.bounty} = ¢{SpecHolder.HolderInstance.totalBounty}";
 
                     var bountyPayouts = new MissionObjectiveResult(bountyResults, Guid.NewGuid().ToString(), false, true, ObjectiveStatus.Succeeded, false);
 
-                    addObjectiveMethod.GetValue(new object[] { bountyPayouts });
+                    addObjectiveMethod.GetValue(bountyPayouts);
 
                     ModInit.modLog.LogMessage($"{SpecHolder.HolderInstance.totalBounty} in bounties awarded.");
                 }

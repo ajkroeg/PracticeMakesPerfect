@@ -8,7 +8,7 @@ using static PracticeMakesPerfect.Framework.GlobalVars;
 
 namespace PracticeMakesPerfect.Framework
 {
-    public class GlobalVars
+    public static class GlobalVars
     {
         internal static SimGameState sim;
         internal const string spGUID = "spGUID_";
@@ -63,7 +63,7 @@ namespace PracticeMakesPerfect.Framework
             this.opforDefault = opforDefault;
         }
     }
-    public class StratCom
+    public abstract class StratCom
     {
         public string StratComID = "";
         public string StratComName = "";
@@ -314,11 +314,11 @@ namespace PracticeMakesPerfect.Framework
             ModInit.modLog.LogMessage($"Serialized missionTracker and adding to company tags.\n\nState was {missionTracker}.");
             GlobalVars.sim.CompanyTags.Add(missionTracker);
 
-            var activeStratCom = sim.CompanyTags.FirstOrDefault((x) => x.StartsWith(ActiveStratComTag));
-            GlobalVars.sim.CompanyTags.Remove(activeStratCom);
-            activeStratCom = $"{ActiveStratComTag}{JsonConvert.SerializeObject(HolderInstance.activeStratCom)}";
-            ModInit.modLog.LogMessage($"Serialized activeStratCom and adding to company tags.\n\nState was {activeStratCom}.");
-            GlobalVars.sim.CompanyTags.Add(activeStratCom);
+            var activeStratComField = sim.CompanyTags.FirstOrDefault((x) => x.StartsWith(ActiveStratComTag));
+            GlobalVars.sim.CompanyTags.Remove(activeStratComField);
+            activeStratComField = $"{ActiveStratComTag}{JsonConvert.SerializeObject(HolderInstance.activeStratCom)}";
+            ModInit.modLog.LogMessage($"Serialized activeStratCom and adding to company tags.\n\nState was {activeStratComField}.");
+            GlobalVars.sim.CompanyTags.Add(activeStratComField);
         }
 
         //deserialize injurymap (dictionary) from tag and save to PilotInjuryHolder.Instance

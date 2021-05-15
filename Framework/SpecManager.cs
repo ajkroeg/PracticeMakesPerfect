@@ -1,17 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using SVGImporter;
 using BattleTech;
 using BattleTech.Designed;
 using BattleTech.UI;
-using BattleTech.UI.Tooltips;
 using Harmony;
 using static PracticeMakesPerfect.Framework.GlobalVars;
 
 namespace PracticeMakesPerfect.Framework
 {
-    static class PilotExtensions
+    internal static class PilotExtensions
     {
         internal static string FetchGUID(this Pilot pilot)
         {
@@ -29,9 +27,9 @@ namespace PracticeMakesPerfect.Framework
     {
         private static SpecManager _instance;
         public List<OpForSpec> OpForSpecList;
-        public List<OpForSpec> OpForDefaultList;
+        private List<OpForSpec> OpForDefaultList;
         public List<MissionSpec> MissionSpecList;
-        public List<MissionSpec> MissionDefaultList;
+        private List<MissionSpec> MissionDefaultList;
 
         public List<StratCom> StratComs;
 
@@ -137,32 +135,35 @@ namespace PracticeMakesPerfect.Framework
                             ModInit.modLog.LogMessage($"Default OpForSpecs for {faction.Value.FactionValue.Name} have same reqs as existing OpForSpec, aborting!");
                             continue;
                         }
-                        var op = new OpForSpec(opforDefault);
 
-                        op.OpForSpecID = opforDefault.OpForSpecID.Insert(0, $"{faction.Value.FactionValue.Name}");
+                        var op = new OpForSpec(opforDefault)
+                        {
+                            OpForSpecID = opforDefault.OpForSpecID.Insert(0, $"{faction.Value.FactionValue.Name}"),
+                            OpForSpecName = opforDefault.OpForSpecName.Insert(0, $"[{faction.Value.Name}]: "),
+                            killsRequired = opforDefault.killsRequired,
+                            applyToFaction = new List<string> {faction.Value.Name},
+                            factionID = faction.Value.FactionValue.Name,
+                            repMult = opforDefault.repMult,
+                            storeDiscount = opforDefault.storeDiscount,
+                            storeBonus = opforDefault.storeBonus,
+                            cashMult = opforDefault.cashMult,
+                            killBounty = opforDefault.killBounty,
+                            description =
+                                opforDefault.description.Replace("{faction}", $"{faction.Value.Demonym} forces"),
+                            effects = opforDefault.effects
+                        };
 
-                        op.OpForSpecName = opforDefault.OpForSpecName.Insert(0, $"[{faction.Value.Name}]: ");
 
-                        op.killsRequired = opforDefault.killsRequired;
 
-                        op.applyToFaction = new List<string> {faction.Value.Name};
 
-                        op.factionID = faction.Value.FactionValue.Name;
 
-                        op.repMult = opforDefault.repMult;
 
-                        op.storeDiscount = opforDefault.storeDiscount;
 
-                        op.storeBonus = opforDefault.storeBonus;
 
-                        op.cashMult = opforDefault.cashMult;
 
-                        op.killBounty = opforDefault.killBounty;
 
-                        op.description =
-                            opforDefault.description.Replace("{faction}", $"{faction.Value.Demonym} forces");
 
-                        op.effects = opforDefault.effects;
+
 
                         ModInit.modLog.LogMessage($"Adding {op.OpForSpecName} for {op.factionID}!\n 1st effectdata Id was {op.effects[0].Description.Id}");
                         OpForSpecList.Add(op);
@@ -176,7 +177,7 @@ namespace PracticeMakesPerfect.Framework
                 if (ModInit.modSettings.WhiteListMissions.Contains(contract.Name))
                 {
                     ModInit.modLog.LogMessage($"Processing default MissionSpecs for {contract.Name}!");
-                    foreach (var defaultMissionSpec in ModInit.modSettings.MissionDefaultList)
+                    foreach (var defaultMissionSpec in MissionDefaultList)
                     {
                         if (MissionSpecList.Any(x => x.contractTypeID == contract.Name &&
                                                    x.missionsRequired == defaultMissionSpec.missionsRequired))
@@ -184,24 +185,26 @@ namespace PracticeMakesPerfect.Framework
                             ModInit.modLog.LogMessage($"Default MissionSpecs for {contract.Name} have same reqs as existing MissionSpec, aborting!");
                             continue;
                         }
-                        var con = new MissionSpec(defaultMissionSpec);
 
-                        con.MissionSpecID = defaultMissionSpec.MissionSpecID.Insert(0, $"{contract.Name}");
+                        var con = new MissionSpec(defaultMissionSpec)
+                        {
+                            MissionSpecID = defaultMissionSpec.MissionSpecID.Insert(0, $"{contract.Name}"),
+                            MissionSpecName = defaultMissionSpec.MissionSpecName.Insert(0, $"[{contract.Name}]: "),
+                            missionsRequired = defaultMissionSpec.missionsRequired,
+                            AdvTargetInfoUnits = defaultMissionSpec.AdvTargetInfoUnits,
+                            cashMult = defaultMissionSpec.cashMult,
+                            contractTypeID = contract.Name,
+                            description = defaultMissionSpec.description.Replace("{contract}", $"{contract.Name}"),
+                            effects = defaultMissionSpec.effects
+                        };
 
-                        con.MissionSpecName = defaultMissionSpec.MissionSpecName.Insert(0, $"[{contract.Name}]: ");
 
-                        con.missionsRequired = defaultMissionSpec.missionsRequired;
 
-                        con.AdvTargetInfoUnits = defaultMissionSpec.AdvTargetInfoUnits;
 
-                        con.cashMult = defaultMissionSpec.cashMult;
 
-                        con.contractTypeID = contract.Name;
 
-                        con.description =
-                            defaultMissionSpec.description.Replace("{contract}", $"{contract.Name}");
 
-                        con.effects = defaultMissionSpec.effects;
+
 
                         ModInit.modLog.LogMessage($"Adding {con.MissionSpecName} for {con.MissionSpecID}!\n 1st effectdata Id was {con.effects[0].Description.Id}");
                         MissionSpecList.Add(con);
@@ -250,7 +253,7 @@ namespace PracticeMakesPerfect.Framework
             var pKey = p.FetchGUID();
             foreach (var id in SpecHolder.HolderInstance.OpForSpecMap[pKey])
             {
-                foreach (OpForSpec op4Spec in ManagerInstance.OpForSpecList.Where(x => x.OpForSpecID == id && (x.factionID == opforID || x.applyToFaction.Contains(opforID))))
+                foreach (var op4Spec in ManagerInstance.OpForSpecList.Where(x => x.OpForSpecID == id && (x.factionID == opforID || x.applyToFaction.Contains(opforID))))
                 {
                     this.ApplyPassiveOp4SpecEffects(actor, op4Spec);
                     ModInit.modLog.LogMessage($"Gathered {op4Spec.OpForSpecID} for {p.Description.Callsign}{pKey}");
@@ -264,7 +267,7 @@ namespace PracticeMakesPerfect.Framework
             var pKey = p.FetchGUID();
             foreach (var id in SpecHolder.HolderInstance.MissionSpecMap[pKey])
             {
-                foreach (MissionSpec mSpec in ManagerInstance.MissionSpecList.Where(x => x.MissionSpecID == id && x.contractTypeID == missionID))
+                foreach (var mSpec in ManagerInstance.MissionSpecList.Where(x => x.MissionSpecID == id && x.contractTypeID == missionID))
                 {
                     this.ApplyPassiveMissionSpecEffects(actor, mSpec);
                     ModInit.modLog.LogMessage($"Gathered {mSpec.MissionSpecID} for {p.Description.Callsign}{pKey}");
@@ -272,25 +275,24 @@ namespace PracticeMakesPerfect.Framework
             }
         }
 
-        protected void ApplyPassiveOp4SpecEffects(AbstractActor actor, OpForSpec op4Spec)
+        private void ApplyPassiveOp4SpecEffects(AbstractActor actor, OpForSpec op4Spec)
         {
             var p = actor.GetPilot();
             var pKey = p.FetchGUID();
             ModInit.modLog.LogMessage(
                 $"processing {op4Spec.effects.Count} op4Spec effects for {p.Description.Callsign}{pKey}");
-            foreach (EffectData effectData in op4Spec.effects)
+            foreach (var effectData in op4Spec.effects)
             {
                 ModInit.modLog.LogMessage(
                     $"processing {effectData.Description.Name} for {p.Description.Callsign}{pKey}");
 
-                string id = ($"op4Spec_{p.Description.Callsign}_{effectData.Description.Id}");
+                var id = ($"op4Spec_{p.Description.Callsign}_{effectData.Description.Id}");
 
                 if (effectData.targetingData.effectTriggerType == EffectTriggerType.Passive &&
                     effectData.targetingData.effectTargetType == EffectTargetType.Creator)
                 {
                     ModInit.modLog.LogMessage($"Applying {id}");
-                    actor.Combat.EffectManager.CreateEffect(effectData, id, -1, actor, actor, default(WeaponHitInfo), 1,
-                        false);
+                    actor.Combat.EffectManager.CreateEffect(effectData, id, -1, actor, actor, default(WeaponHitInfo), 1);
                 }
 
                 if (effectData.targetingData.effectTriggerType == EffectTriggerType.Passive &&
@@ -301,21 +303,19 @@ namespace PracticeMakesPerfect.Framework
                         ModInit.modLog.LogMessage(
                             $"Applying {id} to {ally.GetPilot().Callsign}, an ally of {p.Callsign}");
                         actor.Combat.EffectManager.CreateEffect(effectData, id, -1, actor, ally, default(WeaponHitInfo),
-                            1,
-                            false);
+                            1);
                     }
                 }
 
                 if (effectData.targetingData.effectTriggerType == EffectTriggerType.Passive &&
                     effectData.targetingData.effectTargetType == EffectTargetType.AllLanceMates)
                 {
-                    foreach (var lancemate in new List<AbstractActor>(actor.Combat.AllActors.FindAll((AbstractActor x) => x.team == actor.team && x != actor)))
+                    foreach (var lancemate in new List<AbstractActor>(actor.Combat.AllActors.FindAll(x => x.team == actor.team && x != actor)))
                     {
                         ModInit.modLog.LogMessage(
                             $"Applying {id} to {lancemate.GetPilot().Callsign}, a lancemate of {p.Callsign}");
                         actor.Combat.EffectManager.CreateEffect(effectData, id, -1, actor, lancemate,
-                            default(WeaponHitInfo), 1,
-                            false);
+                            default(WeaponHitInfo), 1);
                     }
                 }
 
@@ -327,31 +327,29 @@ namespace PracticeMakesPerfect.Framework
                         ModInit.modLog.LogMessage(
                             $"Applying {id} to {enemy.GetPilot().Callsign}, an enemy of {p.Callsign}");
                         actor.Combat.EffectManager.CreateEffect(effectData, id, -1, actor, enemy,
-                            default(WeaponHitInfo), 1,
-                            false);
+                            default(WeaponHitInfo), 1);
                     }
                 }
             }
         }
 
-        internal void ApplyStratComs(AbstractActor actor)
+        internal static void ApplyStratComs(AbstractActor actor)
         {
             var p = actor.GetPilot();
             var pKey = p.FetchGUID();
 
-            foreach (StratCom stratcom in ManagerInstance.StratComs.Where(x=>x.StratComID == SpecHolder.HolderInstance.activeStratCom))
+            foreach (var stratcom in ManagerInstance.StratComs.Where(x=>x.StratComID == SpecHolder.HolderInstance.activeStratCom))
             {
-                foreach (EffectData effectData in stratcom.effects)
+                foreach (var effectData in stratcom.effects)
                 {
                     ModInit.modLog.LogMessage(
                         $"processing {effectData.Description.Name} for {p.Description.Callsign}{pKey}");
 
-                    string id = ($"stratcom{p.Description.Callsign}_{effectData.Description.Id}");
+                    var id = ($"stratcom{p.Description.Callsign}_{effectData.Description.Id}");
 
                     ModInit.modLog.LogMessage($"Applying {id}");
                     actor.Combat.EffectManager.CreateEffect(effectData, id, -1, actor, actor,
-                        default(WeaponHitInfo), 1,
-                        false);
+                        default(WeaponHitInfo), 1);
                 }
             }
         }
@@ -389,18 +387,16 @@ namespace PracticeMakesPerfect.Framework
         }
 
 
-
-
-        protected void ApplyPassiveMissionSpecEffects(AbstractActor actor, MissionSpec missionSpec)
+        private void ApplyPassiveMissionSpecEffects(AbstractActor actor, MissionSpec missionSpec)
         {
             var p = actor.GetPilot();
             var pKey = p.FetchGUID();
             var playerTeam = actor.Combat.LocalPlayerTeam;
             ModInit.modLog.LogMessage(
                 $"processing {missionSpec.effects.Count} missionSpec effects for {p.Description.Callsign}{pKey}");
-            foreach (EffectData effectData in missionSpec.effects)
+            foreach (var effectData in missionSpec.effects)
             {
-                string id = ($"missionSpec{p.Description.Callsign}_{effectData.Description.Id}");
+                var id = ($"missionSpec{p.Description.Callsign}_{effectData.Description.Id}");
                 if (effectData.targetingData.effectTriggerType != EffectTriggerType.Passive)
                 {
                     ModInit.modLog.LogMessage(
@@ -415,8 +411,7 @@ namespace PracticeMakesPerfect.Framework
                     effectData.targetingData.effectTargetType == EffectTargetType.Creator)
                 {
                     ModInit.modLog.LogMessage($"Applying {id}");
-                    actor.Combat.EffectManager.CreateEffect(effectData, id, -1, actor, actor, default(WeaponHitInfo), 1,
-                        false);
+                    actor.Combat.EffectManager.CreateEffect(effectData, id, -1, actor, actor, default(WeaponHitInfo), 1);
                 }
 
                 if (missionSpec.AdvTargetInfoUnits.Count < 1)
@@ -431,21 +426,19 @@ namespace PracticeMakesPerfect.Framework
                             ModInit.modLog.LogMessage(
                                 $"Applying {id} to {ally.GetPilot().Callsign}, an ally of {p.Callsign}");
                             actor.Combat.EffectManager.CreateEffect(effectData, id, -1, actor, ally, default(WeaponHitInfo),
-                                1,
-                                false);
+                                1);
                         }
                     }
 
                     if (effectData.targetingData.effectTriggerType == EffectTriggerType.Passive &&
                         effectData.targetingData.effectTargetType == EffectTargetType.AllLanceMates)
                     {
-                        foreach (var lancemate in new List<AbstractActor>(actor.Combat.AllActors.FindAll((AbstractActor x) => x.team == actor.team)))
+                        foreach (var lancemate in new List<AbstractActor>(actor.Combat.AllActors.FindAll(x => x.team == actor.team)))
                         {
                             ModInit.modLog.LogMessage(
                                 $"Applying {id} to {lancemate.GetPilot().Callsign}, a lancemate of {p.Callsign}");
                             actor.Combat.EffectManager.CreateEffect(effectData, id, -1, actor, lancemate,
-                                default(WeaponHitInfo), 1,
-                                false);
+                                default(WeaponHitInfo), 1);
                         }
                     }
 
@@ -457,8 +450,7 @@ namespace PracticeMakesPerfect.Framework
                             ModInit.modLog.LogMessage(
                                 $"Applying {id} to {enemy.GetPilot().Callsign}, an enemy of {p.Callsign}");
                             actor.Combat.EffectManager.CreateEffect(effectData, id, -1, actor, enemy,
-                                default(WeaponHitInfo), 1,
-                                false);
+                                default(WeaponHitInfo), 1);
                         }
                     }
                     continue;
@@ -480,8 +472,7 @@ namespace PracticeMakesPerfect.Framework
                         {
                             ModInit.modLog.LogMessage($"Applying {id}");
                             actor.Combat.EffectManager.CreateEffect(effectData, id, -1, actor, mech,
-                                default(WeaponHitInfo), 1,
-                                false);
+                                default(WeaponHitInfo), 1);
                         }
                     }
                 }
@@ -502,8 +493,7 @@ namespace PracticeMakesPerfect.Framework
                         {
                             ModInit.modLog.LogMessage($"Applying {id}");
                             actor.Combat.EffectManager.CreateEffect(effectData, id, -1, actor, vehicle,
-                                default(WeaponHitInfo), 1,
-                                false);
+                                default(WeaponHitInfo), 1);
                         }
                     }
                 }
@@ -524,8 +514,7 @@ namespace PracticeMakesPerfect.Framework
                         {
                             ModInit.modLog.LogMessage($"Applying {id}");
                             actor.Combat.EffectManager.CreateEffect(effectData, id, -1, actor, turret,
-                                default(WeaponHitInfo), 1,
-                                false);
+                                default(WeaponHitInfo), 1);
                         }
                     }
                 }
@@ -554,8 +543,7 @@ namespace PracticeMakesPerfect.Framework
 
                             ModInit.modLog.LogMessage($"Applying {id}");
                             actor.Combat.EffectManager.CreateEffect(effectData, id, -1, actor, building,
-                                default(WeaponHitInfo), 1,
-                                false);
+                                default(WeaponHitInfo), 1);
                         }
                     }
                 }
@@ -591,8 +579,7 @@ namespace PracticeMakesPerfect.Framework
                                         {
                                             ModInit.modLog.LogMessage($"Applying {id}");
                                             actor.Combat.EffectManager.CreateEffect(effectData, id, -1, actor, unit,
-                                                default(WeaponHitInfo), 1,
-                                                false);
+                                                default(WeaponHitInfo), 1);
                                         }
 
                                         return;
@@ -618,8 +605,7 @@ namespace PracticeMakesPerfect.Framework
                                         {
                                             ModInit.modLog.LogMessage($"Applying {id}");
                                             actor.Combat.EffectManager.CreateEffect(effectData, id, -1, actor, unit,
-                                                default(WeaponHitInfo), 1,
-                                                false);
+                                                default(WeaponHitInfo), 1);
                                         }
 
                                         return;
@@ -645,8 +631,7 @@ namespace PracticeMakesPerfect.Framework
                                         {
                                             ModInit.modLog.LogMessage($"Applying {id}");
                                             actor.Combat.EffectManager.CreateEffect(effectData, id, -1, actor, unit,
-                                                default(WeaponHitInfo), 1,
-                                                false);
+                                                default(WeaponHitInfo), 1);
                                         }
 
                                         return;
@@ -662,16 +647,15 @@ namespace PracticeMakesPerfect.Framework
         {
             var p = playerUnit.GetPilot();
             var pKey = p.FetchGUID();
-            var playerTeam = playerUnit.Combat.LocalPlayerTeam;
 
             foreach (var missionSpecID in SpecHolder.HolderInstance.MissionSpecMap[pKey])
             {
-                foreach (MissionSpec missionSpec in ManagerInstance.MissionSpecList.Where(x =>
+                foreach (var missionSpec in ManagerInstance.MissionSpecList.Where(x =>
                     x.MissionSpecID == missionSpecID && x.contractTypeID == playerUnit.Combat.ActiveContract.ContractTypeValue.Name))
                 {
-                    foreach (EffectData effectData in missionSpec.effects)
+                    foreach (var effectData in missionSpec.effects)
                     {
-                        string id = ($"missionSpec_{p.Description.Callsign}_{effectData.Description.Id}");
+                        var id = ($"missionSpec_{p.Description.Callsign}_{effectData.Description.Id}");
 
                         if (missionSpec.AdvTargetInfoUnits.Contains(AdvTargetUnitData.Primary) && effectData.targetingData.effectTriggerType ==
                             EffectTriggerType.OnWeaponFire &&
@@ -679,8 +663,7 @@ namespace PracticeMakesPerfect.Framework
                         {
                             ModInit.modLog.LogMessage($"Applying {id}");
                             playerUnit.Combat.EffectManager.CreateEffect(effectData, id, -1, playerUnit, playerUnit,
-                                default(WeaponHitInfo), 1,
-                                false);
+                                default(WeaponHitInfo), 1);
                         }
 
                         if (missionSpec.AdvTargetInfoUnits.Contains(AdvTargetUnitData.Primary) && effectData.targetingData.effectTriggerType ==
@@ -689,8 +672,7 @@ namespace PracticeMakesPerfect.Framework
                         {
                             ModInit.modLog.LogMessage($"Applying {id}");
                             playerUnit.Combat.EffectManager.CreateEffect(effectData, id, -1, playerUnit, target,
-                                default(WeaponHitInfo), 1,
-                                false);
+                                default(WeaponHitInfo), 1);
                         }
                     }
                 }
@@ -702,8 +684,6 @@ namespace PracticeMakesPerfect.Framework
         {
             var p = unit.GetPilot();
 
-            var playerTeam = unit.Combat.LocalPlayerTeam;
-
             foreach (var playerUnit in unit.Combat.LocalPlayerTeam.units)
             {
                 ModInit.modLog.LogMessage($"Getting key for {playerUnit.GetPilot().Callsign}.");
@@ -713,25 +693,24 @@ namespace PracticeMakesPerfect.Framework
                 {
                     foreach (var OpForSpecID in SpecHolder.HolderInstance.OpForSpecMap[pKey])
                     {
-                        foreach (OpForSpec op4Spec in ManagerInstance.OpForSpecList.Where(x =>
+                        foreach (var op4Spec in ManagerInstance.OpForSpecList.Where(x =>
                             x.OpForSpecID == OpForSpecID && (x.factionID == target.team.FactionValue.Name ||
                                                              x.applyToFaction.Contains(unit.team.FactionValue.Name))))
                         {
 
-                            foreach (EffectData effectData in op4Spec.effects)
+                            foreach (var effectData in op4Spec.effects)
                             {
                                 ModInit.modLog.LogMessage(
                                     $"processing {effectData.Description.Name} for {p.Description.Callsign}");
 
-                                string id = ($"op4Spec_{p.Description.Callsign}_{effectData.Description.Id}");
+                                var id = ($"op4Spec_{p.Description.Callsign}_{effectData.Description.Id}");
 
                                 if (effectData.targetingData.effectTriggerType == EffectTriggerType.OnWeaponFire &&
                                     effectData.targetingData.effectTargetType == EffectTargetType.AllEnemies)
                                 {
                                     ModInit.modLog.LogMessage($"Applying {id}");
                                     unit.Combat.EffectManager.CreateEffect(effectData, id, -1, unit, unit,
-                                        default(WeaponHitInfo), 1,
-                                        false);
+                                        default(WeaponHitInfo), 1);
                                 }
                             }
                         }
@@ -740,12 +719,12 @@ namespace PracticeMakesPerfect.Framework
 
                 foreach (var missionSpecID in SpecHolder.HolderInstance.MissionSpecMap[pKey])
                 {
-                    foreach (MissionSpec missionSpec in ManagerInstance.MissionSpecList.Where(x =>
+                    foreach (var missionSpec in ManagerInstance.MissionSpecList.Where(x =>
                         x.MissionSpecID == missionSpecID && x.contractTypeID == unit.Combat.ActiveContract.ContractTypeValue.Name))
                     {
-                        foreach (EffectData effectData in missionSpec.effects)
+                        foreach (var effectData in missionSpec.effects)
                         {
-                            string id = ($"missionSpec_{p.Description.Callsign}_{effectData.Description.Id}");
+                            var id = ($"missionSpec_{p.Description.Callsign}_{effectData.Description.Id}");
                             if (missionSpec.AdvTargetInfoUnits.Count < 1)
                             {
 
@@ -754,8 +733,7 @@ namespace PracticeMakesPerfect.Framework
                                 {
                                     ModInit.modLog.LogMessage($"Applying {id}");
                                     unit.Combat.EffectManager.CreateEffect(effectData, id, -1, unit, unit,
-                                        default(WeaponHitInfo), 1,
-                                        false);
+                                        default(WeaponHitInfo), 1);
                                     return;
                                 }
                             }
@@ -768,8 +746,7 @@ namespace PracticeMakesPerfect.Framework
                             {
                                 ModInit.modLog.LogMessage($"Applying {id}");
                                 unit.Combat.EffectManager.CreateEffect(effectData, id, -1, unit, unit,
-                                    default(WeaponHitInfo), 1,
-                                    false);
+                                    default(WeaponHitInfo), 1);
                                 return;
                             }
 
@@ -782,8 +759,7 @@ namespace PracticeMakesPerfect.Framework
                             {
                                 ModInit.modLog.LogMessage($"Applying {id}");
                                 unit.Combat.EffectManager.CreateEffect(effectData, id, -1, unit, unit,
-                                    default(WeaponHitInfo), 1,
-                                    false);
+                                    default(WeaponHitInfo), 1);
                                 return;
                             }
 
@@ -795,8 +771,7 @@ namespace PracticeMakesPerfect.Framework
                             {
                                 ModInit.modLog.LogMessage($"Applying {id}");
                                 unit.Combat.EffectManager.CreateEffect(effectData, id, -1, unit, unit,
-                                    default(WeaponHitInfo), 1,
-                                    false);
+                                    default(WeaponHitInfo), 1);
                                 return;
                             }
 
@@ -808,8 +783,7 @@ namespace PracticeMakesPerfect.Framework
                             {
                                 ModInit.modLog.LogMessage($"Applying {id}");
                                 unit.Combat.EffectManager.CreateEffect(effectData, id, -1, unit, unit,
-                                    default(WeaponHitInfo), 1,
-                                    false);
+                                    default(WeaponHitInfo), 1);
                                 return;
                             }
 
@@ -821,8 +795,7 @@ namespace PracticeMakesPerfect.Framework
                             {
                                 ModInit.modLog.LogMessage($"Applying {id}. This should only happen on a threeway.");
                                 unit.Combat.EffectManager.CreateEffect(effectData, id, -1, unit, unit,
-                                    default(WeaponHitInfo), 1,
-                                    false);
+                                    default(WeaponHitInfo), 1);
                                 return;
                             }
 
@@ -837,20 +810,19 @@ namespace PracticeMakesPerfect.Framework
         {
             var p = unit.GetPilot();
             var pKey = p.FetchGUID();
-            var playerTeam = unit.Combat.LocalPlayerTeam;
 
             foreach (var OpForSpecID in SpecHolder.HolderInstance.OpForSpecMap[pKey])
             {
-                foreach (OpForSpec op4Spec in ManagerInstance.OpForSpecList.Where(x => x.OpForSpecID == OpForSpecID && (x.factionID == building.team.FactionValue.Name || x.applyToFaction.Contains(building.team.FactionValue.Name))))
+                foreach (var op4Spec in ManagerInstance.OpForSpecList.Where(x => x.OpForSpecID == OpForSpecID && (x.factionID == building.team.FactionValue.Name || x.applyToFaction.Contains(building.team.FactionValue.Name))))
                 {
                     //                   ModInit.modLog.LogMessage($"Gathered {op4Spec.OpForSpecID} for {p.Description.Callsign}{pKey}");
 
-                    foreach (EffectData effectData in op4Spec.effects)
+                    foreach (var effectData in op4Spec.effects)
                     {
                         ModInit.modLog.LogMessage(
                             $"processing {effectData.Description.Name} for {p.Description.Callsign}{pKey}");
 
-                        string id = ($"op4Spec_{p.Description.Callsign}_{effectData.Description.Id}");
+                        var id = ($"op4Spec_{p.Description.Callsign}_{effectData.Description.Id}");
 
 
                         if (effectData.targetingData.effectTriggerType == EffectTriggerType.OnWeaponFire &&
@@ -858,8 +830,7 @@ namespace PracticeMakesPerfect.Framework
                         {
                             ModInit.modLog.LogMessage($"Applying {id}");
                             unit.Combat.EffectManager.CreateEffect(effectData, id, -1, unit, unit,
-                                default(WeaponHitInfo), 1,
-                                false);
+                                default(WeaponHitInfo), 1);
                         }
 
                         if (effectData.targetingData.effectTriggerType == EffectTriggerType.OnWeaponFire &&
@@ -867,8 +838,7 @@ namespace PracticeMakesPerfect.Framework
                         {
                             ModInit.modLog.LogMessage($"Applying {id}");
                             unit.Combat.EffectManager.CreateEffect(effectData, id, -1, unit, unit,
-                                default(WeaponHitInfo), 1,
-                                false);
+                                default(WeaponHitInfo), 1);
                         }
                     }
                 }
@@ -876,12 +846,12 @@ namespace PracticeMakesPerfect.Framework
 
             foreach (var missionSpecID in SpecHolder.HolderInstance.MissionSpecMap[pKey])
             {
-                foreach (MissionSpec missionSpec in ManagerInstance.MissionSpecList.Where(x =>
+                foreach (var missionSpec in ManagerInstance.MissionSpecList.Where(x =>
                     x.MissionSpecID == missionSpecID && x.contractTypeID == unit.Combat.ActiveContract.ContractTypeValue.Name))
                 {
-                    foreach (EffectData effectData in missionSpec.effects)
+                    foreach (var effectData in missionSpec.effects)
                     {
-                        string id = ($"missionSpec_{p.Description.Callsign}_{effectData.Description.Id}");
+                        var id = ($"missionSpec_{p.Description.Callsign}_{effectData.Description.Id}");
 
                         if (missionSpec.AdvTargetInfoUnits.Contains(AdvTargetUnitData.Building) &&
                             (building.UnitType & UnitType.Building) != 0 && effectData.targetingData.effectTriggerType ==
@@ -890,8 +860,7 @@ namespace PracticeMakesPerfect.Framework
                         {
                             ModInit.modLog.LogMessage($"Applying {id}");
                             unit.Combat.EffectManager.CreateEffect(effectData, id, -1, unit, unit,
-                                default(WeaponHitInfo), 1,
-                                false);
+                                default(WeaponHitInfo), 1);
                         }
 
                         if (missionSpec.AdvTargetInfoUnits.Contains(AdvTargetUnitData.Building) &&
@@ -901,8 +870,7 @@ namespace PracticeMakesPerfect.Framework
                         {
                             ModInit.modLog.LogMessage($"Applying {id}");
                             unit.Combat.EffectManager.CreateEffect(effectData, id, -1, unit, unit,
-                                default(WeaponHitInfo), 1,
-                                false);
+                                default(WeaponHitInfo), 1);
                         }
                     }
                 }
@@ -914,20 +882,19 @@ namespace PracticeMakesPerfect.Framework
         {
             var p = playerUnit.GetPilot();
             var pKey = p.FetchGUID();
-            var playerTeam = playerUnit.Combat.LocalPlayerTeam;
 
             foreach (var OpForSpecID in SpecHolder.HolderInstance.OpForSpecMap[pKey])
             {
-                foreach (OpForSpec op4Spec in ManagerInstance.OpForSpecList.Where(x => x.OpForSpecID == OpForSpecID && (x.factionID == opforUnit.team.FactionValue.Name || x.applyToFaction.Contains(opforUnit.team.FactionValue.Name))))
+                foreach (var op4Spec in ManagerInstance.OpForSpecList.Where(x => x.OpForSpecID == OpForSpecID && (x.factionID == opforUnit.team.FactionValue.Name || x.applyToFaction.Contains(opforUnit.team.FactionValue.Name))))
                 {
  //                   ModInit.modLog.LogMessage($"Gathered {op4Spec.OpForSpecID} for {p.Description.Callsign}{pKey}");
 
-                    foreach (EffectData effectData in op4Spec.effects)
+                    foreach (var effectData in op4Spec.effects)
                     {
                         ModInit.modLog.LogMessage(
                             $"processing {effectData.Description.Name} for {p.Description.Callsign}{pKey}");
 
-                        string id = ($"op4Spec_{p.Description.Callsign}_{effectData.Description.Id}");
+                        var id = ($"op4Spec_{p.Description.Callsign}_{effectData.Description.Id}");
 
 
                         if (effectData.targetingData.effectTriggerType == EffectTriggerType.OnWeaponFire &&
@@ -935,8 +902,7 @@ namespace PracticeMakesPerfect.Framework
                         {
                             ModInit.modLog.LogMessage($"Applying {id}");
                             playerUnit.Combat.EffectManager.CreateEffect(effectData, id, -1, playerUnit, playerUnit,
-                                default(WeaponHitInfo), 1,
-                                false);
+                                default(WeaponHitInfo), 1);
                         }
                     }
                 }
@@ -945,11 +911,11 @@ namespace PracticeMakesPerfect.Framework
             foreach (var missionSpecID in SpecHolder.HolderInstance.MissionSpecMap[pKey])
             {
 
-                    foreach (MissionSpec missionSpec in ManagerInstance.MissionSpecList.Where(x => x.MissionSpecID == missionSpecID && x.contractTypeID == playerUnit.Combat.ActiveContract.ContractTypeValue.Name))
+                    foreach (var missionSpec in ManagerInstance.MissionSpecList.Where(x => x.MissionSpecID == missionSpecID && x.contractTypeID == playerUnit.Combat.ActiveContract.ContractTypeValue.Name))
                     {
-                        foreach (EffectData effectData in missionSpec.effects)
+                        foreach (var effectData in missionSpec.effects)
                         {
-                            string id = ($"missionSpec_{p.Description.Callsign}_{effectData.Description.Id}");
+                            var id = ($"missionSpec_{p.Description.Callsign}_{effectData.Description.Id}");
                             if (missionSpec.AdvTargetInfoUnits.Count < 1)
                             {
                                 if (effectData.targetingData.effectTriggerType == EffectTriggerType.OnWeaponFire &&
@@ -957,8 +923,7 @@ namespace PracticeMakesPerfect.Framework
                                 {
                                     ModInit.modLog.LogMessage($"Applying {id}");
                                     playerUnit.Combat.EffectManager.CreateEffect(effectData, id, -1, playerUnit, playerUnit,
-                                        default(WeaponHitInfo), 1,
-                                        false);
+                                        default(WeaponHitInfo), 1);
                                 }
 
                                 if (effectData.targetingData.effectTriggerType == EffectTriggerType.OnWeaponFire &&
@@ -966,8 +931,7 @@ namespace PracticeMakesPerfect.Framework
                                 {
                                     ModInit.modLog.LogMessage($"Applying {id}");
                                     playerUnit.Combat.EffectManager.CreateEffect(effectData, id, -1, playerUnit, opforUnit,
-                                        default(WeaponHitInfo), 1,
-                                        false);
+                                        default(WeaponHitInfo), 1);
                                 }
 
                                 continue;
@@ -981,8 +945,7 @@ namespace PracticeMakesPerfect.Framework
                             {
                                 ModInit.modLog.LogMessage($"Applying {id}");
                                 playerUnit.Combat.EffectManager.CreateEffect(effectData, id, -1, playerUnit, playerUnit,
-                                    default(WeaponHitInfo), 1,
-                                    false);
+                                    default(WeaponHitInfo), 1);
                             }
 
                             if (missionSpec.AdvTargetInfoUnits.Contains(AdvTargetUnitData.Mech) &&
@@ -992,8 +955,7 @@ namespace PracticeMakesPerfect.Framework
                             {
                                 ModInit.modLog.LogMessage($"Applying {id}");
                                 playerUnit.Combat.EffectManager.CreateEffect(effectData, id, -1, playerUnit, opforUnit,
-                                    default(WeaponHitInfo), 1,
-                                    false);
+                                    default(WeaponHitInfo), 1);
                             }
 
                             if (missionSpec.AdvTargetInfoUnits.Contains(AdvTargetUnitData.Vehicle) &&
@@ -1003,8 +965,7 @@ namespace PracticeMakesPerfect.Framework
                             {
                                 ModInit.modLog.LogMessage($"Applying {id}");
                                 playerUnit.Combat.EffectManager.CreateEffect(effectData, id, -1, playerUnit, playerUnit,
-                                    default(WeaponHitInfo), 1,
-                                    false);
+                                    default(WeaponHitInfo), 1);
                             }
 
                             if (missionSpec.AdvTargetInfoUnits.Contains(AdvTargetUnitData.Vehicle) &&
@@ -1014,8 +975,7 @@ namespace PracticeMakesPerfect.Framework
                             {
                                 ModInit.modLog.LogMessage($"Applying {id}");
                                 playerUnit.Combat.EffectManager.CreateEffect(effectData, id, -1, playerUnit, opforUnit,
-                                    default(WeaponHitInfo), 1,
-                                    false);
+                                    default(WeaponHitInfo), 1);
                             }
 
                             if (missionSpec.AdvTargetInfoUnits.Contains(AdvTargetUnitData.Turret) &&
@@ -1025,8 +985,7 @@ namespace PracticeMakesPerfect.Framework
                             {
                                 ModInit.modLog.LogMessage($"Applying {id}");
                                 playerUnit.Combat.EffectManager.CreateEffect(effectData, id, -1, playerUnit, playerUnit,
-                                    default(WeaponHitInfo), 1,
-                                    false);
+                                    default(WeaponHitInfo), 1);
                             }
 
                             if (missionSpec.AdvTargetInfoUnits.Contains(AdvTargetUnitData.Turret) &&
@@ -1036,8 +995,7 @@ namespace PracticeMakesPerfect.Framework
                             {
                                 ModInit.modLog.LogMessage($"Applying {id}");
                                 playerUnit.Combat.EffectManager.CreateEffect(effectData, id, -1, playerUnit, opforUnit,
-                                    default(WeaponHitInfo), 1,
-                                    false);
+                                    default(WeaponHitInfo), 1);
                             }
 
                         }
@@ -1057,11 +1015,11 @@ namespace PracticeMakesPerfect.Framework
                 foreach (var opForSpecID in SpecHolder.HolderInstance.OpForSpecMap[pKey])
                 {
                     ModInit.modLog.LogMessage($"Found {opForSpecID}");
-                    foreach (OpForSpec op4Spec in ManagerInstance.OpForSpecList.Where(x => x.OpForSpecID == opForSpecID))
+                    foreach (var op4Spec in ManagerInstance.OpForSpecList.Where(x => x.OpForSpecID == opForSpecID))
                     {
-                        foreach (EffectData effectData in op4Spec.effects)
+                        foreach (var effectData in op4Spec.effects)
                         {
-                            string id = ($"op4Spec_{playerunit.GetPilot().Description.Callsign}_{effectData.Description.Id}");
+                            var id = ($"op4Spec_{playerunit.GetPilot().Description.Callsign}_{effectData.Description.Id}");
 
                             if (effectData.targetingData.effectTriggerType == EffectTriggerType.Passive &&
                                 ((effectData.targetingData.effectTargetType == EffectTargetType.AllEnemies && actor.team.IsEnemy(playerTeam)) ||
@@ -1070,8 +1028,7 @@ namespace PracticeMakesPerfect.Framework
                             {
                                 ModInit.modLog.LogMessage($"Applying {id}");
                                 actor.Combat.EffectManager.CreateEffect(effectData, id, -1, playerunit, actor,
-                                    default(WeaponHitInfo), 1,
-                                    false);
+                                    default(WeaponHitInfo), 1);
                             }
                         }
                     }
@@ -1080,13 +1037,13 @@ namespace PracticeMakesPerfect.Framework
                 foreach (var missionSpecID in SpecHolder.HolderInstance.MissionSpecMap[pKey])
                 {
                     ModInit.modLog.LogMessage($"Found {missionSpecID}");
-                    foreach (MissionSpec missionSpec in ManagerInstance.MissionSpecList.Where(x => x.MissionSpecID == missionSpecID && playerunit.Combat.ActiveContract.ContractTypeValue.Name == x.contractTypeID))
+                    foreach (var missionSpec in ManagerInstance.MissionSpecList.Where(x => x.MissionSpecID == missionSpecID && playerunit.Combat.ActiveContract.ContractTypeValue.Name == x.contractTypeID))
                     {
                         if (missionSpec.AdvTargetInfoUnits.Count < 1)
                         {
-                            foreach (EffectData effectData in missionSpec.effects)
+                            foreach (var effectData in missionSpec.effects)
                             {
-                                string id = ($"missionSpec_{playerunit.GetPilot().Description.Callsign}_{effectData.Description.Id}");
+                                var id = ($"missionSpec_{playerunit.GetPilot().Description.Callsign}_{effectData.Description.Id}");
 
                                 if (effectData.targetingData.effectTriggerType == EffectTriggerType.Passive &&
                                     ((effectData.targetingData.effectTargetType == EffectTargetType.AllEnemies && actor.team.IsEnemy(playerTeam)) ||
@@ -1095,8 +1052,7 @@ namespace PracticeMakesPerfect.Framework
                                 {
                                     ModInit.modLog.LogMessage($"Applying {id}");
                                     actor.Combat.EffectManager.CreateEffect(effectData, id, -1, playerunit, actor,
-                                        default(WeaponHitInfo), 1,
-                                        false);
+                                        default(WeaponHitInfo), 1);
                                 }
                             }
                             continue;
@@ -1105,9 +1061,9 @@ namespace PracticeMakesPerfect.Framework
                         if (missionSpec.AdvTargetInfoUnits.Contains(AdvTargetUnitData.Mech) &&
                                  (actor.UnitType & UnitType.Mech) != 0)
                         {
-                            foreach (EffectData effectData in missionSpec.effects)
+                            foreach (var effectData in missionSpec.effects)
                             {
-                                string id =
+                                var id =
                                     ($"missionSpec_{playerunit.GetPilot().Description.Callsign}_{effectData.Description.Id}"
                                     );
 
@@ -1119,17 +1075,16 @@ namespace PracticeMakesPerfect.Framework
                                 {
                                     ModInit.modLog.LogMessage($"Applying {id}");
                                     actor.Combat.EffectManager.CreateEffect(effectData, id, -1, playerunit, actor,
-                                        default(WeaponHitInfo), 1,
-                                        false);
+                                        default(WeaponHitInfo), 1);
                                 }
                             }
                         }
 
                         if (missionSpec.AdvTargetInfoUnits.Contains(AdvTargetUnitData.Vehicle) && (actor.UnitType & UnitType.Vehicle) != 0)
                         {
-                            foreach (EffectData effectData in missionSpec.effects)
+                            foreach (var effectData in missionSpec.effects)
                             {
-                                string id =
+                                var id =
                                     ($"missionSpec_{playerunit.GetPilot().Description.Callsign}_{effectData.Description.Id}"
                                     );
 
@@ -1141,16 +1096,15 @@ namespace PracticeMakesPerfect.Framework
                                 {
                                     ModInit.modLog.LogMessage($"Applying {id}");
                                     actor.Combat.EffectManager.CreateEffect(effectData, id, -1, playerunit, actor,
-                                        default(WeaponHitInfo), 1,
-                                        false);
+                                        default(WeaponHitInfo), 1);
                                 }
                             }
                         }
                         if (missionSpec.AdvTargetInfoUnits.Contains(AdvTargetUnitData.Turret) && (actor.UnitType & UnitType.Turret) != 0)
                         {
-                            foreach (EffectData effectData in missionSpec.effects)
+                            foreach (var effectData in missionSpec.effects)
                             {
-                                string id =
+                                var id =
                                     ($"missionSpec_{playerunit.GetPilot().Description.Callsign}_{effectData.Description.Id}"
                                     );
 
@@ -1162,8 +1116,7 @@ namespace PracticeMakesPerfect.Framework
                                 {
                                     ModInit.modLog.LogMessage($"Applying {id}");
                                     actor.Combat.EffectManager.CreateEffect(effectData, id, -1, playerunit, actor,
-                                        default(WeaponHitInfo), 1,
-                                        false);
+                                        default(WeaponHitInfo), 1);
                                 }
                             }
                         }

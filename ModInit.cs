@@ -12,7 +12,7 @@ namespace PracticeMakesPerfect
     public static class ModInit
     {
         internal static Logger modLog;
-        internal static string modDir;
+        private static string modDir;
 
 
         internal static Settings modSettings;
@@ -23,16 +23,16 @@ namespace PracticeMakesPerfect
             modLog = new Logger(modDir, "bigPMPin", true);
             try
             {
-                using (StreamReader reader = new StreamReader($"{modDir}/settings.json"))
+                using (var reader = new StreamReader($"{modDir}/settings.json"))
                 {
-                    string jsData = reader.ReadToEnd();
+                    var jsData = reader.ReadToEnd();
                     ModInit.modSettings = JsonConvert.DeserializeObject<Settings>(jsData);
                 }
 
             }
             catch (Exception ex)
             {
-                ModInit.modLog.LogException(ex);
+                Logger.LogException(ex);
                 ModInit.modSettings = new Settings();
             }
             //HarmonyInstance.DEBUG = true;

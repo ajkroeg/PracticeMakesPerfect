@@ -4,54 +4,54 @@ using System.Linq;
 
 namespace PracticeMakesPerfect.Framework
 {
-    class Descriptions
+    static class Descriptions
     {
-        internal static string getMissionSpecializationDescription(string contractID)
+        internal static string GetMissionSpecializationDescription(string contractId)
         {
             var rtrn = "";
-            if (SpecManager.ManagerInstance.MissionSpecList.Any(x=>x.contractTypeID == contractID))
+            if (SpecManager.ManagerInstance.MissionSpecList.Any(x=>x.contractTypeID == contractId))
             {
                 var list = new List<MissionSpec>(
-                    SpecManager.ManagerInstance.MissionSpecList.Where(x => x.contractTypeID == contractID)).OrderBy(x => x.missionsRequired);
-                var title = $"\n\n<b>Available Mission Specializations</b>\n\n";
+                    SpecManager.ManagerInstance.MissionSpecList.Where(x => x.contractTypeID == contractId)).OrderBy(x => x.missionsRequired);
+                var title = "\n\n<b>Available Mission Specializations</b>\n\n";
                 foreach (var missionSpec in list)
                 {
                     var description =
                         $"{missionSpec.MissionSpecName} [{missionSpec.missionsRequired}]: {missionSpec.description}\n\n";
                     rtrn += description;
                 }
-                return title += rtrn;
+                return title + rtrn;
             }
             return null;
         }
 
-        internal static string getOpForSpecializationDescription(string factionID)
+        internal static string GetOpForSpecializationDescription(string factionId)
         {
             var rtrn = "";
-            if (SpecManager.ManagerInstance.OpForSpecList.Any(x => x.factionID == factionID))
+            if (SpecManager.ManagerInstance.OpForSpecList.Any(x => x.factionID == factionId))
             {
                 var list = new List<OpForSpec>(
-                    SpecManager.ManagerInstance.OpForSpecList.Where(x => x.factionID == factionID)).OrderBy(x => x.killsRequired);
-                var title = $"\n\n<b>Available OpFor Specializations</b>\n\n";
+                    SpecManager.ManagerInstance.OpForSpecList.Where(x => x.factionID == factionId)).OrderBy(x => x.killsRequired);
+                var title = "\n\n<b>Available OpFor Specializations</b>\n\n";
                 foreach (var opforSpec in list)
                 {
                     var description =
                         $"{opforSpec.OpForSpecName} [{opforSpec.killsRequired}]: {opforSpec.description}\n\n";
                     rtrn += description;
                 }
-                return title += rtrn;
+                return title + rtrn;
             }
             return null;
         }
 
-        internal static string getPilotSpecializationsOrProgress(Pilot pilot)
+        internal static string GetPilotSpecializationsOrProgress(Pilot pilot)
         {
             var pilotID = pilot.FetchGUID();
             var rtrn = "";
 
             if (pilot.IsPlayerCharacter)
             {
-                rtrn+= $"\n<b>Active StratCom</b>\n\n";
+                rtrn+= "\n<b>Active StratCom</b>\n\n";
 
                 var stratcoms = SpecManager.ManagerInstance.StratComs;
                 foreach (var stratCom in stratcoms.Where(x=>x.StratComID == SpecHolder.HolderInstance.activeStratCom))
@@ -64,7 +64,7 @@ namespace PracticeMakesPerfect.Framework
 
             if (SpecHolder.HolderInstance.MissionSpecMap[pilotID].Count > 0)
             {
-                rtrn+= $"\n<b>Mission Specializations</b>\n\n";
+                rtrn+= "\n<b>Mission Specializations</b>\n\n";
 
                 var mspecsOrdered = SpecManager.ManagerInstance.MissionSpecList.Where(x =>
                     SpecHolder.HolderInstance.MissionSpecMap[pilotID].Any(y => y == x.MissionSpecID)).OrderBy(c=>c.contractTypeID).ThenBy(m=>m.missionsRequired);
@@ -78,7 +78,7 @@ namespace PracticeMakesPerfect.Framework
 
             if (SpecHolder.HolderInstance.OpForSpecMap[pilotID].Count > 0)
             {
-                rtrn += $"\n<b>OpFor Specializations</b>\n\n";
+                rtrn += "\n<b>OpFor Specializations</b>\n\n";
 
                 var opspecsOrdered = SpecManager.ManagerInstance.OpForSpecList.Where(x =>
                     SpecHolder.HolderInstance.OpForSpecMap[pilotID].Any(y => y == x.OpForSpecID)).OrderBy(c => c.factionID).ThenBy(m => m.killsRequired);
@@ -90,13 +90,13 @@ namespace PracticeMakesPerfect.Framework
                 }
             }
 
-            rtrn += $"\n<b>Mission Stats</b>\n\n";
+            rtrn += "\n<b>Mission Stats</b>\n\n";
             foreach (var stat in SpecHolder.HolderInstance.MissionsTracker[pilotID])
             {
                 rtrn += $"<b>{stat.Key}:</b> {stat.Value} complete.\n";
             }
 
-            rtrn += $"\n<b>Opfor Stats</b>\n\n";
+            rtrn += "\n<b>Opfor Stats</b>\n\n";
             foreach (var stat in SpecHolder.HolderInstance.OpForKillsTracker[pilotID])
             {
                 rtrn += $"<b>{stat.Key}:</b> {stat.Value} kills.\n";

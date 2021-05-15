@@ -12,7 +12,7 @@ using UnityEngine;
 
 namespace PracticeMakesPerfect.Patches
 {
-    class SaveAndStatePatches
+    public class SaveAndStatePatches
     {
         [HarmonyPatch(typeof(SGCharacterCreationCareerBackgroundSelectionPanel), "Done")]
         public static class SGCharacterCreationCareerBackgroundSelectionPanel_Done_Patch
@@ -25,12 +25,10 @@ namespace PracticeMakesPerfect.Patches
 
                 SpecHolder.HolderInstance.AddToMaps(sim.Commander);
 
-                foreach (Pilot p in sim.PilotRoster)
+                foreach (var p in sim.PilotRoster)
                 {
                     SpecHolder.HolderInstance.AddToMaps(p);
                 }
-
-                return;
             }
         }
 
@@ -46,7 +44,7 @@ namespace PracticeMakesPerfect.Patches
 
                 SpecHolder.HolderInstance.AddToMaps(sim.Commander);
                 curPilots.Add(sim.Commander.FetchGUID());
-                foreach (Pilot p in sim.PilotRoster)
+                foreach (var p in sim.PilotRoster)
                 {
                     SpecHolder.HolderInstance.AddToMaps(p);
                     curPilots.Add(p.FetchGUID());
@@ -84,7 +82,7 @@ namespace PracticeMakesPerfect.Patches
                 SpecHolder.HolderInstance.AddToMaps(sim.Commander);
                 curPilots.Add(sim.Commander.FetchGUID());
 
-                foreach (Pilot p in sim.PilotRoster)
+                foreach (var p in sim.PilotRoster)
                 {
                     SpecHolder.HolderInstance.AddToMaps(p);
                     curPilots.Add(p.FetchGUID());
@@ -135,7 +133,7 @@ namespace PracticeMakesPerfect.Patches
                     actor.StatCollection.AddStatistic<bool>(ModInit.modSettings.dummyOpForStat, false);
                     if (!playerUnits.Any(x => x.GetPilot().IsPlayerCharacter))
                     {
-                        SpecManager.ManagerInstance.ApplyStratComs(actor);
+                        SpecManager.ApplyStratComs(actor);
                     }
                     var p = actor.GetPilot();
                     if (!p.pilotDef.PilotTags.Any(x => x.StartsWith(spGUID)))
@@ -176,9 +174,9 @@ namespace PracticeMakesPerfect.Patches
         }
 
         [HarmonyPatch(typeof(LoadTransitioning), "BeginCombatRestart", new Type[] {typeof(Contract)})]
-        static class LoadTransitioning_BeginCombatRestart_Patch
+        public static class LoadTransitioning_BeginCombatRestart_Patch
         {
-            static void Prefix(Contract __instance)
+            public static void Prefix(Contract __instance)
             {
                 SpecHolder.HolderInstance.OpForKillsTEMPTracker = new Dictionary<string, Dictionary<string, int>>();
                 ModInit.modLog.LogMessage(
@@ -187,10 +185,10 @@ namespace PracticeMakesPerfect.Patches
         }
 
         [HarmonyPatch(typeof(Contract), "CompleteContract", new Type[] {typeof(MissionResult), typeof(bool)})]
-        static class Contract_CompleteContract_Patch
+        public static class Contract_CompleteContract_Patch
         {
             [HarmonyPriority(Priority.First)]
-            static void Postfix(Contract __instance, MissionResult result, bool isGoodFaithEffort)
+            public static void Postfix(Contract __instance, MissionResult result, bool isGoodFaithEffort)
             {
                 SpecHolder.HolderInstance.emplRep = __instance.EmployerReputationResults;
                 var employer = __instance.Override.employerTeam.FactionDef.FactionValue.Name;

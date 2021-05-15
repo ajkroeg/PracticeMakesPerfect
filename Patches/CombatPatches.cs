@@ -6,10 +6,11 @@ using PracticeMakesPerfect.Framework;
 using BattleTech.Designed;
 using BattleTech.UI;
 using UnityEngine;
+using Logger = PracticeMakesPerfect.Framework.Logger;
 
 namespace PracticeMakesPerfect.Patches
 {
-    class CombatPatches
+    public class CombatPatches
     {
         
         [HarmonyPatch(typeof(Turret), "FlagForDeath",
@@ -20,13 +21,13 @@ namespace PracticeMakesPerfect.Patches
             [HarmonyBefore(new string[] { "us.frostraptor.ConcreteJungle" })]
 
             public static void Prefix(Turret __instance, string reason, DeathMethod deathMethod,
-                DamageType damageType, int location, int stackItemID, string attackerID, bool isSilent)
+                DamageType damageType, int location, int stackItemId, string attackerId, bool isSilent)
             {
                 if (__instance.IsFlaggedForDeath)  return;
-                AbstractActor attacker = __instance.Combat.FindActorByGUID(attackerID);
+                var attacker = __instance.Combat.FindActorByGUID(attackerId);
                 if (attacker != null && attacker != __instance && attacker.team.IsLocalPlayer)
                 {
-                    Pilot p = attacker.GetPilot();
+                    var p = attacker.GetPilot();
                     if (p != null)
                     {
                         
@@ -60,7 +61,7 @@ namespace PracticeMakesPerfect.Patches
         public static class AttackDirectorAttackSequence_OnAttackSequenceFire
         {
             [HarmonyPriority(Priority.First)]
-            public static void Prefix(AttackDirector __instance, int stackItemUID, AbstractActor attacker, ICombatant target, Vector3 attackPosition, Quaternion attackRotation, int attackSequenceIdx, List<Weapon> selectedWeapons, MeleeAttackType meleeAttackType, int calledShotLocation, bool isMoraleAttack)
+            public static void Prefix(AttackDirector __instance, int stackItemUid, AbstractActor attacker, ICombatant target, Vector3 attackPosition, Quaternion attackRotation, int attackSequenceIdx, List<Weapon> selectedWeapons, MeleeAttackType meleeAttackType, int calledShotLocation, bool isMoraleAttack)
             {
 
                 try
@@ -155,120 +156,7 @@ namespace PracticeMakesPerfect.Patches
                 }
                 catch (Exception ex)
                 {
-                    ModInit.modLog.LogException(ex);
-                }
-            }
-        }
-
-
-
-        [HarmonyPatch(typeof(CombatHUDWeaponPanel), "RefreshDisplayedWeapons", new Type[] {typeof(bool), typeof(bool)})]
-
-        public static class CombatHUDWeaponPanel_RefreshDisplayedWeapons_patch
-        {
-            public static bool Prepare()
-            {
-                return false;
-            }
-            [HarmonyPriority(Priority.First)]
-            public static void Prefix(CombatHUDWeaponPanel __instance, AbstractActor ___displayedActor, bool consideringJump = false, bool useCOILPathingPreview = true)
-            {
-                try
-                {
-                    var target = Traverse.Create(__instance).Property("target").GetValue<ICombatant>();
-                    if (___displayedActor == null || target == null) return;
-                    var attacker = ___displayedActor;
-
-
-                    AbstractActor playerUnit = null;
-                    AbstractActor opforUnit = target as AbstractActor;
-                    if (___displayedActor.team.IsLocalPlayer)
-                    {
-                        playerUnit = ___displayedActor;
-                    //    opforUnit = target.GetPilot().ParentActor;
-                        if ((target.UnitType & UnitType.Building) != 0)
-                        {
-                            SpecManager.ManagerInstance.GatherAndApplyActiveBuildingSpecEffects(playerUnit, target);
-                            return;
-                        }
-
-
-                        foreach (var encounterObjectGameLogic in playerUnit.Combat.EncounterLayerData.encounterObjectGameLogicList)
-                        {
-                            if (encounterObjectGameLogic as DefendLanceWithEscapeChunkGameLogic != null) 
-                            {
-                                var encounterAsChunk = encounterObjectGameLogic as DefendLanceWithEscapeChunkGameLogic;
-                                var encounterAsOGL = encounterAsChunk.ensureUnitsSurviveObjective.encounterObject;
-                                if (Traverse.Create(encounterAsOGL).Property("IsContractObjectivePrimary").GetValue<bool>())
-                                {
-                                    ModInit.modLog.LogMessage($"Checking for primary target unit.");
-                                    if (encounterAsOGL.GetTargetUnits().Contains(target))
-                                    {
-                                        ModInit.modLog.LogMessage($"Primary target found.");
-                                        SpecManager.ManagerInstance.GatherAndApplyActivePrimarySpecEffects(playerUnit,
-                                            target);
-                                        return;
-                                    }
-                                }
-                            }
-                            else if (encounterObjectGameLogic as DefendXUnitsChunkGameLogic != null)
-                            {
-                                var encounterAsChunk = encounterObjectGameLogic as DefendXUnitsChunkGameLogic;
-                                var encounterAsOGL = encounterAsChunk.defendXUnitsObjective.encounterObject;
-                                if (Traverse.Create(encounterAsOGL).Property("IsContractObjectivePrimary").GetValue<bool>())
-                                {
-                                    ModInit.modLog.LogMessage($"Checking for primary target unit.");
-                                    if (encounterAsOGL.GetTargetUnits().Contains(target))
-                                    {
-                                        ModInit.modLog.LogMessage($"Primary target found.");
-                                        SpecManager.ManagerInstance.GatherAndApplyActivePrimarySpecEffects(playerUnit,
-                                            target);
-                                        return;
-                                    }
-                                }
-                            }
-                            else if (encounterObjectGameLogic as DestroyXUnitsChunkGameLogic != null)
-                            {
-                                var encounterAsChunk = encounterObjectGameLogic as DestroyXUnitsChunkGameLogic;
-                                var encounterAsOGL = encounterAsChunk.destroyXUnitsObjective.encounterObject;
-                                if (Traverse.Create(encounterAsOGL).Property("IsContractObjectivePrimary").GetValue<bool>())
-                                {
-                                    ModInit.modLog.LogMessage($"Checking for primary target unit.");
-                                    if (encounterAsOGL.GetTargetUnits().Contains(target))
-                                    {
-                                        ModInit.modLog.LogMessage($"Primary target found.");
-                                        SpecManager.ManagerInstance.GatherAndApplyActivePrimarySpecEffects(playerUnit,
-                                            target);
-                                        return;
-                                    }
-                                }
-                            }
-                        }
-                        
-
-                    }
-                    else if (target.team.IsLocalPlayer)
-                    {
-                        playerUnit = target.GetPilot().ParentActor;
-                        opforUnit = ___displayedActor;
-//                        ModInit.modLog.LogMessage($"Attacker is opfor {attacker.DisplayName}, target is player unit {playerUnit.GetPilot().Callsign}.");
-                    }
-                    else
-                    {
-                        ModInit.modLog.LogMessage($"Player not involved here.");
-                        return;
-                    }
-
-                    SpecManager.ManagerInstance.GatherAndApplyActiveSpecEffects(playerUnit, opforUnit);
-
-                    //var HUD = Traverse.Create(__instance).Property("HUD").GetValue<CombatHUD>();
-                    //Traverse.Create(HUD).Method("updateHUDElements", ___displayedActor);
-
-
-                }
-                catch (Exception ex)
-                {
-                    ModInit.modLog.LogException(ex);
+                    Logger.LogException(ex);
                 }
             }
         }
