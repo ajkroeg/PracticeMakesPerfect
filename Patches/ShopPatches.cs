@@ -16,7 +16,7 @@ namespace PracticeMakesPerfect.Patches
         [HarmonyPatch(typeof(SimGameState), "GetReputationShopAdjustment", new Type[] {typeof(FactionValue)})]
         public static class SGS_GetReputationShopAdjustmentFV_Patch
         {
-            public static void Postfix(SimGameState __instance, ref float result, FactionValue faction)
+            public static void Postfix(SimGameState __instance, ref float __result, FactionValue faction)
             {
                 if (GlobalVars.sim == null) return;
                 var curPilots = new List<string> {GlobalVars.sim.Commander.FetchGUID()};
@@ -34,7 +34,7 @@ namespace PracticeMakesPerfect.Patches
                 }
 
                 ModInit.modLog.LogMessage($"Total discount from specs: {discount}");
-                result += discount;
+                __result += discount;
             }
         }
 
@@ -44,7 +44,7 @@ namespace PracticeMakesPerfect.Patches
         public static class SH_Shop_Screen_AddShopItemToWidget
         {
             [HarmonyPriority(Priority.First)]
-            public static void Prefix(SG_Shop_Screen __instance, StarSystem theSystem, ShopDefItem itemDef, Shop shop, //removed ref from shopdefitem?
+            public static void Prefix(SG_Shop_Screen __instance, StarSystem ___theSystem, ShopDefItem itemDef, Shop shop, //removed ref from shopdefitem?
                 IMechLabDropTarget targetWidget, bool isSelling = false, bool isBulkAdd = false)
             {
                 if (GlobalVars.sim == null) return;
@@ -61,13 +61,13 @@ namespace PracticeMakesPerfect.Patches
                 if (shop.ThisShopType == Shop.ShopType.BlackMarket)
                 {
                     shopOwner = FactionEnumeration.GetAuriganPiratesFactionValue().Name;
-                    ModInit.modLog.LogMessage($"System: {theSystem.Name}. shopOwner: {shopOwner}");
+                    ModInit.modLog.LogMessage($"System: {___theSystem.Name}. shopOwner: {shopOwner}");
                 }
                 else
                 {
                     shopOwner = sim.CurSystem.Def.OwnerValue.Name;
                     //shopOwner = Traverse.Create(shop).Field("system").GetValue<StarSystem>().Def.OwnerValue.Name;
-                    ModInit.modLog.LogMessage($"System: {theSystem.Name}. shopOwner: {shopOwner}");
+                    ModInit.modLog.LogMessage($"System: {___theSystem.Name}. shopOwner: {shopOwner}");
                 }
 
                 foreach (var pKey in curPilots)
@@ -99,7 +99,7 @@ namespace PracticeMakesPerfect.Patches
             new Type[] {typeof(FactionValue)})]
         public static class SG_Stores_MiniFactionWidget_FillInData_Patch
         {
-            public static void Postfix(SG_Stores_MiniFactionWidget __instance, FactionValue theFaction, FactionValue owningFactionValue, LocalizableText reputationBonusText)
+            public static void Postfix(SG_Stores_MiniFactionWidget __instance, FactionValue theFaction, FactionValue ___owningFactionValue, LocalizableText ___ReputationBonusText)
             {
                 if (GlobalVars.sim == null) return;
                 var sellBonus = 0f;
@@ -120,9 +120,9 @@ namespace PracticeMakesPerfect.Patches
                         {
                             var opSpec =
                                 SpecManager.ManagerInstance.OpForSpecList.FirstOrDefault(x => x.OpForSpecID == spec);
-                            if (opSpec != null && opSpec.storeBonus.ContainsKey(owningFactionValue.Name))
+                            if (opSpec != null && opSpec.storeBonus.ContainsKey(___owningFactionValue.Name))
                             {
-                                sellBonus += opSpec.storeBonus[owningFactionValue.Name];
+                                sellBonus += opSpec.storeBonus[___owningFactionValue.Name];
                                 ModInit.modLog.LogMessage($"Current sell multiplier from specs: {sellBonus}");
                             }
                         }
@@ -130,7 +130,7 @@ namespace PracticeMakesPerfect.Patches
                 }
 
                 if (sellBonus == 0f) return;
-                reputationBonusText.AppendTextAndRefresh(", {0}% Sell Bonus", new object[]
+                ___ReputationBonusText.AppendTextAndRefresh(", {0}% Sell Bonus", new object[]
                     {
                         Mathf.RoundToInt(sellBonus * 100f)
                     });

@@ -18,13 +18,11 @@ namespace PracticeMakesPerfect.Patches
 
         public static class SGFactionReputationWidget_Init_Patch
         {
-            public static void Postfix(SGFactionReputationWidget __instance, SimGameState sim, FactionValue faction,
-                HBSTooltip tooltipReference, FactionDef currentFactionDef, UnityAction refreshCallback = null,
-                bool bIsAar = false)
+            public static void Postfix(SGFactionReputationWidget __instance, SimGameState sim, FactionValue faction, FactionDef ___CurrentFactionDef)
             {
                 var specDesc = Descriptions.GetOpForSpecializationDescription(faction?.Name);
 
-                var fdesc = currentFactionDef?.Description;
+                var fdesc = ___CurrentFactionDef?.Description;
                 if (!string.IsNullOrEmpty(specDesc))
                 {
                     if (!fdesc.Contains(specDesc))
@@ -33,7 +31,7 @@ namespace PracticeMakesPerfect.Patches
                     }
                 }
 
-                Traverse.Create(currentFactionDef).Property("Description").SetValue(fdesc);
+                Traverse.Create(___CurrentFactionDef).Property("Description").SetValue(fdesc);
 
             }
         }
@@ -44,7 +42,7 @@ namespace PracticeMakesPerfect.Patches
         public static class SGContractsWidget_onContractSelected_Patch
         {
             public static void Postfix(SGContractsWidget __instance, Contract contract,
-                HBSTooltip contractTypeTooltip, Action onNegotiated = null)
+                HBSTooltip ___ContractTypeTooltip)
             {
                 string arg;
                 if (contract.IsPriorityContract)
@@ -79,7 +77,7 @@ namespace PracticeMakesPerfect.Patches
                         }
                     }
 
-                    contractTypeTooltip.SetDefaultStateData(TooltipUtilities.GetStateDataFromObject(def2));
+                    ___ContractTypeTooltip.SetDefaultStateData(TooltipUtilities.GetStateDataFromObject(def2));
                 }
             }
         }
@@ -90,13 +88,12 @@ namespace PracticeMakesPerfect.Patches
 
         public static class SGBarracksDossierPanel_SetPilot_Patch
         {
-            public static void Postfix(SGBarracksDossierPanel __instance, Pilot p, SGBarracksMWDetailPanel details,
-                bool isDissmissable, bool isThumb, Image portrait)
+            public static void Postfix(SGBarracksDossierPanel __instance, Pilot p, Image ___portrait)
             {
                 if (p == null) return;
 
-                var tooltip = portrait.gameObject.GetComponent<HBSTooltip>() ??
-                              portrait.gameObject.AddComponent<HBSTooltip>();
+                var tooltip = ___portrait.gameObject.GetComponent<HBSTooltip>() ??
+                              ___portrait.gameObject.AddComponent<HBSTooltip>();
 
                 var desc = tooltip.GetText();
                 if (String.IsNullOrEmpty(desc))
@@ -116,14 +113,14 @@ namespace PracticeMakesPerfect.Patches
 
         public static class SGBarracksMWDetailPanel_OnServiceClicked
         {
-            public static bool Prefix(SGBarracksMWDetailPanel __instance, Pilot curPilot, SGBarracksDossierPanel dossier)
+            public static bool Prefix(SGBarracksMWDetailPanel __instance, Pilot ___curPilot, SGBarracksDossierPanel ___dossier)
             {
                 var background = UIManager.Instance.UILookAndColorConstants.PopupBackfill;
 
                 var hk = Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl);
                 if (!hk) return true;
                 var resetSpecs = true;
-                if (curPilot.IsPlayerCharacter && SpecManager.ManagerInstance.StratComs.Count > 1)
+                if (___curPilot.IsPlayerCharacter && SpecManager.ManagerInstance.StratComs.Count > 1)
                 {
                     GenericPopupBuilder
                         .Create("Change Stratcoms or Reset Specs?",
@@ -145,7 +142,7 @@ namespace PracticeMakesPerfect.Patches
                             {
                                 popup.AddButton(stratCom.StratComName, () =>
                                 {
-                                    SpecManager.ManagerInstance.SetStratCom(stratCom.StratComID, curPilot, dossier, __instance);
+                                    SpecManager.ManagerInstance.SetStratCom(stratCom.StratComID, ___curPilot, ___dossier, __instance);
                                     resetSpecs = false;
                                 });
                             }
@@ -173,10 +170,10 @@ namespace PracticeMakesPerfect.Patches
                                         "Are you sure you want to reset all specializations and progress for this pilot?")
                                     .AddButton("Cancel")
                                     .AddButton("Reset Mission Specs",
-                                        () => SpecManager.ManagerInstance.ResetMissionSpecs(curPilot, dossier,
+                                        () => SpecManager.ManagerInstance.ResetMissionSpecs(___curPilot, ___dossier,
                                             __instance))
                                     .AddButton("Reset Opfor Specs",
-                                        () => SpecManager.ManagerInstance.ResetOpForSpecs(curPilot, dossier,
+                                        () => SpecManager.ManagerInstance.ResetOpForSpecs(___curPilot, ___dossier,
                                             __instance))
                                     .CancelOnEscape()
                                     .AddFader(background)
@@ -206,8 +203,8 @@ namespace PracticeMakesPerfect.Patches
                     GenericPopupBuilder
                         .Create("Reset Specializations", "Are you sure you want to reset all specializations and progress for this pilot?")
                         .AddButton("Cancel")
-                        .AddButton("Reset Mission Specs", () => SpecManager.ManagerInstance.ResetMissionSpecs(curPilot, dossier, __instance))
-                        .AddButton("Reset Opfor Specs", () => SpecManager.ManagerInstance.ResetOpForSpecs(curPilot, dossier, __instance))
+                        .AddButton("Reset Mission Specs", () => SpecManager.ManagerInstance.ResetMissionSpecs(___curPilot, ___dossier, __instance))
+                        .AddButton("Reset Opfor Specs", () => SpecManager.ManagerInstance.ResetOpForSpecs(___curPilot, ___dossier, __instance))
                         .CancelOnEscape()
                         .AddFader(background)
                         .Render();

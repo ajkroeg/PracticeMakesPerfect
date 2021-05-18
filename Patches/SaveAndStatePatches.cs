@@ -103,8 +103,7 @@ namespace PracticeMakesPerfect.Patches
             new Type[] {typeof(PilotDef), typeof(bool), typeof(bool)})]
         public static class SGS_AddPilotToRoster_Patch
         {
-            public static void Postfix(SimGameState __instance, PilotDef def, bool updatePilotDiscardPile = false,
-                bool initialHiringDontSpawnMessage = false)
+            public static void Postfix(SimGameState __instance, PilotDef def)
             {
                 var p = __instance.PilotRoster.FirstOrDefault(x => x.pilotDef.Description.Id == def.Description.Id);
                 SpecHolder.HolderInstance.AddToMaps(p);

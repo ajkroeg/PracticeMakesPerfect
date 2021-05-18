@@ -63,7 +63,7 @@ namespace PracticeMakesPerfect.Framework
             this.opforDefault = opforDefault;
         }
     }
-    public abstract class StratCom
+    public class StratCom
     {
         public string StratComID = "";
         public string StratComName = "";

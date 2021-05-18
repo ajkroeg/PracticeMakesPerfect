@@ -20,11 +20,10 @@ namespace PracticeMakesPerfect.Patches
         {
             [HarmonyBefore(new string[] { "us.frostraptor.ConcreteJungle" })]
 
-            public static void Prefix(Turret __instance, string reason, DeathMethod deathMethod,
-                DamageType damageType, int location, int stackItemId, string attackerId, bool isSilent)
+            public static void Prefix(Turret __instance, string attackerID)
             {
                 if (__instance.IsFlaggedForDeath)  return;
-                var attacker = __instance.Combat.FindActorByGUID(attackerId);
+                var attacker = __instance.Combat.FindActorByGUID(attackerID);
                 if (attacker != null && attacker != __instance && attacker.team.IsLocalPlayer)
                 {
                     var p = attacker.GetPilot();
@@ -61,7 +60,7 @@ namespace PracticeMakesPerfect.Patches
         public static class AttackDirectorAttackSequence_OnAttackSequenceFire
         {
             [HarmonyPriority(Priority.First)]
-            public static void Prefix(AttackDirector __instance, int stackItemUid, AbstractActor attacker, ICombatant target, Vector3 attackPosition, Quaternion attackRotation, int attackSequenceIdx, List<Weapon> selectedWeapons, MeleeAttackType meleeAttackType, int calledShotLocation, bool isMoraleAttack)
+            public static void Prefix(AttackDirector __instance, AbstractActor attacker, ICombatant target)
             {
 
                 try
