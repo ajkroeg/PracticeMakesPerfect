@@ -26,7 +26,7 @@ namespace PracticeMakesPerfect.Framework
         {
             if (enableLogging)
             {
-                var ts = DateTime.UtcNow.ToString("s", System.Globalization.CultureInfo.InvariantCulture);
+                var ts = DateTime.Now.ToString("s", System.Globalization.CultureInfo.InvariantCulture);
                 logStreamWriter.WriteLine($"INFO: {ts} - {message}");
             }
         }
@@ -34,13 +34,13 @@ namespace PracticeMakesPerfect.Framework
 
         public static void LogError(string message)
         {
-            var ts = DateTime.UtcNow.ToString("s", System.Globalization.CultureInfo.InvariantCulture);
+            var ts = DateTime.Now.ToString("s", System.Globalization.CultureInfo.InvariantCulture);
             logStreamWriter.WriteLine($"ERROR: {ts} - {message}");
         }
 
         public static void LogException(Exception exception)
         {
-            var ts = DateTime.UtcNow.ToString("s", System.Globalization.CultureInfo.InvariantCulture);
+            var ts = DateTime.Now.ToString("s", System.Globalization.CultureInfo.InvariantCulture);
             logStreamWriter.WriteLine($"CRITICAL: {ts} - {exception}");
         }
     }
