@@ -991,6 +991,8 @@ namespace PracticeMakesPerfect.Framework
             foreach (var playerunit in playerUnits)
             {
                 var pKey = playerunit.GetPilot().FetchGUID();
+                if (pKey == "NOTAPILOT") continue;
+
                 ModInit.modLog.LogMessage($"Checking {playerunit.GetPilot().Callsign} for effects to apply");
                 foreach (var opForSpecID in SpecHolder.HolderInstance.OpForSpecMap[pKey])
                 {
