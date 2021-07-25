@@ -17,12 +17,11 @@ namespace PracticeMakesPerfect.Patches
             new Type[] {typeof(SimGameState), typeof(Contract)})]
         public static class AAR_FactionReputationResultWidget_InitializeData_Patch
         {
-            public static void Postfix(AAR_FactionReputationResultWidget __instance,
-                List<SGReputationWidget_Simple> ___FactionWidgets, RectTransform ___WidgetListAnchor,
-                Contract ___contract)
+            public static void Postfix(AAR_FactionReputationResultWidget __instance, SimGameState theSimState, Contract theContract,
+                List<SGReputationWidget_Simple> ___FactionWidgets, RectTransform ___WidgetListAnchor)
             {
-                var employer = ___contract.Override.employerTeam.FactionDef.FactionValue.Name;
-                var target = ___contract.Override.targetTeam.FactionDef.FactionValue.Name;
+                var employer = theContract.Override.employerTeam.FactionDef.FactionValue.Name;
+                var target = theContract.Override.targetTeam.FactionDef.FactionValue.Name;
 
                 var curPilots = new List<string>();
                 var playerUnits = UnityGameInstance.BattleTechGame.Combat.AllActors.Where(x => x.team.IsLocalPlayer);
@@ -82,29 +81,29 @@ namespace PracticeMakesPerfect.Patches
                         .FirstOrDefault(x => x.Value.FactionValue.Name == repMult.Key).Value;
 
                     int repChange;
-                    if (___contract.Override.employerTeam.FactionDef.FactionValue.DoesGainReputation)
+                    if (theContract.Override.employerTeam.FactionDef.FactionValue.DoesGainReputation)
                     {
                         repChange = Mathf.RoundToInt( SpecHolder.HolderInstance.emplRep *
                                                          repMultDictionary[faction.FactionValue.Name]);
-                        ModInit.modLog.LogMessage($"Employer {___contract.Override.employerTeam.FactionDef.FactionValue.Name} is reputation gainer: base employer change {SpecHolder.HolderInstance.emplRep}");
+                        ModInit.modLog.LogMessage($"Employer {theContract.Override.employerTeam.FactionDef.FactionValue.Name} is reputation gainer: base employer change {SpecHolder.HolderInstance.emplRep}");
                     }
                     else
                     {
-                        repChange = Math.Abs(Mathf.RoundToInt(___contract.TargetReputationResults *
+                        repChange = Math.Abs(Mathf.RoundToInt(theContract.TargetReputationResults *
                                                               repMultDictionary[faction.FactionValue.Name]));
-                        ModInit.modLog.LogMessage($"Employer {___contract.Override.employerTeam.FactionDef.FactionValue.Name} is NOT reputation gainer: base target rep change {___contract.TargetReputationResults}");
+                        ModInit.modLog.LogMessage($"Employer {theContract.Override.employerTeam.FactionDef.FactionValue.Name} is NOT reputation gainer: base target rep change {theContract.TargetReputationResults}");
 
 
                         if (repChange <= 1)
                         {
-                            repChange = ___contract.Difficulty + 2; //this is some hacky ugly bullshit for stupid edgecase where player is working for local gov against someone with fully negatived rep.
-                            ModInit.modLog.LogMessage($"{faction.Name} rep change would have been <=1, changing to contract difficulty +2: {___contract.Difficulty + 2}");
+                            repChange = theContract.Difficulty + 2; //this is some hacky ugly bullshit for stupid edgecase where player is working for local gov against someone with fully negatived rep.
+                            ModInit.modLog.LogMessage($"{faction.Name} rep change would have been <=1, changing to contract difficulty +2: {theContract.Difficulty + 2}");
                         }
                     }
 
                     __instance.SetWidgetData(idx, faction.FactionValue, repChange, true);
 
-                    sim.SetReputation(faction.FactionValue, repChange);
+                    theSimState.SetReputation(faction.FactionValue, repChange);
                     ModInit.modLog.LogMessage($"Reputation with {faction.FactionValue.Name} changed by {repChange}");
 
                     idx += 1;
