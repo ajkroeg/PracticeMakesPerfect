@@ -9,6 +9,14 @@ using static PracticeMakesPerfect.Framework.GlobalVars;
 
 namespace PracticeMakesPerfect.Framework
 {
+    public static class CombatantExtensions
+    {
+        public static bool IsCustomUnitVehicle(this ICombatant combatant)
+        {
+            if (!combatant.StatCollection.ContainsStatistic("CUFakeVehicle")) return false;
+            return combatant.StatCollection.GetValue<bool>("CUFakeVehicle");
+        }
+    }
     internal static class PilotExtensions
     {
         internal static string FetchGUID(this Pilot pilot)
@@ -459,7 +467,7 @@ namespace PracticeMakesPerfect.Framework
 
                 if (missionSpec.AdvTargetInfoUnits.Contains(AdvTargetUnitData.Vehicle))
                 {
-                    foreach (var vehicle in actor.Combat.AllActors.Where(x=>(x.UnitType & UnitType.Vehicle) != 0))
+                    foreach (var vehicle in actor.Combat.AllActors.Where(x=>(x.UnitType & UnitType.Vehicle) != 0 || actor.IsCustomUnitVehicle()))
                     {
                         id =
                             ($"missionSpec_{vehicle.GetPilot().Description.Callsign}_{effectData.Description.Id}"
@@ -732,7 +740,7 @@ namespace PracticeMakesPerfect.Framework
 
 
                             if (missionSpec.AdvTargetInfoUnits.Contains(AdvTargetUnitData.Vehicle) &&
-                                (target.UnitType & UnitType.Vehicle) != 0 &&
+                                ((target.UnitType & UnitType.Vehicle) != 0 || target.IsCustomUnitVehicle()) &&
                                 effectData.targetingData.effectTriggerType ==
                                 EffectTriggerType.OnWeaponFire &&
                                 effectData.targetingData.effectTargetType == EffectTargetType.AllEnemies)
@@ -939,7 +947,7 @@ namespace PracticeMakesPerfect.Framework
                             }
 
                             if (missionSpec.AdvTargetInfoUnits.Contains(AdvTargetUnitData.Vehicle) &&
-                                (playerUnit.UnitType & UnitType.Vehicle) != 0 && effectData.targetingData.effectTriggerType ==
+                                ((playerUnit.UnitType & UnitType.Vehicle) != 0 || playerUnit.IsCustomUnitVehicle()) && effectData.targetingData.effectTriggerType ==
                                 EffectTriggerType.OnWeaponFire &&
                                 effectData.targetingData.effectTargetType == EffectTargetType.Creator)
                             {
@@ -949,7 +957,7 @@ namespace PracticeMakesPerfect.Framework
                             }
 
                             if (missionSpec.AdvTargetInfoUnits.Contains(AdvTargetUnitData.Vehicle) &&
-                                (opforUnit.UnitType & UnitType.Vehicle) != 0 && effectData.targetingData.effectTriggerType ==
+                                ((opforUnit.UnitType & UnitType.Vehicle) != 0 || opforUnit.IsCustomUnitVehicle()) && effectData.targetingData.effectTriggerType ==
                                 EffectTriggerType.OnWeaponFire &&
                                 effectData.targetingData.effectTargetType == EffectTargetType.AllEnemies)
                             {
@@ -1062,7 +1070,7 @@ namespace PracticeMakesPerfect.Framework
                             }
                         }
 
-                        if (missionSpec.AdvTargetInfoUnits.Contains(AdvTargetUnitData.Vehicle) && (actor.UnitType & UnitType.Vehicle) != 0)
+                        if (missionSpec.AdvTargetInfoUnits.Contains(AdvTargetUnitData.Vehicle) && (actor.UnitType & UnitType.Vehicle) != 0 || actor.IsCustomUnitVehicle())
                         {
                             foreach (var effectData in missionSpec.effects)
                             {
