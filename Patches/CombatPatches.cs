@@ -29,7 +29,6 @@ namespace PracticeMakesPerfect.Patches
                     var p = attacker.GetPilot();
                     if (p != null)
                     {
-                        
                         var pKey = p.FetchGUID();
                         var opfor = __instance.team.FactionValue.Name;
                         if (ModInit.modSettings.WhiteListOpFor.Contains(opfor))

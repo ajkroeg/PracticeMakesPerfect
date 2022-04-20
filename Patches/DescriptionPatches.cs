@@ -82,6 +82,46 @@ namespace PracticeMakesPerfect.Patches
             }
         }
 
+        [HarmonyPatch(typeof(SGBarracksRosterSlot), "Refresh",
+            new Type[] {})]
+
+        public static class SGBarracksRosterSlot_Refresh
+        {
+            public static void Postfix(SGBarracksRosterSlot __instance)
+            {
+                if (__instance.Pilot == null) return;
+                if (sim == null) return;
+                var tooltip = __instance.gameObject.GetComponent<HBSTooltip>() ??
+                              __instance.gameObject.AddComponent<HBSTooltip>();
+
+                var desc = tooltip.GetText();
+                if (string.IsNullOrEmpty(desc))
+                {
+                    desc = "";
+                }
+
+                var specDesc = Descriptions.GetPilotSpecializationsOrProgress(__instance.Pilot);
+                desc += specDesc;
+                var currentDescDef = Traverse.Create(tooltip).Field("defaultStateData").GetValue<HBSTooltipStateData>().GetTooltipObject() as BaseDescriptionDef;
+                if (currentDescDef != null)
+                {
+                    if (currentDescDef.Id != "PilotSpecs")
+                    {
+                        var currentText = currentDescDef.Details;
+                        currentText += specDesc;
+
+                        var descDefAppended =
+                            new BaseDescriptionDef("PilotSpecs", __instance.Pilot.Callsign, currentText, null);
+                        tooltip.SetDefaultStateData(TooltipUtilities.GetStateDataFromObject(descDefAppended));
+                        return;
+                    }
+                    
+                }
+                var descDef = new BaseDescriptionDef("PilotSpecs", __instance.Pilot.Callsign, desc, null);
+                tooltip.SetDefaultStateData(TooltipUtilities.GetStateDataFromObject(descDef));
+            }
+        }
+
 
         [HarmonyPatch(typeof(SGBarracksDossierPanel), "SetPilot",
             new Type[] {typeof(Pilot), typeof(SGBarracksMWDetailPanel), typeof(bool), typeof(bool)})]
@@ -96,7 +136,7 @@ namespace PracticeMakesPerfect.Patches
                               ___portrait.gameObject.AddComponent<HBSTooltip>();
 
                 var desc = tooltip.GetText();
-                if (String.IsNullOrEmpty(desc))
+                if (string.IsNullOrEmpty(desc))
                 {
                     desc = "";
                 }
