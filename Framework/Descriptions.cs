@@ -47,6 +47,7 @@ namespace PracticeMakesPerfect.Framework
         internal static string GetPilotSpecializationsOrProgress(Pilot pilot)
         {
             var pilotID = pilot.FetchGUID();
+            if (pilotID == "NOTAPILOT") return "";
             var rtrn = "";
 
             if (pilot.IsPlayerCharacter)
@@ -62,7 +63,7 @@ namespace PracticeMakesPerfect.Framework
                 }
             }
 
-            if (SpecHolder.HolderInstance.MissionSpecMap[pilotID].Count > 0)
+            if (SpecHolder.HolderInstance.MissionSpecMap.ContainsKey(pilotID) && SpecHolder.HolderInstance.MissionSpecMap[pilotID].Count > 0)
             {
                 rtrn+= "\n<b>Mission Specializations</b>\n\n";
 
@@ -76,7 +77,7 @@ namespace PracticeMakesPerfect.Framework
                 }
             }
 
-            if (SpecHolder.HolderInstance.OpForSpecMap[pilotID].Count > 0)
+            if (SpecHolder.HolderInstance.OpForSpecMap.ContainsKey(pilotID) && SpecHolder.HolderInstance.OpForSpecMap[pilotID].Count > 0)
             {
                 rtrn += "\n<b>OpFor Specializations</b>\n\n";
 
@@ -91,15 +92,21 @@ namespace PracticeMakesPerfect.Framework
             }
 
             rtrn += "\n<b>Mission Stats</b>\n\n";
-            foreach (var stat in SpecHolder.HolderInstance.MissionsTracker[pilotID])
+            if (SpecHolder.HolderInstance.MissionsTracker.ContainsKey(pilotID))
             {
-                rtrn += $"<b>{stat.Key}:</b> {stat.Value} complete.\n";
+                foreach (var stat in SpecHolder.HolderInstance.MissionsTracker[pilotID])
+                {
+                    rtrn += $"<b>{stat.Key}:</b> {stat.Value} complete.\n";
+                }
             }
 
             rtrn += "\n<b>Opfor Stats</b>\n\n";
-            foreach (var stat in SpecHolder.HolderInstance.OpForKillsTracker[pilotID])
+            if (SpecHolder.HolderInstance.OpForKillsTracker.ContainsKey(pilotID))
             {
-                rtrn += $"<b>{stat.Key}:</b> {stat.Value} kills.\n";
+                foreach (var stat in SpecHolder.HolderInstance.OpForKillsTracker[pilotID])
+                {
+                    rtrn += $"<b>{stat.Key}:</b> {stat.Value} kills.\n";
+                }
             }
 
             return rtrn;

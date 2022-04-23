@@ -91,6 +91,7 @@ namespace PracticeMakesPerfect.Patches
             {
                 if (__instance.Pilot == null) return;
                 if (sim == null) return;
+                if (__instance.Pilot.FetchGUID() == "NOTAPILOT") return;
                 var tooltip = __instance.gameObject.GetComponent<HBSTooltip>() ??
                               __instance.gameObject.AddComponent<HBSTooltip>();
 
@@ -131,7 +132,7 @@ namespace PracticeMakesPerfect.Patches
             public static void Postfix(SGBarracksDossierPanel __instance, Pilot p, Image ___portrait)
             {
                 if (p == null) return;
-
+                if (p.FetchGUID() == "NOTAPILOT") return;
                 var tooltip = ___portrait.gameObject.GetComponent<HBSTooltip>() ??
                               ___portrait.gameObject.AddComponent<HBSTooltip>();
 
