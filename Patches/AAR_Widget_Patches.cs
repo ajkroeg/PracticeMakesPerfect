@@ -35,7 +35,7 @@ namespace PracticeMakesPerfect.Patches
 //                curPilots.Add(GlobalVars.sim.Commander.FetchGUID());
 
 
-                var repMultDictionary = new Dictionary<string, float>();
+                var repModDictionary = new Dictionary<string, float>();
                 
                 
                 foreach (var pKey in curPilots)
@@ -47,19 +47,19 @@ namespace PracticeMakesPerfect.Patches
                             var opSpec =
                                 SpecManager.ManagerInstance.OpForSpecList.FirstOrDefault(x => x.OpForSpecID == spec && x.factionID == target);
                             if (opSpec == null) continue;
-                            if (opSpec.repMult.Count > 0)
+                            if (opSpec.repMod.Count > 0)
                             {
-                                foreach (var repMult in opSpec.repMult.Where(x => x.Key != target && x.Key != employer && x.Key != target_string && x.Key != employer_string && x.Key != owner_string))
+                                foreach (var repMod in opSpec.repMod.Where(x => x.Key != target && x.Key != employer && x.Key != target_string && x.Key != employer_string && x.Key != owner_string))
                                 {
-                                    if (!repMultDictionary.ContainsKey(repMult.Key))
+                                    if (!repModDictionary.ContainsKey(repMod.Key))
                                     {
-                                        repMultDictionary.Add(repMult.Key, repMult.Value);
+                                        repModDictionary.Add(repMod.Key, repMod.Value);
                                     }
                                     else
                                     {
-                                        repMultDictionary[repMult.Key] += repMult.Value;
+                                        repModDictionary[repMod.Key] += repMod.Value;
                                     }
-                                    ModInit.modLog.LogMessage($"repMultDictionary contains {repMult.Key} and {repMult.Value}");
+                                    ModInit.modLog.LogMessage($"repModDictionary contains {repMod.Key} and {repMod.Value}");
                                 }
                             }
                         }
@@ -67,7 +67,7 @@ namespace PracticeMakesPerfect.Patches
                 }
 
                 var idx = ___FactionWidgets.Count;
-                foreach (var repMult in repMultDictionary)
+                foreach (var repMod in repModDictionary)
                 {
                     var component = sim.DataManager
                         .PooledInstantiate("uixPrfWidget_AAR_FactionRepBarAndIcon",
@@ -78,19 +78,19 @@ namespace PracticeMakesPerfect.Patches
                     ___FactionWidgets.Add(component);
 
                     var faction = UnityGameInstance.BattleTechGame.DataManager.Factions
-                        .FirstOrDefault(x => x.Value.FactionValue.Name == repMult.Key).Value;
+                        .FirstOrDefault(x => x.Value.FactionValue.Name == repMod.Key).Value;
 
                     int repChange;
                     if (theContract.Override.employerTeam.FactionDef.FactionValue.DoesGainReputation)
                     {
-                        repChange = Mathf.RoundToInt( SpecHolder.HolderInstance.emplRep *
-                                                         repMultDictionary[faction.FactionValue.Name]);
+                        repChange = Mathf.RoundToInt( SpecHolder.HolderInstance.emplRep +
+                                                         repModDictionary[faction.FactionValue.Name]);
                         ModInit.modLog.LogMessage($"Employer {theContract.Override.employerTeam.FactionDef.FactionValue.Name} is reputation gainer: base employer change {SpecHolder.HolderInstance.emplRep}");
                     }
                     else
                     {
-                        repChange = Math.Abs(Mathf.RoundToInt(theContract.TargetReputationResults *
-                                                              repMultDictionary[faction.FactionValue.Name]));
+                        repChange = Math.Abs(Mathf.RoundToInt(theContract.TargetReputationResults +
+                                                              repModDictionary[faction.FactionValue.Name]));
                         ModInit.modLog.LogMessage($"Employer {theContract.Override.employerTeam.FactionDef.FactionValue.Name} is NOT reputation gainer: base target rep change {theContract.TargetReputationResults}");
 
 

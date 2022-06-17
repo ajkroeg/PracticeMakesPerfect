@@ -45,7 +45,7 @@ namespace PracticeMakesPerfect.Framework
         public List<string> applyToFaction = new List<string>();
         public string description = "";
 
-        public Dictionary<string, float> repMult = new Dictionary<string, float>();
+        public Dictionary<string, int> repMod = new Dictionary<string, int>();
         public Dictionary<string, float> storeDiscount = new Dictionary<string, float>();
         public Dictionary<string, float> storeBonus = new Dictionary<string, float>();
         public Dictionary<string, float> cashMult = new Dictionary<string, float>();

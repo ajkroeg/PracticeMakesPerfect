@@ -151,7 +151,7 @@ namespace PracticeMakesPerfect.Framework
                             killsRequired = opforDefault.killsRequired,
                             applyToFaction = new List<string> {faction.Value.Name},
                             factionID = faction.Value.FactionValue.Name,
-                            repMult = opforDefault.repMult,
+                            repMod = opforDefault.repMod,
                             storeDiscount = opforDefault.storeDiscount,
                             storeBonus = opforDefault.storeBonus,
                             cashMult = opforDefault.cashMult,

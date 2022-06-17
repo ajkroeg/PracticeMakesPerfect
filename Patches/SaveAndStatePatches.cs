@@ -192,8 +192,8 @@ namespace PracticeMakesPerfect.Patches
                 SpecHolder.HolderInstance.emplRep = __instance.EmployerReputationResults;
                 var employer = __instance.Override.employerTeam.FactionDef.FactionValue.Name;
                 var target = __instance.Override.targetTeam.FactionDef.FactionValue.Name;
-                var employerRepMult = 1f;
-                var targetRepMult = 1f;
+                var employerrepMod = 0;
+                var targetrepMod = 0;
                 var contractPayOutMult = 1f;
 
                 SpecHolder.HolderInstance.kills = 0;
@@ -211,7 +211,7 @@ namespace PracticeMakesPerfect.Patches
                     if (SpecHolder.HolderInstance.OpForSpecMap.ContainsKey(pKey))
                     {
                         var opSpecs = new List<OpForSpec>();
-                        var employerRepMultTemp = new List<float>(){0f};
+                        var employerrepModTemp = new List<int>(){0};
                         foreach (var spec in SpecHolder.HolderInstance.OpForSpecMap[pKey])
                         {
                             opSpecs.AddRange(SpecManager.ManagerInstance.OpForSpecList.Where(x=>x.OpForSpecID == spec));
@@ -221,43 +221,43 @@ namespace PracticeMakesPerfect.Patches
                         {
                             if (opSpec.factionID == target || opSpec.applyToFaction.Contains(target))
                             {
-                                if (opSpec.repMult.ContainsKey(employer))
+                                if (opSpec.repMod.ContainsKey(employer))
                                 {
-                                    employerRepMultTemp.Add(opSpec.repMult[employer]);
-                                    //employerRepMult += (opSpec.repMult[employer]);
-                                    ModInit.modLog.LogMessage($"current employer [employer] reputation multiplier: {opSpec.repMult[employer]}");
+                                    employerrepModTemp.Add(opSpec.repMod[employer]);
+                                    //employerrepMod += (opSpec.repMod[employer]);
+                                    ModInit.modLog.LogMessage($"current employer [employer] reputation mod: {opSpec.repMod[employer]}");
                                 }
 
-                                if (opSpec.repMult.ContainsKey(employer_string))
+                                if (opSpec.repMod.ContainsKey(employer_string))
                                 {
-                                    employerRepMultTemp.Add(opSpec.repMult[employer_string]);
-                                    //employerRepMult += (opSpec.repMult[employer_string]);
-                                    ModInit.modLog.LogMessage($"current employer [employer_string] reputation multiplier: {opSpec.repMult[employer_string]}");
+                                    employerrepModTemp.Add(opSpec.repMod[employer_string]);
+                                    //employerrepMod += (opSpec.repMod[employer_string]);
+                                    ModInit.modLog.LogMessage($"current employer [employer_string] reputation mod: {opSpec.repMod[employer_string]}");
                                 }
 
-                                if (opSpec.repMult.ContainsKey(owner_string) && sim.CurSystem.OwnerValue.Name == employer)
+                                if (opSpec.repMod.ContainsKey(owner_string) && sim.CurSystem.OwnerValue.Name == employer)
                                 {
-                                    employerRepMultTemp.Add(opSpec.repMult[owner_string]);
-//                                        employerRepMult += (opSpec.repMult[owner_string]);
-                                    ModInit.modLog.LogMessage($"current employer [owner_string] reputation multiplier: {opSpec.repMult[owner_string]}");
+                                    employerrepModTemp.Add(opSpec.repMod[owner_string]);
+//                                        employerrepMod += (opSpec.repMod[owner_string]);
+                                    ModInit.modLog.LogMessage($"current employer [owner_string] reputation mod: {opSpec.repMod[owner_string]}");
                                 }
 
-                                employerRepMult += employerRepMultTemp.Max();
+                                employerrepMod += employerrepModTemp.Max();
 
-                                if (opSpec.repMult.ContainsKey(target) && !opSpec.repMult.ContainsKey(target_string))
+                                if (opSpec.repMod.ContainsKey(target) && !opSpec.repMod.ContainsKey(target_string))
                                 {
-                                    targetRepMult *= (opSpec.repMult[target]);
-                                    ModInit.modLog.LogMessage($"current target [target] reputation multiplier: {targetRepMult}");
+                                    targetrepMod += (opSpec.repMod[target]);
+                                    ModInit.modLog.LogMessage($"current target [target] reputation mod: {targetrepMod}");
                                 }
-                                if (!opSpec.repMult.ContainsKey(target) && opSpec.repMult.ContainsKey(target_string))
+                                if (!opSpec.repMod.ContainsKey(target) && opSpec.repMod.ContainsKey(target_string))
                                 {
-                                    targetRepMult *= (opSpec.repMult[target_string]);
-                                    ModInit.modLog.LogMessage($"current target [target_string] reputation multiplier: {targetRepMult}");
+                                    targetrepMod += (opSpec.repMod[target_string]);
+                                    ModInit.modLog.LogMessage($"current target [target_string] reputation mod: {targetrepMod}");
                                 }
-                                if (opSpec.repMult.ContainsKey(target) && opSpec.repMult.ContainsKey(target_string))
+                                if (opSpec.repMod.ContainsKey(target) && opSpec.repMod.ContainsKey(target_string))
                                 {
-                                    targetRepMult *= Math.Min(opSpec.repMult[target], opSpec.repMult[target_string]);
-                                    ModInit.modLog.LogMessage($"current target [target && target_string] reputation multiplier: {targetRepMult}");
+                                    targetrepMod += Math.Max(opSpec.repMod[target], opSpec.repMod[target_string]);
+                                    ModInit.modLog.LogMessage($"current target [target && target_string] reputation mod: {targetrepMod}");
                                 }
 
                                 if (opSpec.cashMult.ContainsKey(employer) && !opSpec.cashMult.ContainsKey(employer_string))
@@ -496,12 +496,16 @@ namespace PracticeMakesPerfect.Patches
                 SpecHolder.HolderInstance.totalBounty = SpecHolder.HolderInstance.kills * SpecHolder.HolderInstance.bounty;
                 ModInit.modLog.LogMessage($"{SpecHolder.HolderInstance.totalBounty} in bounties awarded.");
 
-                var employerRep = Mathf.RoundToInt(__instance.EmployerReputationResults * employerRepMult);
-                var targetRep = Mathf.RoundToInt(__instance.TargetReputationResults * targetRepMult);
+                var employerRep = Mathf.RoundToInt(__instance.EmployerReputationResults + employerrepMod);
+                if (__instance.EmployerReputationResults < 0 && employerRep > 0) employerRep = 0;
+
+                var targetRep = Mathf.RoundToInt(__instance.TargetReputationResults + targetrepMod);
+                if (__instance.TargetReputationResults < 0 && targetRep > 0) targetRep = 0;
+
                 var contractPayout = Mathf.RoundToInt((__instance.MoneyResults * contractPayOutMult) + SpecHolder.HolderInstance.totalBounty);
 
-                ModInit.modLog.LogMessage($"Employer Reputation Change: {__instance.EmployerReputationResults} x {employerRepMult} = {employerRep}");
-                ModInit.modLog.LogMessage($"Target Reputation Change: {__instance.TargetReputationResults} x {targetRepMult} = {targetRep}");
+                ModInit.modLog.LogMessage($"Employer Reputation Change: {__instance.EmployerReputationResults} x {employerrepMod} = {employerRep}");
+                ModInit.modLog.LogMessage($"Target Reputation Change: {__instance.TargetReputationResults} x {targetrepMod} = {targetRep}");
                 ModInit.modLog.LogMessage($"Contract Payout: ({__instance.MoneyResults} x {contractPayOutMult}) + {SpecHolder.HolderInstance.totalBounty} = {contractPayout}");
 
 
