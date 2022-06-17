@@ -504,8 +504,8 @@ namespace PracticeMakesPerfect.Patches
 
                 var contractPayout = Mathf.RoundToInt((__instance.MoneyResults * contractPayOutMult) + SpecHolder.HolderInstance.totalBounty);
 
-                ModInit.modLog.LogMessage($"Employer Reputation Change: {__instance.EmployerReputationResults} x {employerrepMod} = {employerRep}");
-                ModInit.modLog.LogMessage($"Target Reputation Change: {__instance.TargetReputationResults} x {targetrepMod} = {targetRep}");
+                ModInit.modLog.LogMessage($"Employer Reputation Change: {__instance.EmployerReputationResults} + {employerrepMod} = {employerRep}");
+                ModInit.modLog.LogMessage($"Target Reputation Change: {__instance.TargetReputationResults} + {targetrepMod} = {targetRep}");
                 ModInit.modLog.LogMessage($"Contract Payout: ({__instance.MoneyResults} x {contractPayOutMult}) + {SpecHolder.HolderInstance.totalBounty} = {contractPayout}");
 
 
