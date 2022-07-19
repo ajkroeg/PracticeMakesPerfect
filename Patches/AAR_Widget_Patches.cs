@@ -81,6 +81,9 @@ namespace PracticeMakesPerfect.Patches
                         .FirstOrDefault(x => x.Value.FactionValue.Name == repMod.Key).Value;
 
                     int repChange;
+
+                    if (faction.FactionValue.IsMercenaryReviewBoard) continue;
+
                     if (theContract.Override.employerTeam.FactionDef.FactionValue.DoesGainReputation)
                     {
                         repChange = Mathf.RoundToInt( SpecHolder.HolderInstance.emplRep +

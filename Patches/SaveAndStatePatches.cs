@@ -194,18 +194,21 @@ namespace PracticeMakesPerfect.Patches
                 var target = __instance.Override.targetTeam.FactionDef.FactionValue.Name;
                 var employerrepMod = 0;
                 var targetrepMod = 0;
+                var mercBoardRepMod = 0;
                 var contractPayOutMult = 1f;
 
+                var MRBName = FactionEnumeration.GetMercenaryReviewBoardFactionValue().Name;
                 SpecHolder.HolderInstance.kills = 0;
                 SpecHolder.HolderInstance.bounty = 0;
 
                 var playerUnits = UnityGameInstance.BattleTechGame.Combat.AllActors.Where(x => x.team.IsLocalPlayer);
+                var contractID = __instance.Override.ContractTypeValue.Name;
                 foreach (var unit in playerUnits)
                 {
                     var p = unit.GetPilot();
                     var pKey = p.FetchGUID();
                     if (pKey == "NOTAPILOT") continue;
-                    var contractID = __instance.Override.ContractTypeValue.Name;
+                    
                     //processing mission outcomes
 
                     if (SpecHolder.HolderInstance.OpForSpecMap.ContainsKey(pKey))
@@ -221,6 +224,12 @@ namespace PracticeMakesPerfect.Patches
                         {
                             if (opSpec.factionID == target || opSpec.applyToFaction.Contains(target))
                             {
+                                if (opSpec.repMod.ContainsKey(MRBName))
+                                {
+                                    mercBoardRepMod += (opSpec.repMod[MRBName]);
+                                    ModInit.modLog.LogMessage($"Merc Review Board reputation mod: {opSpec.repMod[MRBName]}");
+                                }
+
                                 if (opSpec.repMod.ContainsKey(employer))
                                 {
                                     employerrepModTemp.Add(opSpec.repMod[employer]);
@@ -277,9 +286,7 @@ namespace PracticeMakesPerfect.Patches
                                     contractPayOutMult += Math.Max(opSpec.cashMult[employer_string], opSpec.cashMult[employer]);
                                     ModInit.modLog.LogMessage($"current contract payout multiplier: {contractPayOutMult}");
                                 }
-                                    
                             }
-                                
                         }
 
                         if (SpecHolder.HolderInstance.OpForKillsTEMPTracker.ContainsKey(pKey))
@@ -502,15 +509,20 @@ namespace PracticeMakesPerfect.Patches
                 var targetRep = Mathf.RoundToInt(__instance.TargetReputationResults + targetrepMod);
                 if (__instance.TargetReputationResults < 0 && targetRep > 0) targetRep = 0;
 
+                var mercBoardRep = Mathf.RoundToInt(__instance.MercenaryReviewboardReputationResults + mercBoardRepMod);
+                if (__instance.TargetReputationResults < 0 && mercBoardRep > 0) mercBoardRep = 0;
+
                 var contractPayout = Mathf.RoundToInt((__instance.MoneyResults * contractPayOutMult) + SpecHolder.HolderInstance.totalBounty);
 
                 ModInit.modLog.LogMessage($"Employer Reputation Change: {__instance.EmployerReputationResults} + {employerrepMod} = {employerRep}");
                 ModInit.modLog.LogMessage($"Target Reputation Change: {__instance.TargetReputationResults} + {targetrepMod} = {targetRep}");
+                ModInit.modLog.LogMessage($"Merc Review Board Reputation Change: {__instance.MercenaryReviewboardReputationResults} + {mercBoardRepMod} = {mercBoardRep}");
                 ModInit.modLog.LogMessage($"Contract Payout: ({__instance.MoneyResults} x {contractPayOutMult}) + {SpecHolder.HolderInstance.totalBounty} = {contractPayout}");
 
 
                 Traverse.Create(__instance).Property("EmployerReputationResults").SetValue(employerRep);
                 Traverse.Create(__instance).Property("TargetReputationResults").SetValue(targetRep);
+                Traverse.Create(__instance).Property("MercenaryReviewboardReputationResults").SetValue(mercBoardRep);
                 Traverse.Create(__instance).Property("MoneyResults").SetValue(contractPayout);
 
                 SpecHolder.HolderInstance.OpForKillsTEMPTracker = new Dictionary<string, Dictionary<string, int>>();
