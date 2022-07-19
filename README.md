@@ -284,11 +284,11 @@ example json structure for OpForSpec with "simgame" effects:
 		"Locals"
 	],
 	"description": "This pilot is an expert at killing locals, and does fancy things.",
-	"repMult": {
-		"{OWNER}": 1.0,
-		"Liao": 0.8,
-		"Davion": 0.2,
-		"{TARGET}": 0.5
+	"repMod": {
+		"{OWNER}": 2,
+		"Liao": 1,
+		"Davion": 3,
+		"{TARGET}": 8
 		},
 	"storeDiscount": {
 		"ComStar": -0.2
@@ -307,13 +307,15 @@ example json structure for OpForSpec with "simgame" effects:
 
 ```
 
-`repMult` - Dictionary <string, float> - Multipliers added to reputation gained/lost for contracts against this faction (or if faction is listed in `applyToFaction`). For listed factions that are <i>not</i> the contract employer or target, reputation will be gained as a multiple of the contract employer reputation gain. The fixed strings "{OWNER}", {"EMPLOYER"}, and "{TARGET}" can also be used to dynamically change reputation for the system owner, your employer, and target factions respectively.
+`repMod` - Dictionary <string, int> - Added to reputation gained/lost for contracts against this faction (or if faction is listed in `applyToFaction`). For listed factions that are <i>not</i> the contract employer or target, reputation will be gained as a function of the contract employer reputation gain. The fixed strings "{OWNER}", {"EMPLOYER"}, and "{TARGET}" can also be used to dynamically change reputation for the system owner, your employer, and target factions respectively. 
+
+**Special Case** `"repMod": {  "MercenaryReviewBoard": X},` will add X to the normally gained MRB rating from the mission
 
 Using the above settings, if a contract would result in you gaining 5 reputation with the Aurigan Restoration and losing 4 with the Locals, you would also:
-	1. Gain 5 reputation with the system owner if the system owner is also your employer.
-	2. Gain 4 reputation with Liao.
-	3. Gain 1 reputation with Davion.
-	4. Only lose 2 reputation with Locals due to `"{TARGET}": 0.5`
+	1. Gain 7 reputation with the system owner if the system owner is also your employer.
+	2. Gain 5 reputation with Liao.
+	3. Gain 8 reputation with Davion.
+	4. Lose no reputation with Locals due to `"{TARGET}": 8`. In this case `8` (from the repMod) + `-4` (from the contract target rep loss) = 4, which is rounded back down to 0 to prevent gaining reputation vs targets.
 	
 If there is a multiplier for `{"EMPLOYER"}` or `"{OWNER}"` AND that faction is specifically listed in `repMult`, the final employer reputation multiplier will be the largest of the three values.
 
