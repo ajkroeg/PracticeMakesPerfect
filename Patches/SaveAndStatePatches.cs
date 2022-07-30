@@ -510,7 +510,7 @@ namespace PracticeMakesPerfect.Patches
                 if (__instance.TargetReputationResults < 0 && targetRep > 0) targetRep = 0;
 
                 var mercBoardRep = Mathf.RoundToInt(__instance.MercenaryReviewboardReputationResults + mercBoardRepMod);
-                if (__instance.TargetReputationResults < 0 && mercBoardRep > 0) mercBoardRep = 0;
+                if (__instance.MercenaryReviewboardReputationResults < 0 && mercBoardRep > 0) mercBoardRep = 0;
 
                 var contractPayout = Mathf.RoundToInt((__instance.MoneyResults * contractPayOutMult) + SpecHolder.HolderInstance.totalBounty);
 
