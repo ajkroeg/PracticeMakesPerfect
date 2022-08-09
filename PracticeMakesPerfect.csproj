@@ -42,6 +42,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>D:\SteamLibrary\steamapps\common\BATTLETECH\BattleTech_Data\Managed\Assembly-CSharp-firstpass.dll</HintPath>
     </Reference>
+    <Reference Include="CustomAmmoCategories">
+      <HintPath>C:\Program Files (x86)\Steam\steamapps\common\BATTLETECH\Mods\CustomAmmoCategories\CustomAmmoCategories.dll</HintPath>
+    </Reference>
     <Reference Include="InControl, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>D:\SteamLibrary\steamapps\common\BATTLETECH\BattleTech_Data\Managed\InControl.dll</HintPath>
@@ -76,6 +79,7 @@
   <ItemGroup>
     <Compile Include="Framework\Descriptions.cs" />
     <Compile Include="Patches\AAR_Widget_Patches.cs" />
+    <Compile Include="Patches\CAC_AMS_XP.cs" />
     <Compile Include="Patches\ShopPatches.cs" />
     <Compile Include="Patches\DescriptionPatches.cs" />
     <Compile Include="Patches\CombatPatches.cs" />

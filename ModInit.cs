@@ -73,6 +73,8 @@ namespace PracticeMakesPerfect
 
         public Dictionary<string, int> bonusEffects_XP = new Dictionary<string, int>();
 
+        public float AMSKillsXP = 0f;
+
         public int MaxOpForSpecializations = 0;
         public bool OpForTiersCountTowardMax = false;
 

@@ -34,7 +34,6 @@ namespace PracticeMakesPerfect.Framework
             Turret,
             Building
         }
-
     }
     public class OpForSpec
     {
@@ -50,8 +49,6 @@ namespace PracticeMakesPerfect.Framework
         public Dictionary<string, float> storeBonus = new Dictionary<string, float>();
         public Dictionary<string, float> cashMult = new Dictionary<string, float>();
         public Dictionary<string, int> killBounty = new Dictionary<string, int>();
-
-
 
         [JsonIgnore]
         public List<EffectData> effects = new List<EffectData>();
@@ -73,7 +70,6 @@ namespace PracticeMakesPerfect.Framework
         [JsonIgnore]
         public List<EffectData> effects = new List<EffectData>();
         public List<JObject> effectDataJO = new List<JObject>();
-
     }
 
     public class MissionSpec
@@ -144,7 +140,6 @@ namespace PracticeMakesPerfect.Framework
             bounty = new int();
             totalBounty = new int();
             emplRep = new int();
-
         }
 
         internal void AddToMaps(Pilot pilot)
@@ -176,7 +171,6 @@ namespace PracticeMakesPerfect.Framework
                 SpecHolder.HolderInstance.OpForKillsTracker.Add(pKey, new Dictionary<string, int>());
                 ModInit.modLog.LogMessage($"Added {pilot.Callsign} to OpForKillsTracker with iGUID {pKey}");
             }
-
         }
 
         internal void CleanMaps(List<string> currentPilots)
