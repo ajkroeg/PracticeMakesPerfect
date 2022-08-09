@@ -15,9 +15,9 @@ namespace PracticeMakesPerfect.Patches
     {
         [HarmonyPatch(typeof(SGFactionReputationWidget), "Init",
             new Type[] {typeof(SimGameState), typeof(FactionValue), typeof(UnityAction), typeof(bool)})]
-
         public static class SGFactionReputationWidget_Init_Patch
         {
+            public static bool Prepare() => ModInit.modSettings.enableSpecializations;
             public static void Postfix(SGFactionReputationWidget __instance, SimGameState sim, FactionValue faction, FactionDef ___CurrentFactionDef)
             {
                 var specDesc = Descriptions.GetOpForSpecializationDescription(faction?.Name);
@@ -30,17 +30,15 @@ namespace PracticeMakesPerfect.Patches
                         fdesc += specDesc;
                     }
                 }
-
                 Traverse.Create(___CurrentFactionDef).Property("Description").SetValue(fdesc);
-
             }
         }
 
 
         [HarmonyPatch(typeof(SGContractsWidget), "PopulateContract", new Type[] {typeof(Contract), typeof(Action)})]
-
         public static class SGContractsWidget_onContractSelected_Patch
         {
+            public static bool Prepare() => ModInit.modSettings.enableSpecializations;
             public static void Postfix(SGContractsWidget __instance, Contract contract,
                 HBSTooltip ___ContractTypeTooltip)
             {
@@ -76,17 +74,15 @@ namespace PracticeMakesPerfect.Patches
                             Traverse.Create(def2).Property("Details").SetValue(deets);
                         }
                     }
-
                     ___ContractTypeTooltip.SetDefaultStateData(TooltipUtilities.GetStateDataFromObject(def2));
                 }
             }
         }
 
-        [HarmonyPatch(typeof(SGBarracksRosterSlot), "Refresh",
-            new Type[] {})]
-
+        [HarmonyPatch(typeof(SGBarracksRosterSlot), "Refresh", new Type[] {})]
         public static class SGBarracksRosterSlot_Refresh
         {
+            public static bool Prepare() => ModInit.modSettings.enableSpecializations;
             public static void Postfix(SGBarracksRosterSlot __instance)
             {
                 if (__instance.Pilot == null) return;
@@ -123,12 +119,11 @@ namespace PracticeMakesPerfect.Patches
             }
         }
 
-
         [HarmonyPatch(typeof(SGBarracksDossierPanel), "SetPilot",
             new Type[] {typeof(Pilot), typeof(SGBarracksMWDetailPanel), typeof(bool), typeof(bool)})]
-
         public static class SGBarracksDossierPanel_SetPilot_Patch
         {
+            public static bool Prepare() => ModInit.modSettings.enableSpecializations;
             public static void Postfix(SGBarracksDossierPanel __instance, Pilot p, Image ___portrait)
             {
                 if (p == null) return;
@@ -151,9 +146,9 @@ namespace PracticeMakesPerfect.Patches
         }
 
         [HarmonyPatch(typeof(SGBarracksMWDetailPanel), "OnServiceSectionClicked")]
-
         public static class SGBarracksMWDetailPanel_OnServiceClicked
         {
+            public static bool Prepare() => ModInit.modSettings.enableSpecializations;
             public static bool Prefix(SGBarracksMWDetailPanel __instance, Pilot ___curPilot, SGBarracksDossierPanel ___dossier)
             {
                 var background = UIManager.Instance.UILookAndColorConstants.PopupBackfill;
@@ -257,7 +252,5 @@ namespace PracticeMakesPerfect.Patches
                 }
             }
         }
-
-
     }
 }

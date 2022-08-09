@@ -17,6 +17,7 @@ namespace PracticeMakesPerfect.Patches
         [HarmonyPatch(typeof(SGCharacterCreationCareerBackgroundSelectionPanel), "Done")]
         public static class SGCharacterCreationCareerBackgroundSelectionPanel_Done_Patch
         {
+            public static bool Prepare() => ModInit.modSettings.enableSpecializations;
             public static void Postfix(SGCharacterCreationCareerBackgroundSelectionPanel __instance)
             {
                 SpecManager.ManagerInstance.PreloadIcons();
@@ -36,6 +37,7 @@ namespace PracticeMakesPerfect.Patches
             new Type[] {typeof(SimGameSave), typeof(SerializableReferenceContainer)})]
         public static class SGS_Dehydrate_Patch
         {
+            public static bool Prepare() => ModInit.modSettings.enableSpecializations;
             public static void Prefix(SimGameState __instance)
             {
                 SpecManager.ManagerInstance.PreloadIcons();
@@ -62,6 +64,7 @@ namespace PracticeMakesPerfect.Patches
         [HarmonyPatch(typeof(SimGameState), "Rehydrate", new Type[] {typeof(GameInstanceSave)})]
         public static class SGS_Rehydrate_Patch
         {
+            public static bool Prepare() => ModInit.modSettings.enableSpecializations;
             public static void Postfix(SimGameState __instance)
             {
                 sim = __instance;
@@ -90,10 +93,10 @@ namespace PracticeMakesPerfect.Patches
                 }
                 SpecHolder.HolderInstance.CleanMaps(curPilots);
 
-                if (String.IsNullOrEmpty(SpecHolder.HolderInstance.activeStratCom))
+                if (String.IsNullOrEmpty(SpecHolder.HolderInstance.activeStratCom) && SpecManager.ManagerInstance.StratComs.Count > 0)
                 {
                     SpecHolder.HolderInstance.activeStratCom =
-                        SpecManager.ManagerInstance.StratComs[0].StratComID;
+                        SpecManager.ManagerInstance.StratComs.FirstOrDefault()?.StratComID;
                     ModInit.modLog.LogMessage($"no active StratCom detected, setting to first available.");
                 }
             }
@@ -103,6 +106,7 @@ namespace PracticeMakesPerfect.Patches
             new Type[] {typeof(PilotDef), typeof(bool), typeof(bool)})]
         public static class SGS_AddPilotToRoster_Patch
         {
+            public static bool Prepare() => ModInit.modSettings.enableSpecializations;
             public static void Postfix(SimGameState __instance, PilotDef def)
             {
                 var p = __instance.PilotRoster.FirstOrDefault(x => x.pilotDef.Description.Id == def.Description.Id);
@@ -114,6 +118,7 @@ namespace PracticeMakesPerfect.Patches
         [HarmonyPatch(typeof(TurnDirector), "StartFirstRound")]
         public static class TurnDirector_StartFirstRound
         {
+            public static bool Prepare() => ModInit.modSettings.enableSpecializations;
             public static void Postfix(TurnDirector __instance)
             {
                 var combat = __instance.Combat;
@@ -175,6 +180,7 @@ namespace PracticeMakesPerfect.Patches
         [HarmonyPatch(typeof(LoadTransitioning), "BeginCombatRestart", new Type[] {typeof(Contract)})]
         public static class LoadTransitioning_BeginCombatRestart_Patch
         {
+            public static bool Prepare() => ModInit.modSettings.enableSpecializations;
             public static void Prefix(Contract __instance)
             {
                 SpecHolder.HolderInstance.OpForKillsTEMPTracker = new Dictionary<string, Dictionary<string, int>>();
@@ -184,9 +190,10 @@ namespace PracticeMakesPerfect.Patches
         }
 
         [HarmonyPatch(typeof(Contract), "CompleteContract", new Type[] {typeof(MissionResult), typeof(bool)})]
+        [HarmonyPriority(Priority.First)]
         public static class Contract_CompleteContract_Patch
         {
-            [HarmonyPriority(Priority.First)]
+            public static bool Prepare() => ModInit.modSettings.enableSpecializations;
             public static void Postfix(Contract __instance, MissionResult result, bool isGoodFaithEffort)
             {
                 SpecHolder.HolderInstance.emplRep = __instance.EmployerReputationResults;

@@ -37,8 +37,12 @@ namespace PracticeMakesPerfect
             }
             //HarmonyInstance.DEBUG = true;
             ModInit.modLog.LogMessage($"Initializing PracticeMakesPerfect - Version {typeof(Settings).Assembly.GetName().Version}");
-            SpecManager.ManagerInstance.Initialize();
-            SpecHolder.HolderInstance.Initialize();
+            if (modSettings.enableSpecializations)
+            {
+                SpecManager.ManagerInstance.Initialize();
+                SpecHolder.HolderInstance.Initialize();
+            }
+
             var harmony = HarmonyInstance.Create(HarmonyPackage);
             harmony.PatchAll(Assembly.GetExecutingAssembly());
 
@@ -49,7 +53,7 @@ namespace PracticeMakesPerfect
     class Settings
     {
         public bool enableLogging = true;
-
+        public bool enableSpecializations = true;
         public bool useMissionXPforBonus = true;
         public float bonusXP_MissionMechKills = 0.05f;
         public float bonusXP_MissionOtherKills = 0.025f;

@@ -16,6 +16,7 @@ namespace PracticeMakesPerfect.Patches
         [HarmonyPatch(typeof(SimGameState), "GetReputationShopAdjustment", new Type[] {typeof(FactionValue)})]
         public static class SGS_GetReputationShopAdjustmentFV_Patch
         {
+            public static bool Prepare() => ModInit.modSettings.enableSpecializations;
             public static void Postfix(SimGameState __instance, ref float __result, FactionValue faction)
             {
                 if (GlobalVars.sim == null) return;
@@ -41,9 +42,10 @@ namespace PracticeMakesPerfect.Patches
 
         [HarmonyPatch(typeof(SG_Shop_Screen), "AddShopItemToWidget",
             new Type[] {typeof(ShopDefItem), typeof(Shop), typeof(IMechLabDropTarget), typeof(bool), typeof(bool)})]
+        [HarmonyPriority(Priority.First)]
         public static class SH_Shop_Screen_AddShopItemToWidget
         {
-            [HarmonyPriority(Priority.First)]
+            public static bool Prepare() => ModInit.modSettings.enableSpecializations;
             public static void Prefix(SG_Shop_Screen __instance, StarSystem ___theSystem, ShopDefItem itemDef, Shop shop, //removed ref from shopdefitem?
                 IMechLabDropTarget targetWidget, bool isSelling = false, bool isBulkAdd = false)
             {
@@ -99,6 +101,7 @@ namespace PracticeMakesPerfect.Patches
             new Type[] {typeof(FactionValue)})]
         public static class SG_Stores_MiniFactionWidget_FillInData_Patch
         {
+            public static bool Prepare() => ModInit.modSettings.enableSpecializations;
             public static void Postfix(SG_Stores_MiniFactionWidget __instance, FactionValue theFaction, FactionValue ___owningFactionValue, LocalizableText ___ReputationBonusText)
             {
                 if (GlobalVars.sim == null) return;

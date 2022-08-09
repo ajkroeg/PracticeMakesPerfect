@@ -15,11 +15,10 @@ namespace PracticeMakesPerfect.Patches
         
         [HarmonyPatch(typeof(Turret), "FlagForDeath",
             new Type[] {typeof(string), typeof(DeathMethod), typeof(DamageType), typeof(int), typeof(int), typeof(string), typeof(bool)})]
-
+        [HarmonyBefore(new string[] { "us.frostraptor.ConcreteJungle" })]
         public static class Turret_FlagForDeath_Patch
         {
-            [HarmonyBefore(new string[] { "us.frostraptor.ConcreteJungle" })]
-
+            public static bool Prepare() => ModInit.modSettings.enableSpecializations;
             public static void Prefix(Turret __instance, string attackerID)
             {
                 if (__instance.IsFlaggedForDeath)  return;
@@ -56,12 +55,12 @@ namespace PracticeMakesPerfect.Patches
 
         [HarmonyPatch(typeof(AttackDirector), "CreateAttackSequence",
             new Type[] {typeof(int), typeof(AbstractActor), typeof(ICombatant), typeof(Vector3), typeof(Quaternion), typeof(int), typeof(List<Weapon>), typeof(MeleeAttackType), typeof(int), typeof(bool)})]
+        [HarmonyPriority(Priority.First)]
         public static class AttackDirectorAttackSequence_OnAttackSequenceFire
         {
-            [HarmonyPriority(Priority.First)]
+            public static bool Prepare() => ModInit.modSettings.enableSpecializations;
             public static void Prefix(AttackDirector __instance, AbstractActor attacker, ICombatant target)
             {
-
                 try
                 {
                     if (attacker == null || target == null) return;
@@ -162,6 +161,7 @@ namespace PracticeMakesPerfect.Patches
         [HarmonyPatch(typeof(Team), "AddUnit", new Type[] {typeof(AbstractActor)})]
         public static class Team_AddUnit
         {
+            public static bool Prepare() => ModInit.modSettings.enableSpecializations;
             public static void Postfix(Team __instance, AbstractActor unit)
             {
                 if (unit.Combat.TurnDirector.CurrentRound > 1)

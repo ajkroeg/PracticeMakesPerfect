@@ -161,7 +161,7 @@ namespace PracticeMakesPerfect.Framework
                             effects = opforDefault.effects
                         };
 
-                        ModInit.modLog.LogMessage($"Adding {op.OpForSpecName} for {op.factionID}!\n 1st effectdata Id was {op.effects[0].Description.Id}");
+                        ModInit.modLog.LogMessage($"Adding {op.OpForSpecName} for {op.factionID}!\n 1st effectdata Id was {op.effects.FirstOrDefault()?.Description?.Id}");
                         OpForSpecList.Add(op);
                     }
                 }
@@ -194,7 +194,7 @@ namespace PracticeMakesPerfect.Framework
                             effects = defaultMissionSpec.effects
                         };
 
-                        ModInit.modLog.LogMessage($"Adding {con.MissionSpecName} for {con.MissionSpecID}!\n 1st effectdata Id was {con.effects[0].Description.Id}");
+                        ModInit.modLog.LogMessage($"Adding {con.MissionSpecName} for {con.MissionSpecID}!\n 1st effectdata Id was {con.effects.FirstOrDefault()?.Description?.Id}");
                         MissionSpecList.Add(con);
                     }
                 }

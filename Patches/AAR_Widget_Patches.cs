@@ -17,6 +17,7 @@ namespace PracticeMakesPerfect.Patches
             new Type[] {typeof(SimGameState), typeof(Contract)})]
         public static class AAR_FactionReputationResultWidget_InitializeData_Patch
         {
+            public static bool Prepare() => ModInit.modSettings.enableSpecializations;
             public static void Postfix(AAR_FactionReputationResultWidget __instance, SimGameState theSimState, Contract theContract,
                 List<SGReputationWidget_Simple> ___FactionWidgets, RectTransform ___WidgetListAnchor)
             {
@@ -119,9 +120,9 @@ namespace PracticeMakesPerfect.Patches
         [HarmonyPatch(typeof(AAR_ContractObjectivesWidget), "FillInObjectives")]
         public static class AAR_ContractObjectivesWidget_FillInObjectives_Patch
         {
+            public static bool Prepare() => ModInit.modSettings.enableSpecializations;
             public static void Postfix(AAR_ContractObjectivesWidget __instance)
             {
-
                 if (SpecHolder.HolderInstance.totalBounty != 0)
                 {
                     var addObjectiveMethod = Traverse.Create(__instance).Method("AddObjective", new Type[] { typeof(MissionObjectiveResult) });
@@ -139,7 +140,6 @@ namespace PracticeMakesPerfect.Patches
                 {
                     ModInit.modLog.LogMessage($"No bounties awarded.");
                 }
-                
             }
         }
     }
