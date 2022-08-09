@@ -19,6 +19,7 @@ Current XP settings in settings.json:
 ```
 {
 	"useMissionXPforBonus": true,
+	"enableSpecializations": true,
 	"bonusXP_MissionMechKills": 0.05,
 	"bonusXP_MissionOtherKills": 0.025,
 	"bonusXP_MechKills": 100,
@@ -43,6 +44,8 @@ Current XP settings in settings.json:
 		},
 }
 ```
+
+`enableSpecializations` - bool, if true or missing (defaults to true), specializations will be enabled. if false, all specializations and related patches are disabled, even if configured in later settings.
 
 `useMissionXPforBonus` - bool, switch for whether bonus XP is awarded as a function of the contract XP or as flat bonus.
 
