@@ -1,8 +1,8 @@
 # PracticeMakesPerfect
 
+**Versions 1.2.0.0 and higher depend on CustomAmmoCategories!**
+
 Mod consists of two modules, XP and Specializations.
-
-
 
 Original Module: [XP Module](#xp-module) allows Commander and pilots to gain bonus XP from kills and/or damage dealt during contract. In addition, allows bonus XP to be awareded by combat actions as defined below. Also connects PilotDef kill stats (as displayed in barracks) to Pilot stats accessible by events.
 
@@ -29,6 +29,7 @@ Current XP settings in settings.json:
 	"activeProbeXP_PerTarget": true,
 	"activeProbeXP": 25,
 	"sensorLockXP": 25,
+	"AMSKillsXP": 0.5,
 	"missionXPEffects": 0.025,
 	"missionXPeffectBonusDivisor": 35,
 	"reUseRestrictedbonusEffects_XP": {
@@ -39,6 +40,7 @@ Current XP settings in settings.json:
 		},					
 	"bonusEffects_XP": {
 		"DamagePerShot": 25
+		},
 }
 ```
 
@@ -66,6 +68,8 @@ NEW STUFF:
 
 `sensorLockXP` - int, XP awarded to player for using Sensor Lock ability.
 
+`AMSKillsXP`- float, XP awarded for missile "kills" for AMS. Added together per-AMS attack sequence and rounded to integer.
+
 `missionXPEffects` - float, multiplier for bonus XP awarded for effects as a function of Mission XP. Functions in tandem with `missionXPeffectBonusDivisor` below to approximate a per-effect bonus.
 
 `missionXPeffectBonusDivisor` - int, divisor of <i>total bonus XP awarded via the dictionaries below, or `effectXP`</i> in order to approximate a per-effect XP bonus based on contract XP. The resulting bonus follows the formula `ContractXP * missionXPEffects * effectXP / missionXPeffectBonusDivisor`. Thus, for 3 effects defined in the dictionaries with flat-rate bonuses of 35, 50, and 75, a `missionXPeffectBonusDivisor` value of 50 to 55 would give be recommended.
@@ -75,8 +79,6 @@ NEW STUFF:
 `degradingbonusEffects_XP` - Dictionary<String, int> - similar to above. Effects in this dictionary award the full amount when first applied, and then a penalized amount if re-applied, changing as a function of rounds remaining until effect expiration. For example, if the TAG effect has a Duration of 3 activations, the first time TAG is applied, it awards the amount defined in the dictionary. If it is then reapplied the following activation, the XP awarded is base/3. If it was instead reapplied 2 turns later, the XP award would be would be base/2, etc.
 
 `bonusEffects_XP` - Dictionary<String, int> - Effects and corresponding XP rewards for player unit applying those effects. Effects in this dictionary are <b>not</b> subject to same limitations as above; full XP is rewarded every time the effect is applied, regardless of source and target.
-
-
 
 To clarify use of `reUseRestrictedbonusEffects_XP`, `degradingbonusEffects_XP`, and `bonusEffects_XP`, the following is an excerpt of the vanilla WeaponDef for `Weapon_PPC_PPC_0-STOCK`
 
