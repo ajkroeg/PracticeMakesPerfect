@@ -13,13 +13,13 @@ namespace PracticeMakesPerfect.Patches
     public class CombatPatches
     {
         
-        [HarmonyPatch(typeof(Turret), "FlagForDeath",
+        [HarmonyPatch(typeof(AbstractActor), "FlagForDeath",
             new Type[] {typeof(string), typeof(DeathMethod), typeof(DamageType), typeof(int), typeof(int), typeof(string), typeof(bool)})]
         [HarmonyBefore(new string[] { "us.frostraptor.ConcreteJungle" })]
-        public static class Turret_FlagForDeath_Patch
+        public static class AbstractActor_FlagForDeath_Patch
         {
             public static bool Prepare() => ModInit.modSettings.enableSpecializations;
-            public static void Prefix(Turret __instance, string attackerID)
+            public static void Prefix(AbstractActor __instance, string attackerID)
             {
                 if (__instance.IsFlaggedForDeath)  return;
                 var attacker = __instance.Combat.FindActorByGUID(attackerID);
