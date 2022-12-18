@@ -527,11 +527,14 @@ namespace PracticeMakesPerfect.Patches
                 ModInit.modLog.LogMessage($"Contract Payout: ({__instance.MoneyResults} x {contractPayOutMult}) + {SpecHolder.HolderInstance.totalBounty} = {contractPayout}");
 
 
-                Traverse.Create(__instance).Property("EmployerReputationResults").SetValue(employerRep);
-                Traverse.Create(__instance).Property("TargetReputationResults").SetValue(targetRep);
-                Traverse.Create(__instance).Property("MercenaryReviewboardReputationResults").SetValue(mercBoardRep);
-                Traverse.Create(__instance).Property("MoneyResults").SetValue(contractPayout);
-
+                //Traverse.Create(__instance).Property("EmployerReputationResults").SetValue(employerRep);
+                //Traverse.Create(__instance).Property("TargetReputationResults").SetValue(targetRep);
+                //Traverse.Create(__instance).Property("MercenaryReviewboardReputationResults").SetValue(mercBoardRep);
+                //Traverse.Create(__instance).Property("MoneyResults").SetValue(contractPayout);
+                __instance.EmployerReputationResults = employerRep;
+                __instance.TargetReputationResults = targetRep;
+                __instance.MercenaryReviewboardReputationResults = mercBoardRep;
+                __instance.MoneyResults = contractPayout;
                 SpecHolder.HolderInstance.OpForKillsTEMPTracker = new Dictionary<string, Dictionary<string, int>>();
             }
         }

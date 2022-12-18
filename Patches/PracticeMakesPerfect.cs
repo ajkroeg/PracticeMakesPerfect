@@ -12,24 +12,24 @@ namespace PracticeMakesPerfect.Patches
         public static class FillInPilotData_Patch
 
         {
-            public static bool Prefix(AAR_UnitStatusWidget __instance, ref int xpEarned, UnitResult ___UnitData)
+            public static bool Prefix(AAR_UnitStatusWidget __instance, ref int xpEarned)
             {
                 var missionXP = xpEarned;
-                var mechsKilled = ___UnitData.pilot.MechsKilled;
-                var othersKilled = ___UnitData.pilot.OthersKilled;
+                var mechsKilled = __instance.UnitData.pilot.MechsKilled;
+                var othersKilled = __instance.UnitData.pilot.OthersKilled;
                 var newXP = 0;
                 if (ModInit.modSettings.useMissionXPforBonus)
                 {
                     for (var i = 0; i < mechsKilled; i++)
                     {
                         newXP += Mathf.RoundToInt(missionXP * ModInit.modSettings.bonusXP_MissionMechKills);
-                        ModInit.modLog.LogMessage($"adding {Mathf.RoundToInt(missionXP * ModInit.modSettings.bonusXP_MissionMechKills)}XP to {___UnitData.pilot.Description.Callsign} for mech kill, contract multiplier");
+                        ModInit.modLog.LogMessage($"adding {Mathf.RoundToInt(missionXP * ModInit.modSettings.bonusXP_MissionMechKills)}XP to {__instance.UnitData.pilot.Description.Callsign} for mech kill, contract multiplier");
                     }
 
                     for (var j = 0; j < othersKilled; j++)
                     {
                         newXP += Mathf.RoundToInt(missionXP * ModInit.modSettings.bonusXP_MissionOtherKills);
-                        ModInit.modLog.LogMessage($"adding {Mathf.RoundToInt(missionXP * ModInit.modSettings.bonusXP_MissionOtherKills)}XP to {___UnitData.pilot.Description.Callsign} for other kill, contract multiplier");
+                        ModInit.modLog.LogMessage($"adding {Mathf.RoundToInt(missionXP * ModInit.modSettings.bonusXP_MissionOtherKills)}XP to {__instance.UnitData.pilot.Description.Callsign} for other kill, contract multiplier");
                     }
 
 
@@ -38,24 +38,24 @@ namespace PracticeMakesPerfect.Patches
                 for (var i = 0; i < mechsKilled; i++)
                 {
                     newXP += ModInit.modSettings.bonusXP_MechKills;
-                    ModInit.modLog.LogMessage($"adding {ModInit.modSettings.bonusXP_MechKills}XP to {___UnitData.pilot.Description.Callsign} for mech kill, flat bonus");
+                    ModInit.modLog.LogMessage($"adding {ModInit.modSettings.bonusXP_MechKills}XP to {__instance.UnitData.pilot.Description.Callsign} for mech kill, flat bonus");
 
                 }
                 for (var j = 0; j < othersKilled; j++)
                 {
                     newXP += ModInit.modSettings.bonusXP_OtherKills;
-                    ModInit.modLog.LogMessage($"adding {ModInit.modSettings.bonusXP_OtherKills}XP to {___UnitData.pilot.Description.Callsign} for other kill, flat bonus");
+                    ModInit.modLog.LogMessage($"adding {ModInit.modSettings.bonusXP_OtherKills}XP to {__instance.UnitData.pilot.Description.Callsign} for other kill, flat bonus");
                 }
 
 
-                newXP += Mathf.RoundToInt((___UnitData.pilot.StructureDamageInflicted * ModInit.modSettings.bonusXP_StrDamageMult) + (___UnitData.pilot.ArmorDamageInflicted * ModInit.modSettings.bonusXP_ArmDamageMult));
-
-                ModInit.modLog.LogMessage($"adding {Mathf.RoundToInt(___UnitData.pilot.StructureDamageInflicted * ModInit.modSettings.bonusXP_StrDamageMult)}XP from Structure Damage and {Mathf.RoundToInt(___UnitData.pilot.ArmorDamageInflicted * ModInit.modSettings.bonusXP_ArmDamageMult)}XP from Armor Damage to {___UnitData.pilot.Description.Callsign}");
+                newXP += Mathf.RoundToInt((__instance.UnitData.pilot.StructureDamageInflicted * ModInit.modSettings.bonusXP_StrDamageMult) + (__instance.UnitData.pilot.ArmorDamageInflicted * ModInit.modSettings.bonusXP_ArmDamageMult));
+                
+                ModInit.modLog.LogMessage($"adding {Mathf.RoundToInt(__instance.UnitData.pilot.StructureDamageInflicted * ModInit.modSettings.bonusXP_StrDamageMult)}XP from Structure Damage and {Mathf.RoundToInt(__instance.UnitData.pilot.ArmorDamageInflicted * ModInit.modSettings.bonusXP_ArmDamageMult)}XP from Armor Damage to {__instance.UnitData.pilot.Description.Callsign}");
 
                 //new XP from effects and abilities added here
-                newXP += ___UnitData.pilot.StatCollection.GetValue<int>("effectXP");
+                newXP += __instance.UnitData.pilot.StatCollection.GetValue<int>("effectXP");
 
-                ModInit.modLog.LogMessage($"adding stat effectXP: {___UnitData.pilot.StatCollection.GetValue<int>("effectXP")}XP to {___UnitData.pilot.Description.Callsign} from per-use effects/ability bonuses");
+                ModInit.modLog.LogMessage($"adding stat effectXP: {__instance.UnitData.pilot.StatCollection.GetValue<int>("effectXP")}XP to {__instance.UnitData.pilot.Description.Callsign} from per-use effects/ability bonuses");
 
 
                 //check this math shit
@@ -64,23 +64,23 @@ namespace PracticeMakesPerfect.Patches
 
                     var contractFX_XP = Mathf.RoundToInt((missionXP * ModInit.modSettings.missionXPEffects) *
 
-                                                         (___UnitData.pilot.StatCollection.GetValue<int>(
+                                                         (__instance.UnitData.pilot.StatCollection.GetValue<int>(
                                                               "effectXP") /
                                                           ModInit.modSettings.missionXPeffectBonusDivisor));
                     newXP += contractFX_XP;
 
-                    ModInit.modLog.LogMessage($"adding {contractFX_XP}XP to {___UnitData.pilot.Description.Callsign} following formula ContractXP * ModInit.modSettings.missionXPEffects * (effectXP/ModInit.modSettings.missionXPeffectBonusDivisor)");
+                    ModInit.modLog.LogMessage($"adding {contractFX_XP}XP to {__instance.UnitData.pilot.Description.Callsign} following formula ContractXP * ModInit.modSettings.missionXPEffects * (effectXP/ModInit.modSettings.missionXPeffectBonusDivisor)");
                 }
 
 
                 if (newXP > ModInit.modSettings.bonusXP_CAP && ModInit.modSettings.bonusXP_CAP > 0)
                 {
                     newXP = ModInit.modSettings.bonusXP_CAP;
-                    ModInit.modLog.LogMessage($"total XP bonus exceeded ModInit.modSettings.bonusXP_CAP of {ModInit.modSettings.bonusXP_CAP}. {ModInit.modSettings.bonusXP_CAP}XP to {___UnitData.pilot.Description.Callsign} instead");
+                    ModInit.modLog.LogMessage($"total XP bonus exceeded ModInit.modSettings.bonusXP_CAP of {ModInit.modSettings.bonusXP_CAP}. {ModInit.modSettings.bonusXP_CAP}XP to {__instance.UnitData.pilot.Description.Callsign} instead");
                 }
 
-                ___UnitData.pilot.AddExperience(0, "FromKillsOrDmg", newXP);
-                ModInit.modLog.LogMessage($"Total bonus XP awarded to {___UnitData.pilot.Description.Callsign}: {newXP}");
+                __instance.UnitData.pilot.AddExperience(0, "FromKillsOrDmg", newXP);
+                ModInit.modLog.LogMessage($"Total bonus XP awarded to {__instance.UnitData.pilot.Description.Callsign}: {newXP}");
 
 
                 xpEarned += newXP;

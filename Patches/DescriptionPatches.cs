@@ -18,11 +18,11 @@ namespace PracticeMakesPerfect.Patches
         public static class SGFactionReputationWidget_Init_Patch
         {
             public static bool Prepare() => ModInit.modSettings.enableSpecializations;
-            public static void Postfix(SGFactionReputationWidget __instance, SimGameState sim, FactionValue faction, FactionDef ___CurrentFactionDef)
+            public static void Postfix(SGFactionReputationWidget __instance, SimGameState sim, FactionValue faction)
             {
                 var specDesc = Descriptions.GetOpForSpecializationDescription(faction?.Name);
 
-                var fdesc = ___CurrentFactionDef?.Description;
+                var fdesc = __instance.CurrentFactionDef.Description;
                 if (!string.IsNullOrEmpty(specDesc))
                 {
                     if (!fdesc.Contains(specDesc))
@@ -30,7 +30,8 @@ namespace PracticeMakesPerfect.Patches
                         fdesc += specDesc;
                     }
                 }
-                Traverse.Create(___CurrentFactionDef).Property("Description").SetValue(fdesc);
+                __instance.CurrentFactionDef.Description = fdesc;
+                //Traverse.Create(___CurrentFactionDef).Property("Description").SetValue(fdesc);
             }
         }
 
@@ -39,8 +40,7 @@ namespace PracticeMakesPerfect.Patches
         public static class SGContractsWidget_onContractSelected_Patch
         {
             public static bool Prepare() => ModInit.modSettings.enableSpecializations;
-            public static void Postfix(SGContractsWidget __instance, Contract contract,
-                HBSTooltip ___ContractTypeTooltip)
+            public static void Postfix(SGContractsWidget __instance, Contract contract)
             {
                 string arg;
                 if (contract.IsPriorityContract)
@@ -70,11 +70,13 @@ namespace PracticeMakesPerfect.Patches
                             details.Append(specDesc);
 
                             var deets = details.ToString();
-                            Traverse.Create(def2).Field("localizedDetails").SetValue(details);
-                            Traverse.Create(def2).Property("Details").SetValue(deets);
+                            //Traverse.Create(def2).Field("localizedDetails").SetValue(details);
+                            //Traverse.Create(def2).Property("Details").SetValue(deets);
+                            def2.localizedDetails = details;
+                            def2.Details = deets;
                         }
                     }
-                    ___ContractTypeTooltip.SetDefaultStateData(TooltipUtilities.GetStateDataFromObject(def2));
+                    __instance.ContractTypeTooltip.SetDefaultStateData(TooltipUtilities.GetStateDataFromObject(def2));
                 }
             }
         }
@@ -99,8 +101,7 @@ namespace PracticeMakesPerfect.Patches
 
                 var specDesc = Descriptions.GetPilotSpecializationsOrProgress(__instance.Pilot);
                 desc += specDesc;
-                var currentDescDef = Traverse.Create(tooltip).Field("defaultStateData").GetValue<HBSTooltipStateData>().GetTooltipObject() as BaseDescriptionDef;
-                if (currentDescDef != null)
+                if (tooltip.defaultStateData.GetTooltipObject() is BaseDescriptionDef currentDescDef)
                 {
                     if (currentDescDef.Id != "PilotSpecs")
                     {
@@ -124,12 +125,12 @@ namespace PracticeMakesPerfect.Patches
         public static class SGBarracksDossierPanel_SetPilot_Patch
         {
             public static bool Prepare() => ModInit.modSettings.enableSpecializations;
-            public static void Postfix(SGBarracksDossierPanel __instance, Pilot p, Image ___portrait)
+            public static void Postfix(SGBarracksDossierPanel __instance, Pilot p)
             {
                 if (p == null) return;
                 if (p.FetchGUID() == "NOTAPILOT") return;
-                var tooltip = ___portrait.gameObject.GetComponent<HBSTooltip>() ??
-                              ___portrait.gameObject.AddComponent<HBSTooltip>();
+                var tooltip = __instance.portrait.gameObject.GetComponent<HBSTooltip>() ??
+                              __instance.portrait.gameObject.AddComponent<HBSTooltip>();
 
                 var desc = tooltip.GetText();
                 if (string.IsNullOrEmpty(desc))
@@ -149,14 +150,14 @@ namespace PracticeMakesPerfect.Patches
         public static class SGBarracksMWDetailPanel_OnServiceClicked
         {
             public static bool Prepare() => ModInit.modSettings.enableSpecializations;
-            public static bool Prefix(SGBarracksMWDetailPanel __instance, Pilot ___curPilot, SGBarracksDossierPanel ___dossier)
+            public static bool Prefix(SGBarracksMWDetailPanel __instance)
             {
                 var background = UIManager.Instance.UILookAndColorConstants.PopupBackfill;
 
                 var hk = Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl);
                 if (!hk) return true;
                 var resetSpecs = true;
-                if (___curPilot.IsPlayerCharacter && SpecManager.ManagerInstance.StratComs.Count > 1)
+                if (__instance.curPilot.IsPlayerCharacter && SpecManager.ManagerInstance.StratComs.Count > 1)
                 {
                     GenericPopupBuilder
                         .Create("Change Stratcoms or Reset Specs?",
@@ -178,7 +179,7 @@ namespace PracticeMakesPerfect.Patches
                             {
                                 popup.AddButton(stratCom.StratComName, () =>
                                 {
-                                    SpecManager.ManagerInstance.SetStratCom(stratCom.StratComID, ___curPilot, ___dossier, __instance);
+                                    SpecManager.ManagerInstance.SetStratCom(stratCom.StratComID, __instance.curPilot, __instance.dossier, __instance);
                                     resetSpecs = false;
                                 });
                             }
@@ -206,10 +207,10 @@ namespace PracticeMakesPerfect.Patches
                                         "Are you sure you want to reset all specializations and progress for this pilot?")
                                     .AddButton("Cancel")
                                     .AddButton("Reset Mission Specs",
-                                        () => SpecManager.ManagerInstance.ResetMissionSpecs(___curPilot, ___dossier,
+                                        () => SpecManager.ManagerInstance.ResetMissionSpecs(__instance.curPilot, __instance.dossier,
                                             __instance))
                                     .AddButton("Reset Opfor Specs",
-                                        () => SpecManager.ManagerInstance.ResetOpForSpecs(___curPilot, ___dossier,
+                                        () => SpecManager.ManagerInstance.ResetOpForSpecs(__instance.curPilot, __instance.dossier,
                                             __instance))
                                     .CancelOnEscape()
                                     .AddFader(background)
@@ -239,8 +240,8 @@ namespace PracticeMakesPerfect.Patches
                     GenericPopupBuilder
                         .Create("Reset Specializations", "Are you sure you want to reset all specializations and progress for this pilot?")
                         .AddButton("Cancel")
-                        .AddButton("Reset Mission Specs", () => SpecManager.ManagerInstance.ResetMissionSpecs(___curPilot, ___dossier, __instance))
-                        .AddButton("Reset Opfor Specs", () => SpecManager.ManagerInstance.ResetOpForSpecs(___curPilot, ___dossier, __instance))
+                        .AddButton("Reset Mission Specs", () => SpecManager.ManagerInstance.ResetMissionSpecs(__instance.curPilot, __instance.dossier, __instance))
+                        .AddButton("Reset Opfor Specs", () => SpecManager.ManagerInstance.ResetOpForSpecs(__instance.curPilot, __instance.dossier, __instance))
                         .CancelOnEscape()
                         .AddFader(background)
                         .Render();

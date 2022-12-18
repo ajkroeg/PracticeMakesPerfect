@@ -552,8 +552,7 @@ namespace PracticeMakesPerfect.Framework
                             {
                                 var encounterAsChunk = encounterObjectGameLogic as DefendLanceWithEscapeChunkGameLogic;
                                 var encounterAsOGL = encounterAsChunk.ensureUnitsSurviveObjective.encounterObject;
-                                if (Traverse.Create(encounterAsOGL).Property("IsContractObjectivePrimary")
-                                    .GetValue<bool>())
+                                if (encounterAsOGL.IsContractObjectivePrimary)//Traverse.Create(encounterAsOGL).Property("IsContractObjectivePrimary").GetValue<bool>())
                                 {
                                     ModInit.modLog.LogMessage($"Checking for primary target unit.");
                                     if (encounterAsOGL.GetTargetUnits().Contains(unit))
@@ -578,8 +577,7 @@ namespace PracticeMakesPerfect.Framework
                             {
                                 var encounterAsChunk = encounterObjectGameLogic as DefendXUnitsChunkGameLogic;
                                 var encounterAsOGL = encounterAsChunk.defendXUnitsObjective.encounterObject;
-                                if (Traverse.Create(encounterAsOGL).Property("IsContractObjectivePrimary")
-                                    .GetValue<bool>())
+                                if (encounterAsOGL.IsContractObjectivePrimary)//Traverse.Create(encounterAsOGL).Property("IsContractObjectivePrimary").GetValue<bool>())
                                 {
                                     ModInit.modLog.LogMessage($"Checking for primary target unit.");
                                     if (encounterAsOGL.GetTargetUnits().Contains(unit))
@@ -604,8 +602,7 @@ namespace PracticeMakesPerfect.Framework
                             {
                                 var encounterAsChunk = encounterObjectGameLogic as DestroyXUnitsChunkGameLogic;
                                 var encounterAsOGL = encounterAsChunk.destroyXUnitsObjective.encounterObject;
-                                if (Traverse.Create(encounterAsOGL).Property("IsContractObjectivePrimary")
-                                    .GetValue<bool>())
+                                if (encounterAsOGL.IsContractObjectivePrimary)//Traverse.Create(encounterAsOGL).Property("IsContractObjectivePrimary").GetValue<bool>())
                                 {
                                     ModInit.modLog.LogMessage($"Checking for primary target unit.");
                                     if (encounterAsOGL.GetTargetUnits().Contains(unit))

@@ -46,7 +46,7 @@ namespace PracticeMakesPerfect.Patches
         public static class SH_Shop_Screen_AddShopItemToWidget
         {
             public static bool Prepare() => ModInit.modSettings.enableSpecializations;
-            public static void Prefix(SG_Shop_Screen __instance, StarSystem ___theSystem, ShopDefItem itemDef, Shop shop, //removed ref from shopdefitem?
+            public static void Prefix(SG_Shop_Screen __instance, ShopDefItem itemDef, Shop shop, //removed ref from shopdefitem?
                 IMechLabDropTarget targetWidget, bool isSelling = false, bool isBulkAdd = false)
             {
                 if (GlobalVars.sim == null) return;
@@ -63,13 +63,13 @@ namespace PracticeMakesPerfect.Patches
                 if (shop.ThisShopType == Shop.ShopType.BlackMarket)
                 {
                     shopOwner = FactionEnumeration.GetAuriganPiratesFactionValue().Name;
-                    ModInit.modLog.LogMessage($"System: {___theSystem.Name}. shopOwner: {shopOwner}");
+                    ModInit.modLog.LogMessage($"System: {__instance.theSystem.Name}. shopOwner: {shopOwner}");
                 }
                 else
                 {
                     shopOwner = sim.CurSystem.Def.OwnerValue.Name;
                     //shopOwner = Traverse.Create(shop).Field("system").GetValue<StarSystem>().Def.OwnerValue.Name;
-                    ModInit.modLog.LogMessage($"System: {___theSystem.Name}. shopOwner: {shopOwner}");
+                    ModInit.modLog.LogMessage($"System: {__instance.theSystem.Name}. shopOwner: {shopOwner}");
                 }
 
                 foreach (var pKey in curPilots)
@@ -102,7 +102,7 @@ namespace PracticeMakesPerfect.Patches
         public static class SG_Stores_MiniFactionWidget_FillInData_Patch
         {
             public static bool Prepare() => ModInit.modSettings.enableSpecializations;
-            public static void Postfix(SG_Stores_MiniFactionWidget __instance, FactionValue theFaction, FactionValue ___owningFactionValue, LocalizableText ___ReputationBonusText)
+            public static void Postfix(SG_Stores_MiniFactionWidget __instance, FactionValue theFaction)
             {
                 if (GlobalVars.sim == null) return;
                 var sellBonus = 0f;
@@ -123,9 +123,9 @@ namespace PracticeMakesPerfect.Patches
                         {
                             var opSpec =
                                 SpecManager.ManagerInstance.OpForSpecList.FirstOrDefault(x => x.OpForSpecID == spec);
-                            if (opSpec != null && opSpec.storeBonus.ContainsKey(___owningFactionValue.Name))
+                            if (opSpec != null && opSpec.storeBonus.ContainsKey(__instance.owningFactionValue.Name))
                             {
-                                sellBonus += opSpec.storeBonus[___owningFactionValue.Name];
+                                sellBonus += opSpec.storeBonus[__instance.owningFactionValue.Name];
                                 ModInit.modLog.LogMessage($"Current sell multiplier from specs: {sellBonus}");
                             }
                         }
@@ -133,7 +133,7 @@ namespace PracticeMakesPerfect.Patches
                 }
 
                 if (sellBonus == 0f) return;
-                ___ReputationBonusText.AppendTextAndRefresh(", {0}% Sell Bonus", new object[]
+                __instance.ReputationBonusText.AppendTextAndRefresh(", {0}% Sell Bonus", new object[]
                     {
                         Mathf.RoundToInt(sellBonus * 100f)
                     });

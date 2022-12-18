@@ -18,8 +18,7 @@ namespace PracticeMakesPerfect.Patches
         public static class AAR_FactionReputationResultWidget_InitializeData_Patch
         {
             public static bool Prepare() => ModInit.modSettings.enableSpecializations;
-            public static void Postfix(AAR_FactionReputationResultWidget __instance, SimGameState theSimState, Contract theContract,
-                List<SGReputationWidget_Simple> ___FactionWidgets, RectTransform ___WidgetListAnchor)
+            public static void Postfix(AAR_FactionReputationResultWidget __instance, SimGameState theSimState, Contract theContract)
             {
                 var employer = theContract.Override.employerTeam.FactionDef.FactionValue.Name;
                 var target = theContract.Override.targetTeam.FactionDef.FactionValue.Name;
@@ -67,16 +66,16 @@ namespace PracticeMakesPerfect.Patches
                     }
                 }
 
-                var idx = ___FactionWidgets.Count;
+                var idx = __instance.FactionWidgets.Count;
                 foreach (var repMod in repModDictionary)
                 {
                     var component = sim.DataManager
                         .PooledInstantiate("uixPrfWidget_AAR_FactionRepBarAndIcon",
                             BattleTechResourceType.UIModulePrefabs)
                         .GetComponent<SGReputationWidget_Simple>();
-                    component.transform.SetParent(___WidgetListAnchor, false);
+                    component.transform.SetParent(__instance.WidgetListAnchor, false);
 
-                    ___FactionWidgets.Add(component);
+                    __instance.FactionWidgets.Add(component);
 
                     var faction = UnityGameInstance.BattleTechGame.DataManager.Factions
                         .FirstOrDefault(x => x.Value.FactionValue.Name == repMod.Key).Value;
@@ -125,17 +124,16 @@ namespace PracticeMakesPerfect.Patches
             {
                 if (SpecHolder.HolderInstance.totalBounty != 0)
                 {
-                    var addObjectiveMethod = Traverse.Create(__instance).Method("AddObjective", new Type[] { typeof(MissionObjectiveResult) });
+                    //var addObjectiveMethod = Traverse.Create(__instance).Method("AddObjective", new Type[] { typeof(MissionObjectiveResult) });
 
                     var bountyResults = $"Bounty Payouts: {SpecHolder.HolderInstance.kills} kills x {SpecHolder.HolderInstance.bounty} = ¢{SpecHolder.HolderInstance.totalBounty}";
 
                     var bountyPayouts = new MissionObjectiveResult(bountyResults, Guid.NewGuid().ToString(), false, true, ObjectiveStatus.Succeeded, false);
 
-                    addObjectiveMethod.GetValue(bountyPayouts);
-
+                    //addObjectiveMethod.GetValue(bountyPayouts);
+                    __instance.AddObjective(bountyPayouts);
                     ModInit.modLog.LogMessage($"{SpecHolder.HolderInstance.totalBounty} in bounties awarded.");
                 }
-
                 else
                 {
                     ModInit.modLog.LogMessage($"No bounties awarded.");
