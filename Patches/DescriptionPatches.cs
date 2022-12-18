@@ -18,20 +18,25 @@ namespace PracticeMakesPerfect.Patches
         public static class SGFactionReputationWidget_Init_Patch
         {
             public static bool Prepare() => ModInit.modSettings.enableSpecializations;
+
             public static void Postfix(SGFactionReputationWidget __instance, SimGameState sim, FactionValue faction)
             {
-                var specDesc = Descriptions.GetOpForSpecializationDescription(faction?.Name);
-
-                var fdesc = __instance.CurrentFactionDef.Description;
-                if (!string.IsNullOrEmpty(specDesc))
+                if (__instance.HasFactionDef)
                 {
-                    if (!fdesc.Contains(specDesc))
+                    var specDesc = Descriptions.GetOpForSpecializationDescription(faction.Name);
+                    var fdesc = __instance.CurrentFactionDef?.Description;
+                    
+                    if (!string.IsNullOrEmpty(specDesc))
                     {
-                        fdesc += specDesc;
+                        if (!fdesc.Contains(specDesc))
+                        {
+                            fdesc += specDesc;
+                        }
                     }
+                    
+                    __instance.CurrentFactionDef.Description = fdesc;
+                    //Traverse.Create(___CurrentFactionDef).Property("Description").SetValue(fdesc);
                 }
-                __instance.CurrentFactionDef.Description = fdesc;
-                //Traverse.Create(___CurrentFactionDef).Property("Description").SetValue(fdesc);
             }
         }
 
