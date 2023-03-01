@@ -90,8 +90,11 @@ namespace PracticeMakesPerfect.Patches
                     SpecHolder.HolderInstance.AddToMaps(p);
                     curPilots.Add(p.FetchGUID());
                     SpecHolder.HolderInstance.ProcessTaggedSpecs(p);
+                }// SAR getting reset. oops.
+                if (ModInit.modSettings.removeDeprecated)
+                {
+                    SpecHolder.HolderInstance.CleanMaps(curPilots);
                 }
-                SpecHolder.HolderInstance.CleanMaps(curPilots);
 
                 if (String.IsNullOrEmpty(SpecHolder.HolderInstance.activeStratCom) && SpecManager.ManagerInstance.StratComs.Count > 0)
                 {
@@ -112,6 +115,54 @@ namespace PracticeMakesPerfect.Patches
                 var p = __instance.PilotRoster.FirstOrDefault(x => x.pilotDef.Description.Id == def.Description.Id);
                 SpecHolder.HolderInstance.AddToMaps(p);
                 SpecHolder.HolderInstance.ProcessTaggedSpecs(p);
+            }
+        }
+
+        [HarmonyPatch(typeof(SimGameState), "DismissPilot", new Type[] {typeof(Pilot)})]
+        public static class SimGameState_DismissPilot
+        {
+            public static void Postfix(SimGameState __instance, Pilot p)
+            {
+                var key = p.FetchGUID();
+                SpecHolder.HolderInstance.MissionSpecMap.Remove(key);
+                ModInit.modLog.LogMessage(
+                    $"Pilot {p.Callsign} with pilotID {key} has been dismissed, removing from MissionSpecMap");
+
+                SpecHolder.HolderInstance.OpForSpecMap.Remove(key);
+                ModInit.modLog.LogMessage(
+                    $"Pilot {p.Callsign} with pilotID {key} has been dismissed, removing from OpForSpecMap");
+           
+                SpecHolder.HolderInstance.MissionsTracker.Remove(key);
+                ModInit.modLog.LogMessage(
+                    $"Pilot {p.Callsign} with pilotID {key} has been dismissed, removing from MissionsTracker");
+           
+                SpecHolder.HolderInstance.OpForKillsTracker.Remove(key);
+                ModInit.modLog.LogMessage(
+                    $"Pilot {p.Callsign} with pilotID {key} has been dismissed, removing from OpForKillsTracker");
+            }
+        }
+
+        [HarmonyPatch(typeof(SimGameState), "KillPilot", new Type[] { typeof(Pilot), typeof(bool), typeof(string), typeof(string) })]
+        public static class SimGameState_KillPilot
+        {
+            public static void Postfix(SimGameState __instance, Pilot p, bool fromEvent = false, string StarSystemID = null, string causeOfDeathOverride = null)
+            {
+                var key = p.FetchGUID();
+                SpecHolder.HolderInstance.MissionSpecMap.Remove(key);
+                ModInit.modLog.LogMessage(
+                    $"Pilot {p.Callsign} with pilotID {key} has been killed, removing from MissionSpecMap");
+
+                SpecHolder.HolderInstance.OpForSpecMap.Remove(key);
+                ModInit.modLog.LogMessage(
+                    $"Pilot {p.Callsign} with pilotID {key} has been killed, removing from OpForSpecMap");
+
+                SpecHolder.HolderInstance.MissionsTracker.Remove(key);
+                ModInit.modLog.LogMessage(
+                    $"Pilot {p.Callsign} with pilotID {key} has been killed, removing from MissionsTracker");
+
+                SpecHolder.HolderInstance.OpForKillsTracker.Remove(key);
+                ModInit.modLog.LogMessage(
+                    $"Pilot {p.Callsign} with pilotID {key} has been killed, removing from OpForKillsTracker");
             }
         }
 

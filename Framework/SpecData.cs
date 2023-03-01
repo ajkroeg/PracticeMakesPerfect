@@ -213,9 +213,8 @@ namespace PracticeMakesPerfect.Framework
                     }
                 }
             }
-
-            var rm1 = SpecHolder.HolderInstance.MissionSpecMap.Keys.Where(x =>
-                !currentPilots.Contains(x) || x.EndsWith(aiPilotFlag));
+            //this is where SAR is resetgging things? so eithe prevent cleanup, or spcefically skip SAR pilots...with tag maybe?l
+            var rm1 = SpecHolder.HolderInstance.MissionSpecMap.Keys.Where(x => x.EndsWith(aiPilotFlag));
             foreach (var key in new List<string>(rm1))
             {
                 SpecHolder.HolderInstance.MissionSpecMap.Remove(key);
