@@ -123,6 +123,7 @@ namespace PracticeMakesPerfect.Patches
         {
             public static void Postfix(SimGameState __instance, Pilot p)
             {
+                if (p == null) return;
                 var key = p.FetchGUID();
                 SpecHolder.HolderInstance.MissionSpecMap.Remove(key);
                 ModInit.modLog.LogMessage(
@@ -147,6 +148,7 @@ namespace PracticeMakesPerfect.Patches
         {
             public static void Postfix(SimGameState __instance, Pilot p, bool fromEvent = false, string StarSystemID = null, string causeOfDeathOverride = null)
             {
+                if (p == null) return;
                 var key = p.FetchGUID();
                 SpecHolder.HolderInstance.MissionSpecMap.Remove(key);
                 ModInit.modLog.LogMessage(
