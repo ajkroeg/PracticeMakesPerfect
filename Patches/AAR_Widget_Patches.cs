@@ -15,13 +15,20 @@ namespace PracticeMakesPerfect.Patches
     {
         [HarmonyPatch(typeof(AAR_FactionReputationResultWidget), "InitializeData",
             new Type[] {typeof(SimGameState), typeof(Contract)})]
-        public static class AAR_FactionReputationResultWidget_InitializeData_Patch
+        public static class AAR_FactionReputationResultWidget_InitializeData_Patch //added rep for nonfaction?
         {
             public static bool Prepare() => ModInit.modSettings.enableSpecializations;
             public static void Postfix(AAR_FactionReputationResultWidget __instance, SimGameState theSimState, Contract theContract)
             {
                 var employer = theContract.Override.employerTeam.FactionDef.FactionValue.Name;
                 var target = theContract.Override.targetTeam.FactionDef.FactionValue.Name;
+
+                var baseOpfor = target;
+                if (SpecHolder.HolderInstance.SubfactionsMap.ContainsKey(target))
+                {
+                    ModInit.modLog.LogMessage($"set baseOpfor to {baseOpfor} from subfaction map.");
+                    baseOpfor = SpecHolder.HolderInstance.SubfactionsMap[target];
+                }
 
                 var curPilots = new List<string>();
                 var playerUnits = UnityGameInstance.BattleTechGame.Combat.AllActors.Where(x => x.team.IsLocalPlayer);
@@ -44,8 +51,9 @@ namespace PracticeMakesPerfect.Patches
                     {
                         foreach (var spec in SpecHolder.HolderInstance.OpForSpecMap[pKey])
                         {
+                            
                             var opSpec =
-                                SpecManager.ManagerInstance.OpForSpecList.FirstOrDefault(x => x.OpForSpecID == spec && x.factionID == target);
+                                SpecManager.ManagerInstance.OpForSpecList.FirstOrDefault(x => x.OpForSpecID == spec && (x.factionID == baseOpfor || x.applyToFaction.Contains(baseOpfor)));
                             if (opSpec == null) continue;
                             if (opSpec.repMod.Count > 0)
                             {
@@ -69,6 +77,9 @@ namespace PracticeMakesPerfect.Patches
                 var idx = __instance.FactionWidgets.Count;
                 foreach (var repMod in repModDictionary)
                 {
+                    var faction = UnityGameInstance.BattleTechGame.DataManager.Factions
+                        .FirstOrDefault(x => x.Value.FactionValue.Name == repMod.Key).Value;
+                    if (faction.FactionValue.IsMercenaryReviewBoard) continue;
                     var component = sim.DataManager
                         .PooledInstantiate("uixPrfWidget_AAR_FactionRepBarAndIcon",
                             BattleTechResourceType.UIModulePrefabs)
@@ -77,12 +88,7 @@ namespace PracticeMakesPerfect.Patches
 
                     __instance.FactionWidgets.Add(component);
 
-                    var faction = UnityGameInstance.BattleTechGame.DataManager.Factions
-                        .FirstOrDefault(x => x.Value.FactionValue.Name == repMod.Key).Value;
-
                     int repChange;
-
-                    if (faction.FactionValue.IsMercenaryReviewBoard) continue;
 
                     if (theContract.Override.employerTeam.FactionDef.FactionValue.DoesGainReputation)
                     {

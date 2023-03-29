@@ -9,10 +9,10 @@ namespace PracticeMakesPerfect.Patches
     
     public class BonusEffectsXP_Module
     {
-        private static bool reUseRestricted;
-        private static bool reUseDegrades;
-        private static Effect appliedEffect;
-        private static List<Effect> effectsList;
+        public static bool reUseRestricted;
+        public static bool reUseDegrades;
+        public static Effect appliedEffect;
+        public static List<Effect> effectsList;
 
         [HarmonyPatch(typeof(AbstractActor), "InitEffectStats")]
         public static class AbstractActor_InitEffectStats_Patch

@@ -30,7 +30,11 @@ namespace PracticeMakesPerfect.Patches
                     {
                         var pKey = p.FetchGUID();
                         var opfor = __instance.team.FactionValue.Name;
-                        if (ModInit.modSettings.WhiteListOpFor.Contains(opfor))
+
+                        var foundInSubMap = SpecHolder.HolderInstance.SubfactionsMap.ContainsKey(opfor) &&
+                                            ModInit.modSettings.WhiteListOpFor.Contains(
+                                                SpecHolder.HolderInstance.SubfactionsMap[opfor]);
+                        if (foundInSubMap || ModInit.modSettings.WhiteListOpFor.Contains(opfor))
                         {
                             if (!SpecHolder.HolderInstance.OpForKillsTEMPTracker.ContainsKey(pKey))
                             {

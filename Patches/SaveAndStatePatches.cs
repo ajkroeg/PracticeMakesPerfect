@@ -205,19 +205,33 @@ namespace PracticeMakesPerfect.Patches
                         ModInit.modLog.LogMessage($"{p.Callsign} was missing OpForKillsTEMPTracker. Adding an empty one.");
                     }
 
-                    if (ModInit.modSettings.WhiteListOpFor.Contains(opforID) && !SpecHolder.HolderInstance.OpForKillsTEMPTracker[pKey].ContainsKey(opforID))
+                    var baseOpfor = opforID;
+                    if (SpecHolder.HolderInstance.SubfactionsMap.ContainsKey(opforID))
+                    {
+                        ModInit.modLog.LogMessage($"set baseOpfor to {baseOpfor} from subfaction map.");
+                        baseOpfor = SpecHolder.HolderInstance.SubfactionsMap[opforID];
+                    }
+
+                    if (ModInit.modSettings.WhiteListOpFor.Contains(baseOpfor) && !SpecHolder.HolderInstance.OpForKillsTEMPTracker[pKey].ContainsKey(opforID))
                     {
                         SpecHolder.HolderInstance.OpForKillsTEMPTracker[pKey].Add(opforID, 0);
                         ModInit.modLog.LogMessage($"Initializing {p.Callsign}'s OpForKillsTEMPTracker for target team {opforID}.");
                     }
 
-                    if (ModInit.modSettings.WhiteListOpFor.Contains(opAllyID) && string.IsNullOrEmpty(opAllyID) && !SpecHolder.HolderInstance.OpForKillsTEMPTracker[pKey].ContainsKey(opAllyID))
+                    if (!string.IsNullOrEmpty(opAllyID) && ModInit.modSettings.WhiteListOpFor.Contains(opAllyID) && !SpecHolder.HolderInstance.OpForKillsTEMPTracker[pKey].ContainsKey(opAllyID))
                     {
                         SpecHolder.HolderInstance.OpForKillsTEMPTracker[pKey].Add(opAllyID, 0);
                         ModInit.modLog.LogMessage($"Initializing {p.Callsign}'s OpForKillsTEMPTracker for targets ally team {opAllyID}.");
                     }
 
-                    if (ModInit.modSettings.WhiteListOpFor.Contains(hostiletoALLID) && string.IsNullOrEmpty(hostiletoALLID) && !SpecHolder.HolderInstance.OpForKillsTEMPTracker[pKey].ContainsKey(hostiletoALLID))
+                    var baseHostileAllOpfor = hostiletoALLID;
+                    if (SpecHolder.HolderInstance.SubfactionsMap.ContainsKey(hostiletoALLID))
+                    {
+                        ModInit.modLog.LogMessage($"set baseHostileALLOpfor to {baseHostileAllOpfor} from subfaction map.");
+                        baseHostileAllOpfor = SpecHolder.HolderInstance.SubfactionsMap[hostiletoALLID];
+                    }
+
+                    if (!string.IsNullOrEmpty(hostiletoALLID) && ModInit.modSettings.WhiteListOpFor.Contains(baseHostileAllOpfor) && !SpecHolder.HolderInstance.OpForKillsTEMPTracker[pKey].ContainsKey(hostiletoALLID))
                     {
                         SpecHolder.HolderInstance.OpForKillsTEMPTracker[pKey].Add(hostiletoALLID, 0);
                         ModInit.modLog.LogMessage($"Initializing {p.Callsign}'s OpForKillsTEMPTracker for hostile to all team {hostiletoALLID}.");
@@ -225,7 +239,7 @@ namespace PracticeMakesPerfect.Patches
 
                     SpecManager.ManagerInstance.GatherPassiveMissionSpecs(actor, contractID);
 
-                    SpecManager.ManagerInstance.GatherPassiveOpforSpecs(actor, opforID);
+                    SpecManager.ManagerInstance.GatherPassiveOpforSpecs(actor, baseOpfor);
                 }
             }
         }
@@ -282,7 +296,11 @@ namespace PracticeMakesPerfect.Patches
 
                         foreach (var opSpec in opSpecs)
                         {
-                            if (opSpec.factionID == target || opSpec.applyToFaction.Contains(target))
+                            var foundInSubMap = SpecHolder.HolderInstance.SubfactionsMap.ContainsKey(target) &&
+                                              (SpecHolder.HolderInstance.SubfactionsMap[target] == opSpec.factionID ||
+                                               opSpec.applyToFaction.Contains(
+                                                   SpecHolder.HolderInstance.SubfactionsMap[target]));
+                            if (foundInSubMap || opSpec.factionID == target || opSpec.applyToFaction.Contains(target))
                             {
                                 if (opSpec.repMod.ContainsKey(MRBName))
                                 {
@@ -359,7 +377,11 @@ namespace PracticeMakesPerfect.Patches
 
                             foreach (var opSpec in opSpecs)
                             {
-                                if (opSpec.factionID.Contains(target) || opSpec.applyToFaction.Contains(target))
+                                var foundInSubMap = SpecHolder.HolderInstance.SubfactionsMap.ContainsKey(target) &&
+                                                    (SpecHolder.HolderInstance.SubfactionsMap[target] == opSpec.factionID ||
+                                                     opSpec.applyToFaction.Contains(
+                                                         SpecHolder.HolderInstance.SubfactionsMap[target]));
+                                if (foundInSubMap || opSpec.factionID.Contains(target) || opSpec.applyToFaction.Contains(target))
                                 {
                                     if (opSpec.killBounty.ContainsKey(employer) &&
                                         !opSpec.killBounty.ContainsKey(employer_string))
@@ -389,7 +411,6 @@ namespace PracticeMakesPerfect.Patches
 
                     if (!ModInit.modSettings.TaggedMissionSpecsCountTowardMax)
                     {
-
                         foreach (var tag in ModInit.modSettings.taggedMissionSpecs)
                         {
                             if (p.pilotDef.PilotTags.Contains(tag.Key))
@@ -414,7 +435,6 @@ namespace PracticeMakesPerfect.Patches
                     {
                         if (SpecHolder.HolderInstance.MissionsTracker.ContainsKey(pKey))
                         {
-
                             if (!SpecHolder.HolderInstance.MissionsTracker[pKey].ContainsKey(contractID))
                             {
                                 SpecHolder.HolderInstance.MissionsTracker[pKey].Add(contractID, 0);
@@ -489,25 +509,30 @@ namespace PracticeMakesPerfect.Patches
                         }
                     }
 
-                    if (ModInit.modSettings.WhiteListOpFor.Contains(__instance.Override.targetTeam.FactionValue.Name) && SpecHolder.HolderInstance.OpForKillsTEMPTracker.ContainsKey(pKey))
+                    if (SpecHolder.HolderInstance.OpForKillsTEMPTracker.ContainsKey(pKey))
                     {
                         if (SpecHolder.HolderInstance.OpForKillsTEMPTracker[pKey].Count <= 0) return;
                         foreach (var key in SpecHolder.HolderInstance.OpForKillsTEMPTracker[pKey]?.Keys)
                         {
-                            if (ModInit.modSettings.WhiteListOpFor.Contains(key))
+                            var usableKey = key;
+                            if (SpecHolder.HolderInstance.SubfactionsMap.ContainsKey(key))
                             {
-                                if (!SpecHolder.HolderInstance.OpForKillsTracker[pKey].ContainsKey(key))
+                                usableKey = SpecHolder.HolderInstance.SubfactionsMap[key];
+                                ModInit.modLog.LogMessage($"Converted faction key {key} to {usableKey} from SubfactionsMap.");
+                            }
+                            if (ModInit.modSettings.WhiteListOpFor.Contains(usableKey))
+                            {
+                                if (!SpecHolder.HolderInstance.OpForKillsTracker[pKey].ContainsKey(usableKey))
                                 {
-                                    SpecHolder.HolderInstance.OpForKillsTracker[pKey].Add(key, 0);
+                                    SpecHolder.HolderInstance.OpForKillsTracker[pKey].Add(usableKey, 0);
                                     ModInit.modLog.LogMessage(
-                                        $"No key for {key} found in {p.Callsign}'s OpForKillsTracker. Adding it with default value 0.");
+                                        $"No key for {usableKey} found in {p.Callsign}'s OpForKillsTracker. Adding it with default value 0.");
                                 }
-                                SpecHolder.HolderInstance.OpForKillsTracker[pKey][key] +=
+                                SpecHolder.HolderInstance.OpForKillsTracker[pKey][usableKey] +=
                                     SpecHolder.HolderInstance.OpForKillsTEMPTracker[pKey][key];
                                 ModInit.modLog.LogMessage(
-                                    $"Adding {SpecHolder.HolderInstance.OpForKillsTEMPTracker[pKey][key]} {key} kills to {p.Callsign}'s OpForKillsTracker");
+                                    $"Adding {SpecHolder.HolderInstance.OpForKillsTEMPTracker[pKey][key]} {usableKey} kills to {p.Callsign}'s OpForKillsTracker");
                             }
-
                         }
                     }
 

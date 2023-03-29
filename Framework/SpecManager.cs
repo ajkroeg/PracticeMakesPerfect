@@ -6,6 +6,7 @@ using BattleTech.Designed;
 using BattleTech.UI;
 using Harmony;
 using static PracticeMakesPerfect.Framework.GlobalVars;
+using HBS.Scripting;
 
 namespace PracticeMakesPerfect.Framework
 {
@@ -17,9 +18,9 @@ namespace PracticeMakesPerfect.Framework
             return combatant.StatCollection.GetValue<bool>("CUFakeVehicle");
         }
     }
-    internal static class PilotExtensions
+    public static class PilotExtensions
     {
-        internal static string FetchGUID(this Pilot pilot)
+        public static string FetchGUID(this Pilot pilot)
         {
             var guid = pilot.pilotDef.PilotTags.FirstOrDefault(x => x.StartsWith(spGUID));
             if (string.IsNullOrEmpty(guid))
@@ -33,11 +34,11 @@ namespace PracticeMakesPerfect.Framework
 
     public class SpecManager
     {
-        private static SpecManager _instance;
+        public static SpecManager _instance;
         public List<OpForSpec> OpForSpecList;
-        private List<OpForSpec> OpForDefaultList;
+        public List<OpForSpec> OpForDefaultList;
         public List<MissionSpec> MissionSpecList;
-        private List<MissionSpec> MissionDefaultList;
+        public List<MissionSpec> MissionDefaultList;
 
         public List<StratCom> StratComs;
 
@@ -51,7 +52,7 @@ namespace PracticeMakesPerfect.Framework
             }
         }
 
-        internal void Initialize()
+        public void Initialize()
         {
             StratComs = new List<StratCom>();
             ModInit.modLog.LogMessage($"Initializing StratComs!");
@@ -125,7 +126,7 @@ namespace PracticeMakesPerfect.Framework
             }
         }
 
-        internal void ProcessDefaults()
+        public void ProcessDefaults()
         {
             var factions = UnityGameInstance.BattleTechGame.DataManager.Factions;
             ModInit.modLog.LogMessage($"Initializing Default OpForSpecs!");
@@ -201,7 +202,7 @@ namespace PracticeMakesPerfect.Framework
             }
         }
 
-        internal void PreloadIcons()
+        public void PreloadIcons()
         {
             var dm = UnityGameInstance.BattleTechGame.DataManager;
             var loadRequest = dm.CreateLoadRequest();
@@ -235,7 +236,7 @@ namespace PracticeMakesPerfect.Framework
             loadRequest.ProcessRequests();
         }
 
-        internal void GatherPassiveOpforSpecs(AbstractActor actor, string opforID)
+        public void GatherPassiveOpforSpecs(AbstractActor actor, string opforID)
         {
             var p = actor.GetPilot();
             var pKey = p.FetchGUID();
@@ -249,7 +250,7 @@ namespace PracticeMakesPerfect.Framework
             }
         }
 
-        internal void GatherPassiveMissionSpecs(AbstractActor actor, string missionID)
+        public void GatherPassiveMissionSpecs(AbstractActor actor, string missionID)
         {
             var p = actor.GetPilot();
             var pKey = p.FetchGUID();
@@ -263,7 +264,7 @@ namespace PracticeMakesPerfect.Framework
             }
         }
 
-        private void ApplyPassiveOp4SpecEffects(AbstractActor actor, OpForSpec op4Spec)
+        public void ApplyPassiveOp4SpecEffects(AbstractActor actor, OpForSpec op4Spec)
         {
             var p = actor.GetPilot();
             var pKey = p.FetchGUID();
@@ -321,7 +322,7 @@ namespace PracticeMakesPerfect.Framework
             }
         }
 
-        internal static void ApplyStratComs(AbstractActor actor)
+        public static void ApplyStratComs(AbstractActor actor)
         {
             var p = actor.GetPilot();
             var pKey = p.FetchGUID();
@@ -342,7 +343,7 @@ namespace PracticeMakesPerfect.Framework
             }
         }
 
-        internal void SetStratCom(string stratcom, Pilot pilot, SGBarracksDossierPanel dossier, SGBarracksMWDetailPanel details)
+        public void SetStratCom(string stratcom, Pilot pilot, SGBarracksDossierPanel dossier, SGBarracksMWDetailPanel details)
         {
             SpecHolder.HolderInstance.activeStratCom = stratcom;
             ModInit.modLog.LogMessage(
@@ -350,7 +351,7 @@ namespace PracticeMakesPerfect.Framework
             dossier.SetPilot(pilot, details, pilot.GUID != sim.Commander.GUID, false);
         }
 
-        internal void ResetMissionSpecs(Pilot pilot, SGBarracksDossierPanel dossier, SGBarracksMWDetailPanel details)
+        public void ResetMissionSpecs(Pilot pilot, SGBarracksDossierPanel dossier, SGBarracksMWDetailPanel details)
         {
             var pKey = pilot.FetchGUID();
             SpecHolder.HolderInstance.MissionSpecMap[pKey] = new List<string>();
@@ -362,7 +363,7 @@ namespace PracticeMakesPerfect.Framework
             
         }
 
-        internal void ResetOpForSpecs(Pilot pilot, SGBarracksDossierPanel dossier, SGBarracksMWDetailPanel details)
+        public void ResetOpForSpecs(Pilot pilot, SGBarracksDossierPanel dossier, SGBarracksMWDetailPanel details)
         {
             var pKey = pilot.FetchGUID();
             SpecHolder.HolderInstance.OpForSpecMap[pKey] = new List<string>();
@@ -375,7 +376,7 @@ namespace PracticeMakesPerfect.Framework
         }
 
 
-        private void ApplyPassiveMissionSpecEffects(AbstractActor actor, MissionSpec missionSpec)
+        public void ApplyPassiveMissionSpecEffects(AbstractActor actor, MissionSpec missionSpec)
         {
             var p = actor.GetPilot();
             var pKey = p.FetchGUID();
@@ -628,7 +629,7 @@ namespace PracticeMakesPerfect.Framework
                 }
             }
         }
-        internal void GatherAndApplyActivePrimarySpecEffects(AbstractActor playerUnit, ICombatant target)
+        public void GatherAndApplyActivePrimarySpecEffects(AbstractActor playerUnit, ICombatant target)
         {
             var p = playerUnit.GetPilot();
             var pKey = p.FetchGUID();
@@ -665,7 +666,7 @@ namespace PracticeMakesPerfect.Framework
 
         }
 
-        internal void GatherAndApplyGlobalEffects(AbstractActor unit, ICombatant target)
+        public void GatherAndApplyGlobalEffects(AbstractActor unit, ICombatant target)
         {
             var p = unit.GetPilot();
 
@@ -678,24 +679,31 @@ namespace PracticeMakesPerfect.Framework
                 {
                     foreach (var OpForSpecID in SpecHolder.HolderInstance.OpForSpecMap[pKey])
                     {
-                        foreach (var op4Spec in ManagerInstance.OpForSpecList.Where(x =>
-                            x.OpForSpecID == OpForSpecID && (x.factionID == target.team.FactionValue.Name ||
-                                                             x.applyToFaction.Contains(unit.team.FactionValue.Name))))
+                        
+                        foreach (var op4Spec in ManagerInstance.OpForSpecList)
                         {
-
-                            foreach (var effectData in op4Spec.effects)
+                            if (OpForSpecID != op4Spec.OpForSpecID) continue;
+                            var foundInSubMap = SpecHolder.HolderInstance.SubfactionsMap.ContainsKey(target.team.FactionValue.Name) &&
+                                                (SpecHolder.HolderInstance.SubfactionsMap[target.team.FactionValue.Name] == op4Spec.factionID ||
+                                                 op4Spec.applyToFaction.Contains(
+                                                     SpecHolder.HolderInstance.SubfactionsMap[target.team.FactionValue.Name]));
+                            if (foundInSubMap || op4Spec.factionID == target.team.factionValue.Name ||
+                                op4Spec.applyToFaction.Contains(target.team.factionValue.Name))
                             {
-                                ModInit.modLog.LogMessage(
-                                    $"processing {effectData.Description.Name} for {p.Description.Callsign}");
-
-                                var id = ($"op4Spec_{p.Description.Callsign}_{effectData.Description.Id}");
-
-                                if (effectData.targetingData.effectTriggerType == EffectTriggerType.OnWeaponFire &&
-                                    effectData.targetingData.effectTargetType == EffectTargetType.AllEnemies)
+                                foreach (var effectData in op4Spec.effects)
                                 {
-                                    ModInit.modLog.LogMessage($"Applying {id}");
-                                    unit.Combat.EffectManager.CreateEffect(effectData, id, -1, unit, unit,
-                                        default(WeaponHitInfo), 1);
+                                    ModInit.modLog.LogMessage(
+                                        $"processing {effectData.Description.Name} for {p.Description.Callsign}");
+
+                                    var id = ($"op4Spec_{p.Description.Callsign}_{effectData.Description.Id}");
+
+                                    if (effectData.targetingData.effectTriggerType == EffectTriggerType.OnWeaponFire &&
+                                        effectData.targetingData.effectTargetType == EffectTargetType.AllEnemies)
+                                    {
+                                        ModInit.modLog.LogMessage($"Applying {id}");
+                                        unit.Combat.EffectManager.CreateEffect(effectData, id, -1, unit, unit,
+                                            default(WeaponHitInfo), 1);
+                                    }
                                 }
                             }
                         }
@@ -791,39 +799,46 @@ namespace PracticeMakesPerfect.Framework
         }
 
 
-        internal void GatherAndApplyActiveBuildingSpecEffects(AbstractActor unit, ICombatant building)
+        public void GatherAndApplyActiveBuildingSpecEffects(AbstractActor unit, ICombatant building)
         {
             var p = unit.GetPilot();
             var pKey = p.FetchGUID();
 
             foreach (var OpForSpecID in SpecHolder.HolderInstance.OpForSpecMap[pKey])
             {
-                foreach (var op4Spec in ManagerInstance.OpForSpecList.Where(x => x.OpForSpecID == OpForSpecID && (x.factionID == building.team.FactionValue.Name || x.applyToFaction.Contains(building.team.FactionValue.Name))))
+                foreach (var op4Spec in ManagerInstance.OpForSpecList)
                 {
-                    //                   ModInit.modLog.LogMessage($"Gathered {op4Spec.OpForSpecID} for {p.Description.Callsign}{pKey}");
-
-                    foreach (var effectData in op4Spec.effects)
+                    if (OpForSpecID != op4Spec.OpForSpecID) continue;
+                    var foundInSubMap = SpecHolder.HolderInstance.SubfactionsMap.ContainsKey(building.team.FactionValue.Name) &&
+                                        (SpecHolder.HolderInstance.SubfactionsMap[building.team.FactionValue.Name] == op4Spec.factionID ||
+                                         op4Spec.applyToFaction.Contains(
+                                             SpecHolder.HolderInstance.SubfactionsMap[building.team.FactionValue.Name]));
+                    if (foundInSubMap || op4Spec.factionID == building.team.factionValue.Name ||
+                        op4Spec.applyToFaction.Contains(building.team.factionValue.Name))
                     {
-                        ModInit.modLog.LogMessage(
-                            $"processing {effectData.Description.Name} for {p.Description.Callsign}{pKey}");
-
-                        var id = ($"op4Spec_{p.Description.Callsign}_{effectData.Description.Id}");
-
-
-                        if (effectData.targetingData.effectTriggerType == EffectTriggerType.OnWeaponFire &&
-                            effectData.targetingData.effectTargetType == EffectTargetType.Creator)
+                        foreach (var effectData in op4Spec.effects)
                         {
-                            ModInit.modLog.LogMessage($"Applying {id}");
-                            unit.Combat.EffectManager.CreateEffect(effectData, id, -1, unit, unit,
-                                default(WeaponHitInfo), 1);
-                        }
+                            ModInit.modLog.LogMessage(
+                                $"processing {effectData.Description.Name} for {p.Description.Callsign}{pKey}");
 
-                        if (effectData.targetingData.effectTriggerType == EffectTriggerType.OnWeaponFire &&
-                            effectData.targetingData.effectTargetType == EffectTargetType.AllEnemies)
-                        {
-                            ModInit.modLog.LogMessage($"Applying {id}");
-                            unit.Combat.EffectManager.CreateEffect(effectData, id, -1, unit, unit,
-                                default(WeaponHitInfo), 1);
+                            var id = ($"op4Spec_{p.Description.Callsign}_{effectData.Description.Id}");
+
+
+                            if (effectData.targetingData.effectTriggerType == EffectTriggerType.OnWeaponFire &&
+                                effectData.targetingData.effectTargetType == EffectTargetType.Creator)
+                            {
+                                ModInit.modLog.LogMessage($"Applying {id}");
+                                unit.Combat.EffectManager.CreateEffect(effectData, id, -1, unit, unit,
+                                    default(WeaponHitInfo), 1);
+                            }
+
+                            if (effectData.targetingData.effectTriggerType == EffectTriggerType.OnWeaponFire &&
+                                effectData.targetingData.effectTargetType == EffectTargetType.AllEnemies)
+                            {
+                                ModInit.modLog.LogMessage($"Applying {id}");
+                                unit.Combat.EffectManager.CreateEffect(effectData, id, -1, unit, unit,
+                                    default(WeaponHitInfo), 1);
+                            }
                         }
                     }
                 }
@@ -863,31 +878,40 @@ namespace PracticeMakesPerfect.Framework
 
         }
 
-        internal void GatherAndApplyActiveSpecEffects(AbstractActor playerUnit, AbstractActor opforUnit) // need to figure out how to target primaries only here and also make opfor teams inflict +++ damage to eachother only
+        public void GatherAndApplyActiveSpecEffects(AbstractActor playerUnit, AbstractActor opforUnit) // need to figure out how to target primaries only here and also make opfor teams inflict +++ damage to eachother only
         {
             var p = playerUnit.GetPilot();
             var pKey = p.FetchGUID();
 
             foreach (var OpForSpecID in SpecHolder.HolderInstance.OpForSpecMap[pKey])
             {
-                foreach (var op4Spec in ManagerInstance.OpForSpecList.Where(x => x.OpForSpecID == OpForSpecID && (x.factionID == opforUnit.team.FactionValue.Name || x.applyToFaction.Contains(opforUnit.team.FactionValue.Name))))
+                foreach (var op4Spec in ManagerInstance.OpForSpecList)
                 {
- //                   ModInit.modLog.LogMessage($"Gathered {op4Spec.OpForSpecID} for {p.Description.Callsign}{pKey}");
-
-                    foreach (var effectData in op4Spec.effects)
+                    if (OpForSpecID != op4Spec.OpForSpecID) continue;
+                    var foundInSubMap =
+                        SpecHolder.HolderInstance.SubfactionsMap.ContainsKey(opforUnit.team.FactionValue.Name) &&
+                        (SpecHolder.HolderInstance.SubfactionsMap[opforUnit.team.FactionValue.Name] ==
+                         op4Spec.factionID ||
+                         op4Spec.applyToFaction.Contains(
+                             SpecHolder.HolderInstance.SubfactionsMap[opforUnit.team.FactionValue.Name]));
+                    if (foundInSubMap || op4Spec.factionID == opforUnit.team.factionValue.Name ||
+                        op4Spec.applyToFaction.Contains(opforUnit.team.factionValue.Name))
                     {
-                        ModInit.modLog.LogMessage(
-                            $"processing {effectData.Description.Name} for {p.Description.Callsign}{pKey}");
-
-                        var id = ($"op4Spec_{p.Description.Callsign}_{effectData.Description.Id}");
-
-
-                        if (effectData.targetingData.effectTriggerType == EffectTriggerType.OnWeaponFire &&
-                            effectData.targetingData.effectTargetType == EffectTargetType.Creator)
+                        foreach (var effectData in op4Spec.effects)
                         {
-                            ModInit.modLog.LogMessage($"Applying {id}");
-                            playerUnit.Combat.EffectManager.CreateEffect(effectData, id, -1, playerUnit, playerUnit,
-                                default(WeaponHitInfo), 1);
+                            ModInit.modLog.LogMessage(
+                                $"processing {effectData.Description.Name} for {p.Description.Callsign}{pKey}");
+
+                            var id = ($"op4Spec_{p.Description.Callsign}_{effectData.Description.Id}");
+
+
+                            if (effectData.targetingData.effectTriggerType == EffectTriggerType.OnWeaponFire &&
+                                effectData.targetingData.effectTargetType == EffectTargetType.Creator)
+                            {
+                                ModInit.modLog.LogMessage($"Applying {id}");
+                                playerUnit.Combat.EffectManager.CreateEffect(effectData, id, -1, playerUnit, playerUnit,
+                                    default(WeaponHitInfo), 1);
+                            }
                         }
                     }
                 }
@@ -895,37 +919,14 @@ namespace PracticeMakesPerfect.Framework
 
             foreach (var missionSpecID in SpecHolder.HolderInstance.MissionSpecMap[pKey])
             {
-
-                    foreach (var missionSpec in ManagerInstance.MissionSpecList.Where(x => x.MissionSpecID == missionSpecID && x.contractTypeID == playerUnit.Combat.ActiveContract.ContractTypeValue.Name))
+                foreach (var missionSpec in ManagerInstance.MissionSpecList.Where(x => x.MissionSpecID == missionSpecID && x.contractTypeID == playerUnit.Combat.ActiveContract.ContractTypeValue.Name))
+                {
+                    foreach (var effectData in missionSpec.effects)
                     {
-                        foreach (var effectData in missionSpec.effects)
+                        var id = ($"missionSpec_{p.Description.Callsign}_{effectData.Description.Id}");
+                        if (missionSpec.AdvTargetInfoUnits.Count < 1)
                         {
-                            var id = ($"missionSpec_{p.Description.Callsign}_{effectData.Description.Id}");
-                            if (missionSpec.AdvTargetInfoUnits.Count < 1)
-                            {
-                                if (effectData.targetingData.effectTriggerType == EffectTriggerType.OnWeaponFire &&
-                                    effectData.targetingData.effectTargetType == EffectTargetType.Creator)
-                                {
-                                    ModInit.modLog.LogMessage($"Applying {id}");
-                                    playerUnit.Combat.EffectManager.CreateEffect(effectData, id, -1, playerUnit, playerUnit,
-                                        default(WeaponHitInfo), 1);
-                                }
-
-                                if (effectData.targetingData.effectTriggerType == EffectTriggerType.OnWeaponFire &&
-                                    effectData.targetingData.effectTargetType == EffectTargetType.AllEnemies)
-                                {
-                                    ModInit.modLog.LogMessage($"Applying {id}");
-                                    playerUnit.Combat.EffectManager.CreateEffect(effectData, id, -1, playerUnit, opforUnit,
-                                        default(WeaponHitInfo), 1);
-                                }
-
-                                continue;
-                            }
-
-
-                            if (missionSpec.AdvTargetInfoUnits.Contains(AdvTargetUnitData.Mech) &&
-                                (playerUnit.UnitType & UnitType.Mech) != 0 && effectData.targetingData.effectTriggerType ==
-                                EffectTriggerType.OnWeaponFire &&
+                            if (effectData.targetingData.effectTriggerType == EffectTriggerType.OnWeaponFire &&
                                 effectData.targetingData.effectTargetType == EffectTargetType.Creator)
                             {
                                 ModInit.modLog.LogMessage($"Applying {id}");
@@ -933,9 +934,7 @@ namespace PracticeMakesPerfect.Framework
                                     default(WeaponHitInfo), 1);
                             }
 
-                            if (missionSpec.AdvTargetInfoUnits.Contains(AdvTargetUnitData.Mech) &&
-                                (opforUnit.UnitType & UnitType.Mech) != 0 && effectData.targetingData.effectTriggerType ==
-                                EffectTriggerType.OnWeaponFire &&
+                            if (effectData.targetingData.effectTriggerType == EffectTriggerType.OnWeaponFire &&
                                 effectData.targetingData.effectTargetType == EffectTargetType.AllEnemies)
                             {
                                 ModInit.modLog.LogMessage($"Applying {id}");
@@ -943,53 +942,77 @@ namespace PracticeMakesPerfect.Framework
                                     default(WeaponHitInfo), 1);
                             }
 
-                            if (missionSpec.AdvTargetInfoUnits.Contains(AdvTargetUnitData.Vehicle) &&
-                                ((playerUnit.UnitType & UnitType.Vehicle) != 0 || playerUnit.IsCustomUnitVehicle()) && effectData.targetingData.effectTriggerType ==
-                                EffectTriggerType.OnWeaponFire &&
-                                effectData.targetingData.effectTargetType == EffectTargetType.Creator)
-                            {
-                                ModInit.modLog.LogMessage($"Applying {id}");
-                                playerUnit.Combat.EffectManager.CreateEffect(effectData, id, -1, playerUnit, playerUnit,
-                                    default(WeaponHitInfo), 1);
-                            }
-
-                            if (missionSpec.AdvTargetInfoUnits.Contains(AdvTargetUnitData.Vehicle) &&
-                                ((opforUnit.UnitType & UnitType.Vehicle) != 0 || opforUnit.IsCustomUnitVehicle()) && effectData.targetingData.effectTriggerType ==
-                                EffectTriggerType.OnWeaponFire &&
-                                effectData.targetingData.effectTargetType == EffectTargetType.AllEnemies)
-                            {
-                                ModInit.modLog.LogMessage($"Applying {id}");
-                                playerUnit.Combat.EffectManager.CreateEffect(effectData, id, -1, playerUnit, opforUnit,
-                                    default(WeaponHitInfo), 1);
-                            }
-
-                            if (missionSpec.AdvTargetInfoUnits.Contains(AdvTargetUnitData.Turret) &&
-                                (playerUnit.UnitType & UnitType.Turret) != 0 && effectData.targetingData.effectTriggerType ==
-                                EffectTriggerType.OnWeaponFire &&
-                                effectData.targetingData.effectTargetType == EffectTargetType.Creator)
-                            {
-                                ModInit.modLog.LogMessage($"Applying {id}");
-                                playerUnit.Combat.EffectManager.CreateEffect(effectData, id, -1, playerUnit, playerUnit,
-                                    default(WeaponHitInfo), 1);
-                            }
-
-                            if (missionSpec.AdvTargetInfoUnits.Contains(AdvTargetUnitData.Turret) &&
-                                (opforUnit.UnitType & UnitType.Turret) != 0 && effectData.targetingData.effectTriggerType ==
-                                EffectTriggerType.OnWeaponFire &&
-                                effectData.targetingData.effectTargetType == EffectTargetType.AllEnemies)
-                            {
-                                ModInit.modLog.LogMessage($"Applying {id}");
-                                playerUnit.Combat.EffectManager.CreateEffect(effectData, id, -1, playerUnit, opforUnit,
-                                    default(WeaponHitInfo), 1);
-                            }
-
+                            continue;
                         }
+
+
+                        if (missionSpec.AdvTargetInfoUnits.Contains(AdvTargetUnitData.Mech) &&
+                            (playerUnit.UnitType & UnitType.Mech) != 0 && effectData.targetingData.effectTriggerType ==
+                            EffectTriggerType.OnWeaponFire &&
+                            effectData.targetingData.effectTargetType == EffectTargetType.Creator)
+                        {
+                            ModInit.modLog.LogMessage($"Applying {id}");
+                            playerUnit.Combat.EffectManager.CreateEffect(effectData, id, -1, playerUnit, playerUnit,
+                                default(WeaponHitInfo), 1);
+                        }
+
+                        if (missionSpec.AdvTargetInfoUnits.Contains(AdvTargetUnitData.Mech) &&
+                            (opforUnit.UnitType & UnitType.Mech) != 0 && effectData.targetingData.effectTriggerType ==
+                            EffectTriggerType.OnWeaponFire &&
+                            effectData.targetingData.effectTargetType == EffectTargetType.AllEnemies)
+                        {
+                            ModInit.modLog.LogMessage($"Applying {id}");
+                            playerUnit.Combat.EffectManager.CreateEffect(effectData, id, -1, playerUnit, opforUnit,
+                                default(WeaponHitInfo), 1);
+                        }
+
+                        if (missionSpec.AdvTargetInfoUnits.Contains(AdvTargetUnitData.Vehicle) &&
+                            ((playerUnit.UnitType & UnitType.Vehicle) != 0 || playerUnit.IsCustomUnitVehicle()) && effectData.targetingData.effectTriggerType ==
+                            EffectTriggerType.OnWeaponFire &&
+                            effectData.targetingData.effectTargetType == EffectTargetType.Creator)
+                        {
+                            ModInit.modLog.LogMessage($"Applying {id}");
+                            playerUnit.Combat.EffectManager.CreateEffect(effectData, id, -1, playerUnit, playerUnit,
+                                default(WeaponHitInfo), 1);
+                        }
+
+                        if (missionSpec.AdvTargetInfoUnits.Contains(AdvTargetUnitData.Vehicle) &&
+                            ((opforUnit.UnitType & UnitType.Vehicle) != 0 || opforUnit.IsCustomUnitVehicle()) && effectData.targetingData.effectTriggerType ==
+                            EffectTriggerType.OnWeaponFire &&
+                            effectData.targetingData.effectTargetType == EffectTargetType.AllEnemies)
+                        {
+                            ModInit.modLog.LogMessage($"Applying {id}");
+                            playerUnit.Combat.EffectManager.CreateEffect(effectData, id, -1, playerUnit, opforUnit,
+                                default(WeaponHitInfo), 1);
+                        }
+
+                        if (missionSpec.AdvTargetInfoUnits.Contains(AdvTargetUnitData.Turret) &&
+                            (playerUnit.UnitType & UnitType.Turret) != 0 && effectData.targetingData.effectTriggerType ==
+                            EffectTriggerType.OnWeaponFire &&
+                            effectData.targetingData.effectTargetType == EffectTargetType.Creator)
+                        {
+                            ModInit.modLog.LogMessage($"Applying {id}");
+                            playerUnit.Combat.EffectManager.CreateEffect(effectData, id, -1, playerUnit, playerUnit,
+                                default(WeaponHitInfo), 1);
+                        }
+
+                        if (missionSpec.AdvTargetInfoUnits.Contains(AdvTargetUnitData.Turret) &&
+                            (opforUnit.UnitType & UnitType.Turret) != 0 && effectData.targetingData.effectTriggerType ==
+                            EffectTriggerType.OnWeaponFire &&
+                            effectData.targetingData.effectTargetType == EffectTargetType.AllEnemies)
+                        {
+                            ModInit.modLog.LogMessage($"Applying {id}");
+                            playerUnit.Combat.EffectManager.CreateEffect(effectData, id, -1, playerUnit, opforUnit,
+                                default(WeaponHitInfo), 1);
+                        }
+
                     }
+                }
                 
             }
         }
 
-        internal void GatherAndApplyPostSpawnEffects(AbstractActor actor)
+        public void GatherAndApplyPostSpawnEffects(AbstractActor actor)
         {
             var playerUnits = actor.Combat.AllActors.Where(x => x.team.IsLocalPlayer);
             var playerTeam = actor.Combat.LocalPlayerTeam;

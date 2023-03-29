@@ -3,10 +3,10 @@ using System.IO;
 
 namespace PracticeMakesPerfect.Framework
 {
-    internal class Logger
+    public class Logger
     {
-        private static StreamWriter logStreamWriter;
-        private readonly bool enableLogging;
+        public static StreamWriter logStreamWriter;
+        public readonly bool enableLogging;
 
         public Logger(string modDir, string fileName, bool enableLogging)
         {

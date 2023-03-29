@@ -11,11 +11,11 @@ namespace PracticeMakesPerfect
 
     public static class ModInit
     {
-        internal static Logger modLog;
-        private static string modDir;
+        public static Logger modLog;
+        public static string modDir;
 
 
-        internal static Settings modSettings;
+        public static Settings modSettings;
         public const string HarmonyPackage = "us.tbone.PracticeMakesPerfect";
         public static void Init(string directory, string settingsJSON)
         {
@@ -47,10 +47,9 @@ namespace PracticeMakesPerfect
             harmony.PatchAll(Assembly.GetExecutingAssembly());
 
         }
-
     }
 
-    class Settings
+    public class Settings
     {
         public bool enableLogging = true;
         public bool enableSpecializations = true;
@@ -110,5 +109,7 @@ namespace PracticeMakesPerfect
 
         public bool removeDeprecated = false;
         public bool DebugCleaning = false;
+
+        public Dictionary<string, List<string>> OpforSubfactionsMap = new Dictionary<string, List<string>>(); // key is "parent" faction, values are "subfactions"
     }
 }

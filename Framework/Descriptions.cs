@@ -6,7 +6,7 @@ namespace PracticeMakesPerfect.Framework
 {
     static class Descriptions
     {
-        internal static string GetMissionSpecializationDescription(string contractId)
+        public static string GetMissionSpecializationDescription(string contractId)
         {
             var rtrn = "";
             if (SpecManager.ManagerInstance.MissionSpecList.Any(x=>x.contractTypeID == contractId))
@@ -25,7 +25,7 @@ namespace PracticeMakesPerfect.Framework
             return null;
         }
 
-        internal static string GetOpForSpecializationDescription(string factionId)
+        public static string GetOpForSpecializationDescription(string factionId)
         {
             var rtrn = "";
             if (SpecManager.ManagerInstance.OpForSpecList.Any(x => x.factionID == factionId))
@@ -44,7 +44,7 @@ namespace PracticeMakesPerfect.Framework
             return null;
         }
 
-        internal static string GetPilotSpecializationsOrProgress(Pilot pilot)
+        public static string GetPilotSpecializationsOrProgress(Pilot pilot)
         {
             var pilotID = pilot.FetchGUID();
             if (pilotID == "NOTAPILOT") return "";

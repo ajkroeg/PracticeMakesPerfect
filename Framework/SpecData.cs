@@ -2,26 +2,28 @@
 using System.Collections.Generic;
 using System.Linq;
 using BattleTech;
+using InControl;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using SVGImporter.LibTessDotNet;
 using static PracticeMakesPerfect.Framework.GlobalVars;
 
 namespace PracticeMakesPerfect.Framework
 {
     public static class GlobalVars
     {
-        internal static SimGameState sim;
-        internal const string spGUID = "spGUID_";
-        internal const string aiPilotFlag = "_AI_TEMP_PMP_";
-        internal const string OP4SpecStateTag = "PMP_OP4SPEC_";
-        internal const string OP4SpecTrackerTag = "PMP_OP4TRACKER_";
-        internal const string MissionSpecStateTag = "PMP_MISSIONSPEC_";
-        internal const string MissionSpecTrackerTag = "PMP_MISSIONTRACKER_";
-        internal const string ActiveStratComTag = "PMP_ACTIVESTRATCOM_";
+        public static SimGameState sim;
+        public const string spGUID = "spGUID_";
+        public const string aiPilotFlag = "_AI_TEMP_PMP_";
+        public const string OP4SpecStateTag = "PMP_OP4SPEC_";
+        public const string OP4SpecTrackerTag = "PMP_OP4TRACKER_";
+        public const string MissionSpecStateTag = "PMP_MISSIONSPEC_";
+        public const string MissionSpecTrackerTag = "PMP_MISSIONTRACKER_";
+        public const string ActiveStratComTag = "PMP_ACTIVESTRATCOM_";
 
-        internal const string owner_string = "{OWNER}";
-        internal const string employer_string = "{EMPLOYER}";
-        internal const string target_string = "{TARGET}";
+        public const string owner_string = "{OWNER}";
+        public const string employer_string = "{EMPLOYER}";
+        public const string target_string = "{TARGET}";
 
         public enum AdvTargetUnitData
 
@@ -53,7 +55,7 @@ namespace PracticeMakesPerfect.Framework
         [JsonIgnore]
         public List<EffectData> effects = new List<EffectData>();
         public List<JObject> effectDataJO = new List<JObject>();
-        private OpForSpec opforDefault;
+        public OpForSpec opforDefault;
 
         public OpForSpec(OpForSpec opforDefault)
         {
@@ -87,7 +89,7 @@ namespace PracticeMakesPerfect.Framework
         [JsonIgnore]
         public List<EffectData> effects = new List<EffectData>();
         public List<JObject> effectDataJO = new List<JObject>();
-        private MissionSpec defaultMissionSpec;
+        public MissionSpec defaultMissionSpec;
 
         public MissionSpec(MissionSpec defaultMissionSpec)
         {
@@ -98,7 +100,7 @@ namespace PracticeMakesPerfect.Framework
 
     public class SpecHolder
     {
-        private static SpecHolder _instance;
+        public static SpecHolder _instance;
 
         public Dictionary<string, List<string>> OpForSpecMap;
         public Dictionary<string, List<string>> MissionSpecMap;
@@ -107,6 +109,9 @@ namespace PracticeMakesPerfect.Framework
         public Dictionary<string, Dictionary<string, int>> MissionsTracker;
 
         public Dictionary<string, Dictionary<string, int>> OpForKillsTEMPTracker;
+        public Dictionary<string, Dictionary<string, int>> OpForKillsTEMPTrackerFlattened;
+
+        public Dictionary<string, string> SubfactionsMap = new Dictionary<string, string>();// key is "subfaction", value is "parent";
 
         public string activeStratCom;
 
@@ -124,7 +129,7 @@ namespace PracticeMakesPerfect.Framework
             }
         }
 
-        internal void Initialize()
+        public void Initialize()
         {
             OpForSpecMap = new Dictionary<string, List<string>>();
             MissionSpecMap = new Dictionary<string, List<string>>();
@@ -133,6 +138,9 @@ namespace PracticeMakesPerfect.Framework
             MissionsTracker = new Dictionary<string, Dictionary<string, int>>();
 
             OpForKillsTEMPTracker = new Dictionary<string, Dictionary<string, int>>();
+            OpForKillsTEMPTrackerFlattened = new Dictionary<string, Dictionary<string, int>>();
+
+            SubfactionsMap = new Dictionary<string, string>();
 
             activeStratCom = null;
 
@@ -140,9 +148,22 @@ namespace PracticeMakesPerfect.Framework
             bounty = new int();
             totalBounty = new int();
             emplRep = new int();
+
+            ModInit.modLog.LogMessage($"Processing subfactions map!");
+            foreach (var key in ModInit.modSettings.OpforSubfactionsMap)
+            {
+                foreach (var subfaction in key.Value)
+                {
+                    if (!SubfactionsMap.ContainsKey(subfaction))
+                    {
+                        SubfactionsMap.Add(subfaction, key.Key);
+                        ModInit.modLog.LogMessage($"Mapped subfaction {subfaction} to parent {key.Key}!");
+                    }
+                }
+            }
         }
 
-        internal void AddToMaps(Pilot pilot)
+        public void AddToMaps(Pilot pilot)
         {
             if (!pilot.pilotDef.PilotTags.Any(x => x.StartsWith(spGUID)))
             {
@@ -173,7 +194,7 @@ namespace PracticeMakesPerfect.Framework
             }
         }
 
-        internal void CleanMaps(List<string> currentPilots)
+        public void CleanMaps(List<string> currentPilots)
         {
             foreach (var pKey in currentPilots)
             {
@@ -247,7 +268,7 @@ namespace PracticeMakesPerfect.Framework
             }
         }
 
-        internal void ProcessTaggedSpecs(Pilot pilot)
+        public void ProcessTaggedSpecs(Pilot pilot)
         {
             var pKey = pilot.FetchGUID();
             foreach (var tag in ModInit.modSettings.taggedMissionSpecs)
@@ -281,7 +302,7 @@ namespace PracticeMakesPerfect.Framework
             }
         }
 
-        internal void SerializeSpecState()
+        public void SerializeSpecState()
         {
             var op4State = sim.CompanyTags.FirstOrDefault((x) => x.StartsWith(OP4SpecStateTag));
             GlobalVars.sim.CompanyTags.Remove(op4State);
@@ -315,7 +336,7 @@ namespace PracticeMakesPerfect.Framework
         }
 
         //deserialize injurymap (dictionary) from tag and save to PilotInjuryHolder.Instance
-        internal void DeserializeSpecState()
+        public void DeserializeSpecState()
         {
             if (sim.CompanyTags.Any(x => x.StartsWith(OP4SpecStateTag)))
             {

@@ -513,7 +513,12 @@ Specializations settings in settings.json:
 		"name_t-bone": "TC_Destructor"
 	},
 	"taggedMissionSpecs": {},
-	"DebugCleaning": false
+	"DebugCleaning": false,
+	"OpforSubfactionsMap": {
+		"ClanWolf": [
+			"CWEpsilonGalaxy"
+		]
+	}
 }
 ```
 
@@ -554,3 +559,5 @@ Specializations settings in settings.json:
 `dummyOpForStat` - string, name of dummy stat used to create fake status effect for pilots with OpForSpecs that use OnWeaponFire
 
 `DebugCleaning` - bool. Debugging only! if set to `true`, will wipe all specializations on save load.
+
+`OpforSubfactionsMap` - dictionary <string, List<string>> - defines subfactions which will count toward OpForSpecs for the "key" faction. Such OpforSpecs will also apply to these subfactions regardless of `factionID` and `applyToFaction` settings within the OpforSpec
