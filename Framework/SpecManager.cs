@@ -4,7 +4,6 @@ using SVGImporter;
 using BattleTech;
 using BattleTech.Designed;
 using BattleTech.UI;
-using Harmony;
 using static PracticeMakesPerfect.Framework.GlobalVars;
 using HBS.Scripting;
 

@@ -1,5 +1,4 @@
-﻿using Harmony;
-using BattleTech;
+﻿using BattleTech;
 using BattleTech.UI;
 using System.Collections.Generic;
 using UnityEngine;
@@ -12,7 +11,7 @@ namespace PracticeMakesPerfect.Patches
         public static class FillInPilotData_Patch
 
         {
-            public static bool Prefix(AAR_UnitStatusWidget __instance, ref int xpEarned)
+            public static void Prefix(ref bool __runOriginal, AAR_UnitStatusWidget __instance, ref int xpEarned)
             {
                 var missionXP = xpEarned;
                 var mechsKilled = __instance.UnitData.pilot.MechsKilled;
@@ -31,22 +30,18 @@ namespace PracticeMakesPerfect.Patches
                         newXP += Mathf.RoundToInt(missionXP * ModInit.modSettings.bonusXP_MissionOtherKills);
                         ModInit.modLog.LogMessage($"adding {Mathf.RoundToInt(missionXP * ModInit.modSettings.bonusXP_MissionOtherKills)}XP to {__instance.UnitData.pilot.Description.Callsign} for other kill, contract multiplier");
                     }
-
-
                 }
 
                 for (var i = 0; i < mechsKilled; i++)
                 {
                     newXP += ModInit.modSettings.bonusXP_MechKills;
                     ModInit.modLog.LogMessage($"adding {ModInit.modSettings.bonusXP_MechKills}XP to {__instance.UnitData.pilot.Description.Callsign} for mech kill, flat bonus");
-
                 }
                 for (var j = 0; j < othersKilled; j++)
                 {
                     newXP += ModInit.modSettings.bonusXP_OtherKills;
                     ModInit.modLog.LogMessage($"adding {ModInit.modSettings.bonusXP_OtherKills}XP to {__instance.UnitData.pilot.Description.Callsign} for other kill, flat bonus");
                 }
-
 
                 newXP += Mathf.RoundToInt((__instance.UnitData.pilot.StructureDamageInflicted * ModInit.modSettings.bonusXP_StrDamageMult) + (__instance.UnitData.pilot.ArmorDamageInflicted * ModInit.modSettings.bonusXP_ArmDamageMult));
                 
@@ -57,11 +52,9 @@ namespace PracticeMakesPerfect.Patches
 
                 ModInit.modLog.LogMessage($"adding stat effectXP: {__instance.UnitData.pilot.StatCollection.GetValue<int>("effectXP")}XP to {__instance.UnitData.pilot.Description.Callsign} from per-use effects/ability bonuses");
 
-
                 //check this math shit
                 if (ModInit.modSettings.missionXPEffects > 0f && ModInit.modSettings.missionXPeffectBonusDivisor > 0f)
                 {
-
                     var contractFX_XP = Mathf.RoundToInt((missionXP * ModInit.modSettings.missionXPEffects) *
 
                                                          (__instance.UnitData.pilot.StatCollection.GetValue<int>(
@@ -72,7 +65,6 @@ namespace PracticeMakesPerfect.Patches
                     ModInit.modLog.LogMessage($"adding {contractFX_XP}XP to {__instance.UnitData.pilot.Description.Callsign} following formula ContractXP * ModInit.modSettings.missionXPEffects * (effectXP/ModInit.modSettings.missionXPeffectBonusDivisor)");
                 }
 
-
                 if (newXP > ModInit.modSettings.bonusXP_CAP && ModInit.modSettings.bonusXP_CAP > 0)
                 {
                     newXP = ModInit.modSettings.bonusXP_CAP;
@@ -82,13 +74,9 @@ namespace PracticeMakesPerfect.Patches
                 __instance.UnitData.pilot.AddExperience(0, "FromKillsOrDmg", newXP);
                 ModInit.modLog.LogMessage($"Total bonus XP awarded to {__instance.UnitData.pilot.Description.Callsign}: {newXP}");
 
-
                 xpEarned += newXP;
-                return true;
+                return;
             }
-
-
-
         }
         [HarmonyPatch(typeof(SimGameState), "ResolveCompleteContract")]
         [HarmonyPriority(Priority.Low)]

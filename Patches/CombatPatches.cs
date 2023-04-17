@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using Harmony;
 using BattleTech;
 using PracticeMakesPerfect.Framework;
 using BattleTech.Designed;

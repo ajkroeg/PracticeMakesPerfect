@@ -5,7 +5,6 @@ using BattleTech.UI;
 using BattleTech.UI.Tooltips;
 using UnityEngine.UI;
 using PracticeMakesPerfect.Framework;
-using Harmony;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -155,12 +154,16 @@ namespace PracticeMakesPerfect.Patches
         public static class SGBarracksMWDetailPanel_OnServiceClicked
         {
             public static bool Prepare() => ModInit.modSettings.enableSpecializations;
-            public static bool Prefix(SGBarracksMWDetailPanel __instance)
+            public static void Prefix(ref bool __runOriginal, SGBarracksMWDetailPanel __instance)
             {
+                if (!__runOriginal) return;
                 var background = UIManager.Instance.UILookAndColorConstants.PopupBackfill;
-
                 var hk = Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl);
-                if (!hk) return true;
+                if (!hk)
+                {
+                    __runOriginal = true;
+                    return;
+                }
                 var resetSpecs = true;
                 if (__instance.curPilot.IsPlayerCharacter && SpecManager.ManagerInstance.StratComs.Count > 1)
                 {
@@ -224,7 +227,8 @@ namespace PracticeMakesPerfect.Patches
                         }).CancelOnEscape()
                         .AddFader(background)
                         .Render();
-                    return false;
+                    __runOriginal = false;
+                    return;
                 }
 
                 if (!String.IsNullOrEmpty(ModInit.modSettings.argoUpgradeToReset) && resetSpecs &&
@@ -236,7 +240,8 @@ namespace PracticeMakesPerfect.Patches
                         .CancelOnEscape()
                         .AddFader(background)
                         .Render();
-                    return false;
+                    __runOriginal = false;
+                    return;
                 }
 
                 else if ((!String.IsNullOrEmpty(ModInit.modSettings.argoUpgradeToReset) && resetSpecs &&
@@ -250,11 +255,13 @@ namespace PracticeMakesPerfect.Patches
                         .CancelOnEscape()
                         .AddFader(background)
                         .Render();
-                    return false;
+                    __runOriginal = false;
+                    return;
                 }
                 else
                 {
-                    return false;
+                    __runOriginal = false;
+                    return;
                 }
             }
         }

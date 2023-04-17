@@ -1,5 +1,4 @@
 ﻿using System;
-using Harmony;
 using BattleTech;
 using System.Collections.Generic;
 using System.Linq;

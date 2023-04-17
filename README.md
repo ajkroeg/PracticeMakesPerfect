@@ -1,6 +1,7 @@
 # PracticeMakesPerfect
 
 **Versions 1.2.0.0 and higher depend on CustomAmmoCategories!**
+**Versions 1.3.0.0 and higher requires modtek v3 or higher**
 
 Mod consists of two modules, XP and Specializations.
 

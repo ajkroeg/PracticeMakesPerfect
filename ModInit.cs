@@ -1,5 +1,4 @@
-﻿using Harmony;
-using System;
+﻿using System;
 using System.Reflection;
 using System.Collections.Generic;
 using System.IO;
@@ -42,10 +41,9 @@ namespace PracticeMakesPerfect
                 SpecManager.ManagerInstance.Initialize();
                 SpecHolder.HolderInstance.Initialize();
             }
-
-            var harmony = HarmonyInstance.Create(HarmonyPackage);
-            harmony.PatchAll(Assembly.GetExecutingAssembly());
-
+            //var harmony = HarmonyInstance.Create(HarmonyPackage);
+            //harmony.PatchAll(Assembly.GetExecutingAssembly());
+            Harmony.CreateAndPatchAll(Assembly.GetExecutingAssembly(), HarmonyPackage);
         }
     }
 
