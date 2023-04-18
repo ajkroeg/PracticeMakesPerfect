@@ -120,6 +120,7 @@ namespace PracticeMakesPerfect.Patches
         [HarmonyPatch(typeof(SimGameState), "DismissPilot", new Type[] {typeof(Pilot)})]
         public static class SimGameState_DismissPilot
         {
+            public static bool Prepare() => ModInit.modSettings.enableSpecializations;
             public static void Postfix(SimGameState __instance, Pilot p)
             {
                 if (p == null) return;
@@ -145,6 +146,7 @@ namespace PracticeMakesPerfect.Patches
         [HarmonyPatch(typeof(SimGameState), "KillPilot", new Type[] { typeof(Pilot), typeof(bool), typeof(string), typeof(string) })]
         public static class SimGameState_KillPilot
         {
+            public static bool Prepare() => ModInit.modSettings.enableSpecializations;
             public static void Postfix(SimGameState __instance, Pilot p, bool fromEvent = false, string StarSystemID = null, string causeOfDeathOverride = null)
             {
                 if (p == null) return;
