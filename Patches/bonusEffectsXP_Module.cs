@@ -2,6 +2,7 @@
 using BattleTech;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine;
 
 namespace PracticeMakesPerfect.Patches
 {
@@ -113,7 +114,8 @@ namespace PracticeMakesPerfect.Patches
                             appliedEffect.Duration.numMovementsRemaining, 
                             appliedEffect.Duration.numPhasesRemaining, 
                             appliedEffect.Duration.numRoundsRemaining
-                        }.Max() + 1;
+                        }.Max();
+                        if (degradationFactor <= 0) degradationFactor = 1;
                     }
 
                     ModInit.modLog.LogMessage($"Matching effect found: {effectData?.Description?.Id} from {creator.GetPilot().Description.Callsign} targeting {target?.Description?.UIName}. Adding {effectXP}/{degradationFactor} = {effectXP / degradationFactor} to {creator.GetPilot().Description.Callsign}'s 'effectXP' pilot stat. Degraded double-dip: more XP closer to effect expiration.");
@@ -137,10 +139,11 @@ namespace PracticeMakesPerfect.Patches
                         degradationFactor = new int[]
                         {
                             appliedEffect.Duration.numActivationsRemaining,
-                            appliedEffect.Duration.numMovementsRemaining, 
+                            appliedEffect.Duration.numMovementsRemaining,
                             appliedEffect.Duration.numPhasesRemaining,
                             appliedEffect.Duration.numRoundsRemaining
-                        }.Max() + 1;
+                        }.Max();
+                        if (degradationFactor <= 0) degradationFactor = 1;
                     }
 
                     ModInit.modLog.LogMessage($"Matching effect found: {effectData.statisticData?.statName} from {creator.GetPilot().Description.Callsign} targeting {target?.Description?.UIName}. Adding {effectXP}/{degradationFactor} = {effectXP / degradationFactor} to {creator.GetPilot().Description.Callsign}'s 'effectXP' pilot stat. Degraded double-dip: more XP closer to effect expiration.");
