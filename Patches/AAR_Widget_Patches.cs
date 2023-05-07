@@ -25,8 +25,8 @@ namespace PracticeMakesPerfect.Patches
                 var baseOpfor = target;
                 if (SpecHolder.HolderInstance.SubfactionsMap.ContainsKey(target))
                 {
-                    ModInit.modLog.LogMessage($"set baseOpfor to {baseOpfor} from subfaction map.");
                     baseOpfor = SpecHolder.HolderInstance.SubfactionsMap[target];
+                    ModInit.modLog.LogMessage($"set baseOpfor to {baseOpfor} from subfaction map.");
                 }
 
                 var curPilots = new List<string>();

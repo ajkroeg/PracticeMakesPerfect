@@ -209,8 +209,8 @@ namespace PracticeMakesPerfect.Patches
                     var baseOpfor = opforID;
                     if (SpecHolder.HolderInstance.SubfactionsMap.ContainsKey(opforID))
                     {
-                        ModInit.modLog.LogMessage($"set baseOpfor to {baseOpfor} from subfaction map.");
                         baseOpfor = SpecHolder.HolderInstance.SubfactionsMap[opforID];
+                        ModInit.modLog.LogMessage($"set baseOpfor to {baseOpfor} from subfaction map.");
                     }
 
                     if (ModInit.modSettings.WhiteListOpFor.Contains(baseOpfor) && !SpecHolder.HolderInstance.OpForKillsTEMPTracker[pKey].ContainsKey(opforID))
